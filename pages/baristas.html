@@ -32,7 +32,7 @@
         <h2>المرحلة 3 — سِيَر البريستا</h2>
         <p>منصة متخصصة للبريستا الباحثين عن عمل. صورة، خبرة، مهارات، وتواصل.</p>
       </div>
-      <button class="btn btn-gold" id="new-profile-btn">＋ ملف جديد</button>
+      <div id="auth-area" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;"></div>
     </div>
 
     <div class="toolbar">
@@ -43,10 +43,63 @@
         <option value="mid">متوسط (1-3 سنوات)</option>
         <option value="senior">خبير (3+ سنوات)</option>
       </select>
+      <button class="btn btn-gold" id="new-profile-btn">＋ ملف جديد</button>
     </div>
 
     <div id="baristas" class="baristas-grid"></div>
   </main>
+
+  <!-- Modal: Auth (signin / signup) -->
+  <div class="modal-backdrop" id="auth-modal">
+    <div class="modal" style="max-width: 440px;">
+      <header>
+        <h3 id="auth-title">تسجيل الدخول</h3>
+        <button class="close" id="close-auth">×</button>
+      </header>
+
+      <div class="tabs">
+        <div class="tab active" data-tab="signin">تسجيل الدخول</div>
+        <div class="tab" data-tab="signup">إنشاء حساب</div>
+      </div>
+
+      <!-- Sign in -->
+      <form id="signin-form" class="auth-form">
+        <div class="field">
+          <label>البريد الإلكتروني</label>
+          <input name="email" type="email" class="input" required autocomplete="email" />
+        </div>
+        <div class="field" style="margin-top:10px;">
+          <label>كلمة المرور</label>
+          <input name="password" type="password" class="input" required autocomplete="current-password" />
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+          <button type="button" class="btn btn-outline" data-cancel>إلغاء</button>
+          <button type="submit" class="btn btn-primary">دخول</button>
+        </div>
+      </form>
+
+      <!-- Sign up -->
+      <form id="signup-form" class="auth-form" style="display:none;">
+        <div class="field">
+          <label>الاسم الكامل</label>
+          <input name="name" class="input" required maxlength="60" />
+        </div>
+        <div class="field" style="margin-top:10px;">
+          <label>البريد الإلكتروني</label>
+          <input name="email" type="email" class="input" required autocomplete="email" />
+        </div>
+        <div class="field" style="margin-top:10px;">
+          <label>كلمة المرور</label>
+          <input name="password" type="password" class="input" required minlength="6" autocomplete="new-password" />
+          <span class="hint">6 أحرف على الأقل</span>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+          <button type="button" class="btn btn-outline" data-cancel>إلغاء</button>
+          <button type="submit" class="btn btn-gold">إنشاء الحساب</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- Modal: New profile -->
   <div class="modal-backdrop" id="profile-modal">
@@ -115,10 +168,10 @@
           <label>الصورة الشخصية</label>
           <label class="upload" for="profile-photo">
             <div>📷 اضغط لاختيار صورتك الشخصية</div>
-            <small class="hint">صورة واحدة (JPG/PNG)</small>
+            <small class="hint">صورة واحدة (JPG/PNG) — ستظهر دائرية</small>
             <input type="file" id="profile-photo" accept="image/*" />
           </label>
-          <div class="preview" id="profile-preview" style="margin-top:10px;"></div>
+          <div class="avatar-preview" id="profile-preview"><span>👤</span></div>
         </div>
 
         <div class="field" style="margin-top:10px;">
