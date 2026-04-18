@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>سِيَر البريستا — Coffee World</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css" />
+</head>
+<body data-page="baristas">
+  <header class="site-header">
+    <div class="container nav">
+      <a href="../index.html" class="brand">
+        <span class="brand-logo">CW</span>
+        <span>Coffee World</span>
+      </a>
+      <button class="menu-toggle" aria-label="القائمة">☰</button>
+      <ul class="nav-links">
+        <li><a href="../index.html" data-page="home">الرئيسية</a></li>
+        <li><a href="recipe.html" data-page="recipe">ابتكر وصفتك</a></li>
+        <li><a href="marketplace.html" data-page="marketplace">السوق</a></li>
+        <li><a href="baristas.html" data-page="baristas">البريستا</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main class="container section">
+    <div class="section-title">
+      <div>
+        <h2>المرحلة 3 — سِيَر البريستا</h2>
+        <p>منصة متخصصة للبريستا الباحثين عن عمل. صورة، خبرة، مهارات، وتواصل.</p>
+      </div>
+      <button class="btn btn-gold" id="new-profile-btn">＋ ملف جديد</button>
+    </div>
+
+    <div class="toolbar">
+      <input id="search" class="input search" placeholder="ابحث بالاسم، المدينة، أو المهارة..." />
+      <select id="filter-exp" class="select" style="max-width: 220px;">
+        <option value="">كل مستويات الخبرة</option>
+        <option value="junior">مبتدئ (أقل من سنة)</option>
+        <option value="mid">متوسط (1-3 سنوات)</option>
+        <option value="senior">خبير (3+ سنوات)</option>
+      </select>
+    </div>
+
+    <div id="baristas" class="baristas-grid"></div>
+  </main>
+
+  <!-- Modal: New profile -->
+  <div class="modal-backdrop" id="profile-modal">
+    <div class="modal">
+      <header>
+        <h3>ملف بريستا جديد</h3>
+        <button class="close" id="close-profile">×</button>
+      </header>
+      <form id="profile-form">
+        <div class="form-grid">
+          <div class="field">
+            <label>الاسم الكامل *</label>
+            <input name="name" class="input" required maxlength="60" />
+          </div>
+          <div class="field">
+            <label>المدينة</label>
+            <input name="city" class="input" placeholder="الرياض، جدة، ..." />
+          </div>
+          <div class="field">
+            <label>سنوات الخبرة</label>
+            <input name="years" type="number" min="0" max="60" class="input" placeholder="0" />
+          </div>
+          <div class="field">
+            <label>المستوى *</label>
+            <select name="experience" class="select" required>
+              <option value="">اختر...</option>
+              <option value="junior">مبتدئ</option>
+              <option value="mid">متوسط</option>
+              <option value="senior">خبير</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>رقم التواصل *</label>
+            <input name="phone" class="input" required placeholder="05xxxxxxxx" />
+          </div>
+          <div class="field">
+            <label>البريد الإلكتروني</label>
+            <input name="email" type="email" class="input" />
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:10px;">
+          <label>نبذة تعريفية</label>
+          <textarea name="bio" class="textarea" maxlength="800" placeholder="اكتب نبذة مختصرة عنك..."></textarea>
+        </div>
+
+        <div class="field" style="margin-top:10px;">
+          <label>المهارات</label>
+          <div class="chips" id="skills-chips">
+            <span class="chip" data-skill="latte-art">لاتيه آرت</span>
+            <span class="chip" data-skill="espresso">إسبريسو</span>
+            <span class="chip" data-skill="v60">في60</span>
+            <span class="chip" data-skill="chemex">كيمكس</span>
+            <span class="chip" data-skill="aeropress">آيروبرس</span>
+            <span class="chip" data-skill="cold-brew">كولد برو</span>
+            <span class="chip" data-skill="cupping">كابينج</span>
+            <span class="chip" data-skill="roasting">تحميص</span>
+            <span class="chip" data-skill="q-grader">Q-Grader</span>
+            <span class="chip" data-skill="management">إدارة فرع</span>
+            <span class="chip" data-skill="training">تدريب</span>
+          </div>
+          <span class="hint">يمكن اختيار أكثر من مهارة.</span>
+        </div>
+
+        <div class="field" style="margin-top:10px;">
+          <label>الصورة الشخصية</label>
+          <label class="upload" for="profile-photo">
+            <div>📷 اضغط لاختيار صورتك الشخصية</div>
+            <small class="hint">صورة واحدة (JPG/PNG)</small>
+            <input type="file" id="profile-photo" accept="image/*" />
+            <div class="preview" id="profile-preview"></div>
+          </label>
+        </div>
+
+        <div class="field" style="margin-top:10px;">
+          <label>ملف السيرة الذاتية (PDF)</label>
+          <label class="upload" for="profile-cv">
+            <div>📄 اضغط لاختيار ملف PDF</div>
+            <small class="hint">اختياري</small>
+            <input type="file" id="profile-cv" accept="application/pdf" />
+            <div id="cv-name" style="margin-top:8px; color:var(--coffee-800); font-weight:700;"></div>
+          </label>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:16px; justify-content:flex-end;">
+          <button type="button" class="btn btn-outline" id="cancel-profile">إلغاء</button>
+          <button type="submit" class="btn btn-primary">نشر الملف</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container">© <span id="year"></span> Coffee World</div>
+  </footer>
+
+  <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/baristas.js"></script>
+</body>
+</html>

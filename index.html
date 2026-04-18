@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Coffee World — عالم القهوة</title>
+<meta name="description" content="منصة Coffee World: ابتكر وصفتك، تسوّق لمستلزمات القهوة، وتواصل مع أفضل البريستا." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/main.css" />
+</head>
+<body data-page="home">
+  <header class="site-header">
+    <div class="container nav">
+      <a href="index.html" class="brand">
+        <span class="brand-logo">CW</span>
+        <span>Coffee World</span>
+      </a>
+      <button class="menu-toggle" aria-label="القائمة">☰</button>
+      <ul class="nav-links">
+        <li><a href="index.html" data-page="home">الرئيسية</a></li>
+        <li><a href="pages/recipe.html" data-page="recipe">ابتكر وصفتك</a></li>
+        <li><a href="pages/marketplace.html" data-page="marketplace">السوق</a></li>
+        <li><a href="pages/baristas.html" data-page="baristas">البريستا</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <section class="container hero">
+      <div>
+        <h1>عالمك من <span>القهوة</span> في مكان واحد.</h1>
+        <p>
+          ابتكر وصفتك المثالية، بِع واشترِ مستلزمات القهوة،
+          وتصفّح سِيَر البريستا المحترفين — كل ذلك في منصة واحدة
+          أنيقة وجاهزة للربط مع أي واجهة برمجية خلفية.
+        </p>
+        <div class="hero-ctas">
+          <a href="pages/recipe.html" class="btn btn-primary">ابدأ وصفة جديدة ←</a>
+          <a href="pages/marketplace.html" class="btn btn-outline">تصفّح السوق</a>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true"></div>
+    </section>
+
+    <section class="container section">
+      <div class="section-title">
+        <h2>ثلاث مراحل. منصة واحدة.</h2>
+        <p>اختر المرحلة التي تريد البدء منها.</p>
+      </div>
+      <div class="stages-grid">
+        <article class="stage-card">
+          <div class="stage-num">1</div>
+          <h3>ابتكر وصفتك</h3>
+          <p>اختر نوع القهوة وحدّد مقادير الحليب والإسبريسو والماء والثلج والبومب، ثم احصل على كوب بصري ووصفة ورقية للبريستا مع خيار الحفظ.</p>
+          <a href="pages/recipe.html" class="btn btn-primary">ابدأ الآن</a>
+        </article>
+
+        <article class="stage-card">
+          <div class="stage-num">2</div>
+          <h3>سوق القهوة</h3>
+          <p>منصة إعلانات مخصصة للقهوة ومستلزماتها. ارفع صور منتجك، أضف رقم تواصلك، ودع المشترين يصلون إليك بسهولة.</p>
+          <a href="pages/marketplace.html" class="btn btn-primary">دخول السوق</a>
+        </article>
+
+        <article class="stage-card">
+          <div class="stage-num">3</div>
+          <h3>سيَر البريستا</h3>
+          <p>ملفات تعريفية للبريستا الباحثين عن عمل — صورة، خبرات، مهارات، ومعلومات التواصل. بسيط، مرتّب، واحترافي.</p>
+          <a href="pages/baristas.html" class="btn btn-primary">استعراض البريستا</a>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      © <span id="year"></span> Coffee World — صُنع بحب ☕
+    </div>
+  </footer>
+
+  <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
