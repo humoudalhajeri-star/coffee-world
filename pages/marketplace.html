@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>سوق القهوة — Coffee World</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css" />
+</head>
+<body data-page="marketplace">
+  <header class="site-header">
+    <div class="container nav">
+      <a href="../index.html" class="brand">
+        <span class="brand-logo">CW</span>
+        <span>Coffee World</span>
+      </a>
+      <button class="menu-toggle" aria-label="القائمة">☰</button>
+      <ul class="nav-links">
+        <li><a href="../index.html" data-page="home">الرئيسية</a></li>
+        <li><a href="recipe.html" data-page="recipe">ابتكر وصفتك</a></li>
+        <li><a href="marketplace.html" data-page="marketplace">السوق</a></li>
+        <li><a href="baristas.html" data-page="baristas">البريستا</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main class="container section">
+    <div class="section-title">
+      <div>
+        <h2>المرحلة 2 — سوق القهوة</h2>
+        <p>منصة إعلانات مخصصة للقهوة ومستلزماتها. تصفّح، أو أضف إعلانك.</p>
+      </div>
+      <button class="btn btn-gold" id="new-listing-btn">＋ إعلان جديد</button>
+    </div>
+
+    <div class="toolbar">
+      <input id="search" class="input search" placeholder="ابحث بالعنوان، الوصف، أو الفئة..." />
+      <select id="filter-category" class="select" style="max-width: 220px;">
+        <option value="">كل الفئات</option>
+        <option value="beans">حبوب قهوة</option>
+        <option value="machines">مكائن وإسبريسو</option>
+        <option value="grinders">مطاحن</option>
+        <option value="accessories">أدوات وإكسسوارات</option>
+        <option value="cups">أكواب وعبوات</option>
+        <option value="syrups">نكهات وبومب</option>
+        <option value="other">أخرى</option>
+      </select>
+    </div>
+
+    <div id="listings" class="listings-grid"></div>
+  </main>
+
+  <!-- Modal: New listing -->
+  <div class="modal-backdrop" id="listing-modal">
+    <div class="modal">
+      <header>
+        <h3>إعلان جديد</h3>
+        <button class="close" id="close-listing">×</button>
+      </header>
+      <form id="listing-form">
+        <div class="form-grid full">
+          <div class="field">
+            <label>العنوان *</label>
+            <input name="title" class="input" required maxlength="80" placeholder="مثال: مكينة إسبريسو شبه أوتوماتيكية" />
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label>السعر (ر.س)</label>
+            <input name="price" type="number" min="0" class="input" placeholder="0" />
+          </div>
+          <div class="field">
+            <label>الفئة *</label>
+            <select name="category" class="select" required>
+              <option value="">اختر...</option>
+              <option value="beans">حبوب قهوة</option>
+              <option value="machines">مكائن وإسبريسو</option>
+              <option value="grinders">مطاحن</option>
+              <option value="accessories">أدوات وإكسسوارات</option>
+              <option value="cups">أكواب وعبوات</option>
+              <option value="syrups">نكهات وبومب</option>
+              <option value="other">أخرى</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>المدينة</label>
+            <input name="city" class="input" placeholder="الرياض، جدة، ..." />
+          </div>
+          <div class="field">
+            <label>رقم التواصل *</label>
+            <input name="phone" class="input" required placeholder="05xxxxxxxx" />
+          </div>
+        </div>
+        <div class="field" style="margin-top:10px;">
+          <label>الوصف</label>
+          <textarea name="description" class="textarea" maxlength="600" placeholder="اذكر حالة المنتج، السنة، الضمان، ..."></textarea>
+        </div>
+
+        <div class="field" style="margin-top:10px;">
+          <label>الصور</label>
+          <label class="upload" for="listing-files">
+            <div>📷 اضغط لاختيار صور — أو اسحبها هنا</div>
+            <small class="hint">يمكن اختيار أكثر من صورة (حتى 6)</small>
+            <input type="file" id="listing-files" accept="image/*" multiple />
+            <div class="preview" id="listing-preview"></div>
+          </label>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:16px; justify-content:flex-end;">
+          <button type="button" class="btn btn-outline" id="cancel-listing">إلغاء</button>
+          <button type="submit" class="btn btn-primary">نشر الإعلان</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container">© <span id="year"></span> Coffee World</div>
+  </footer>
+
+  <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/marketplace.js"></script>
+</body>
+</html>

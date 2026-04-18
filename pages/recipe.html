@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ابتكر وصفتك — Coffee World</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css" />
+</head>
+<body data-page="recipe">
+  <header class="site-header">
+    <div class="container nav">
+      <a href="../index.html" class="brand">
+        <span class="brand-logo">CW</span>
+        <span>Coffee World</span>
+      </a>
+      <button class="menu-toggle" aria-label="القائمة">☰</button>
+      <ul class="nav-links">
+        <li><a href="../index.html" data-page="home">الرئيسية</a></li>
+        <li><a href="recipe.html" data-page="recipe">ابتكر وصفتك</a></li>
+        <li><a href="marketplace.html" data-page="marketplace">السوق</a></li>
+        <li><a href="baristas.html" data-page="baristas">البريستا</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main class="container section">
+    <div class="section-title">
+      <div>
+        <h2>المرحلة 1 — ابتكر وصفتك</h2>
+        <p>اختر نوع القهوة وحدّد المقادير بدقة. اضغط "تم" لعرض الكوب ووصفة البريستا.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="form-grid full">
+        <!-- Coffee Type -->
+        <div class="field">
+          <label>نوع القهوة</label>
+          <div class="chips" id="type-chips"></div>
+        </div>
+
+        <!-- Size -->
+        <div class="field">
+          <label>حجم الكوب</label>
+          <div class="chips" id="size-chips">
+            <span class="chip" data-size="S">صغير 240مل</span>
+            <span class="chip active" data-size="M">وسط 350مل</span>
+            <span class="chip" data-size="L">كبير 470مل</span>
+          </div>
+        </div>
+
+        <!-- Temperature -->
+        <div class="field">
+          <label>درجة الحرارة</label>
+          <div class="chips" id="temp-chips">
+            <span class="chip active" data-temp="hot">ساخن</span>
+            <span class="chip" data-temp="iced">مثلّج</span>
+          </div>
+        </div>
+      </div>
+
+      <hr style="border: none; border-top: 1px solid var(--border); margin: 22px 0;" />
+
+      <div class="form-grid">
+        <!-- Espresso shots -->
+        <div class="field">
+          <label>عدد شوتات الإسبريسو</label>
+          <div class="slider-row">
+            <input type="range" id="shots" min="0" max="6" step="1" value="2" />
+            <output id="shots-out">2</output>
+          </div>
+          <span class="hint">كل شوت ≈ 30مل</span>
+        </div>
+
+        <!-- Water -->
+        <div class="field">
+          <label>كمية الماء (مل)</label>
+          <div class="slider-row">
+            <input type="range" id="water" min="0" max="300" step="10" value="0" />
+            <output id="water-out">0 مل</output>
+          </div>
+          <span class="hint">يُضاف للأمريكانو ونحوه</span>
+        </div>
+
+        <!-- Milk quantity -->
+        <div class="field">
+          <label>كمية الحليب (مل)</label>
+          <div class="slider-row">
+            <input type="range" id="milk" min="0" max="400" step="10" value="180" />
+            <output id="milk-out">180 مل</output>
+          </div>
+        </div>
+
+        <!-- Milk type -->
+        <div class="field">
+          <label>نوع الحليب</label>
+          <select class="select" id="milk-type">
+            <option value="full">حليب كامل الدسم</option>
+            <option value="low">حليب قليل الدسم</option>
+            <option value="oat">حليب شوفان</option>
+            <option value="almond">حليب لوز</option>
+            <option value="soy">حليب صويا</option>
+            <option value="coconut">حليب جوز الهند</option>
+            <option value="none">بدون حليب</option>
+          </select>
+        </div>
+
+        <!-- Ice -->
+        <div class="field">
+          <label>كمية الثلج</label>
+          <div class="slider-row">
+            <input type="range" id="ice" min="0" max="5" step="1" value="0" />
+            <output id="ice-out">بدون</output>
+          </div>
+        </div>
+
+        <!-- Sugar -->
+        <div class="field">
+          <label>السكر (ملاعق)</label>
+          <div class="slider-row">
+            <input type="range" id="sugar" min="0" max="5" step="1" value="0" />
+            <output id="sugar-out">0</output>
+          </div>
+        </div>
+      </div>
+
+      <div class="field" style="margin-top: 18px;">
+        <label>إضافات البومب / النكهات</label>
+        <div class="chips" id="pump-chips">
+          <span class="chip" data-pump="vanilla">فانيلا</span>
+          <span class="chip" data-pump="caramel">كراميل</span>
+          <span class="chip" data-pump="hazelnut">بندق</span>
+          <span class="chip" data-pump="chocolate">شوكولاتة</span>
+          <span class="chip" data-pump="cinnamon">قرفة</span>
+          <span class="chip" data-pump="toffee">توفي</span>
+          <span class="chip" data-pump="pumpkin">يقطين</span>
+          <span class="chip" data-pump="rose">ورد</span>
+          <span class="chip" data-pump="saffron">زعفران</span>
+        </div>
+        <span class="hint">يمكن اختيار أكثر من نكهة. الجرعة الافتراضية: شوت واحد لكل نكهة.</span>
+      </div>
+
+      <div class="field" style="margin-top: 18px;">
+        <label>ملاحظات للبريستا (اختياري)</label>
+        <textarea id="notes" class="textarea" placeholder="مثال: رغوة حليب كثيفة، بدون رغوة، حليب دافئ 60°..."></textarea>
+      </div>
+
+      <div class="field" style="margin-top: 18px;">
+        <label>اسم الوصفة (لحفظها)</label>
+        <input id="recipe-name" class="input" placeholder="مثال: كابتشينو الصباح" />
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;">
+        <button class="btn btn-gold" id="done-btn">تم — عرض الوصفة ←</button>
+        <button class="btn btn-outline" id="save-btn">💾 حفظ الوصفة</button>
+        <button class="btn btn-outline" id="reset-btn">إعادة الضبط</button>
+      </div>
+    </div>
+
+    <section class="section">
+      <div class="section-title">
+        <h2>الوصفات المحفوظة</h2>
+        <p>الوصفات التي حفظتها لاستدعائها لاحقاً.</p>
+      </div>
+      <div id="saved-list" class="saved-list"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">© <span id="year"></span> Coffee World</div>
+  </footer>
+
+  <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/recipe-data.js"></script>
+  <script src="../assets/js/recipe.js"></script>
+</body>
+</html>
