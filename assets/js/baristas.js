@@ -96,6 +96,8 @@
     $("#cv-name").textContent = "";
     $$("#skills-chips .chip").forEach(c => c.classList.remove("active"));
     $("#profile-form").reset();
+    $("#profile-photo").value = "";
+    $("#profile-cv").value = "";
     $("#profile-modal").classList.add("open");
   }
   function closeModal() { $("#profile-modal").classList.remove("open"); }

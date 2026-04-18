@@ -58,7 +58,28 @@
       catch { return []; }
     },
     write(key, value) {
-      localStorage.setItem(key, JSON.stringify(value));
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch (err) {
+        // QuotaExceededError: common when storing large images as data URLs.
+        // Free space by stripping image payloads from older entries.
+        if (Array.isArray(value)) {
+          const trimmed = value.map((entry, i) => {
+            if (i === 0) return entry; // keep the newest one whole
+            const clone = { ...entry };
+            if (Array.isArray(clone.images)) clone.images = [];
+            if (clone.photo && clone.photo.startsWith && clone.photo.startsWith("data:")) clone.photo = null;
+            if (clone.cv && clone.cv.startsWith && clone.cv.startsWith("data:")) clone.cv = null;
+            return clone;
+          });
+          try {
+            localStorage.setItem(key, JSON.stringify(trimmed));
+            console.warn("LocalStorage quota hit — older media stripped.");
+            return;
+          } catch {}
+        }
+        throw new Error("تجاوز حجم التخزين المحلي. فعّل الـ API أو قلل حجم الصور.");
+      }
     },
     uid() {
       return "id_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);

@@ -621,6 +621,7 @@ input[type=range]::-moz-range-thumb {
   text-align: center;
   padding: 50px 20px;
   color: var(--muted);
+  grid-column: 1 / -1;
 }
 .empty h3 { color: var(--coffee-900); margin: 0 0 6px; }
 

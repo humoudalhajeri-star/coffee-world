@@ -201,6 +201,8 @@
     wireSlider("sugar", "sugar", v => `${v}`);
     wireButtons();
     wireSavedList();
+    // Sync UI with initial state (avoids slider/label mismatch on first paint)
+    applyDefaultsFor(state.type);
     renderSaved();
   });
 })();
