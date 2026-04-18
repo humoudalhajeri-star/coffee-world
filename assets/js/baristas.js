@@ -1,5 +1,5 @@
 /**
- * Stage 3 — Barista profiles (LinkedIn-style for baristas).
+ * Stage 3 — Barista profiles with auth (sign in / sign up).
  */
 (function () {
   const { $, $$, toast, escapeHTML, formatDate } = window.CW;
@@ -21,6 +21,80 @@
   let cvUrl    = null;
   let cvName   = "";
 
+  /* ============ Auth UI ============ */
+  function renderAuthArea() {
+    const area = $("#auth-area");
+    const user = window.CoffeeAPI.Auth.current();
+    if (user) {
+      const initial = (user.user?.name || "?").trim().charAt(0);
+      area.innerHTML = `
+        <span class="auth-chip">
+          <span class="av">${escapeHTML(initial)}</span>
+          مرحباً، ${escapeHTML(user.user?.name || "")}
+        </span>
+        <button class="btn btn-outline" id="signout-btn">تسجيل خروج</button>`;
+      $("#signout-btn").addEventListener("click", async () => {
+        await window.CoffeeAPI.Auth.signOut();
+        toast("تم تسجيل الخروج", "info");
+        renderAuthArea();
+      });
+    } else {
+      area.innerHTML = `
+        <button class="btn btn-outline" id="open-signin">تسجيل الدخول</button>
+        <button class="btn btn-gold"    id="open-signup">إنشاء حساب</button>`;
+      $("#open-signin").addEventListener("click", () => openAuth("signin"));
+      $("#open-signup").addEventListener("click", () => openAuth("signup"));
+    }
+  }
+
+  function openAuth(tab = "signin") {
+    $("#auth-modal").classList.add("open");
+    switchTab(tab);
+  }
+  function closeAuth() {
+    $("#auth-modal").classList.remove("open");
+    $$("#auth-modal form").forEach(f => f.reset());
+  }
+  function switchTab(tab) {
+    $$("#auth-modal .tab").forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
+    $("#signin-form").style.display = tab === "signin" ? "" : "none";
+    $("#signup-form").style.display = tab === "signup" ? "" : "none";
+    $("#auth-title").textContent = tab === "signin" ? "تسجيل الدخول" : "إنشاء حساب";
+  }
+
+  async function handleSignIn(e) {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    try {
+      await window.CoffeeAPI.Auth.signIn({
+        email: fd.get("email").toString(),
+        password: fd.get("password").toString(),
+      });
+      toast("تم تسجيل الدخول ✓", "success");
+      closeAuth();
+      renderAuthArea();
+    } catch (err) {
+      toast(err.message || "تعذّر تسجيل الدخول", "error");
+    }
+  }
+  async function handleSignUp(e) {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    try {
+      await window.CoffeeAPI.Auth.signUp({
+        name: fd.get("name").toString(),
+        email: fd.get("email").toString(),
+        password: fd.get("password").toString(),
+      });
+      toast("مرحباً بك في Coffee World ✓", "success");
+      closeAuth();
+      renderAuthArea();
+    } catch (err) {
+      toast(err.message || "تعذّر إنشاء الحساب", "error");
+    }
+  }
+
+  /* ============ Listing + cards ============ */
   async function loadAndRender() {
     const search = $("#search").value.trim();
     const exp    = $("#filter-exp").value;
@@ -30,7 +104,7 @@
       let items = await window.CoffeeAPI.Baristas.list(search);
       if (exp) items = items.filter(b => b.experience === exp);
       if (!items.length) {
-        grid.innerHTML = `<div class="empty"><h3>لا توجد ملفات بعد</h3><p>اضغط "ملف جديد" لإضافة أول بريستا.</p></div>`;
+        grid.innerHTML = `<div class="empty"><h3>لا توجد ملفات بعد</h3><p>سجّل حسابك ثم اضغط "ملف جديد".</p></div>`;
         return;
       }
       grid.innerHTML = items.map(cardHTML).join("");
@@ -40,7 +114,7 @@
   }
 
   function cardHTML(b) {
-    const media = b.photo
+    const avatar = b.photo
       ? `<img src="${escapeHTML(b.photo)}" alt="${escapeHTML(b.name)}">`
       : `<span>👤</span>`;
     const skills = (b.skills || []).slice(0, 4)
@@ -51,25 +125,31 @@
     const phoneHref = b.phone ? `tel:${encodeURIComponent(b.phone)}` : "#";
     const waHref    = b.phone ? `https://wa.me/${(b.phone || "").replace(/[^\d]/g,"")}` : "#";
     const cvBtn     = b.cv ? `<a class="btn btn-outline" href="${escapeHTML(b.cv)}" target="_blank" rel="noopener">📄 السيرة</a>` : "";
+    const currentUser = window.CoffeeAPI.Auth.current();
+    const canDelete = currentUser?.user?.id && b.ownerId === currentUser.user.id;
+    const deleteBtn = canDelete
+      ? `<button class="btn btn-danger" data-delete="${b.id}" title="حذف">🗑️</button>`
+      : "";
     return `
       <article class="barista-card">
-        <div class="barista-media">${media}</div>
+        <div class="barista-banner"></div>
+        <div class="barista-avatar">${avatar}</div>
         <div class="barista-body">
           <h3>${escapeHTML(b.name)}</h3>
           <div class="meta-row">
             <span class="tag">${escapeHTML(EXPERIENCE_LABELS[b.experience] || b.experience || "")}</span>
             ${years}
             ${city}
-            <span>🗓️ ${formatDate(b.createdAt)}</span>
           </div>
           <div class="meta-row" style="margin-top:4px;">${skills} ${more}</div>
           <p>${escapeHTML((b.bio || "").slice(0, 160))}${(b.bio || "").length > 160 ? "..." : ""}</p>
+          <small style="color:var(--muted);">🗓️ ${formatDate(b.createdAt)}</small>
         </div>
         <div class="barista-actions">
           <a class="btn btn-gold"    href="${waHref}" target="_blank" rel="noopener">💬 واتساب</a>
           <a class="btn btn-outline" href="${phoneHref}">☎️</a>
           ${cvBtn}
-          <button class="btn btn-danger" data-delete="${b.id}" title="حذف">🗑️</button>
+          ${deleteBtn}
         </div>
       </article>`;
   }
@@ -89,13 +169,24 @@
     });
   }
 
-  /* ===== Modal + form ===== */
+  /* ============ Profile modal ============ */
   function openModal() {
+    const user = window.CoffeeAPI.Auth.current();
+    if (!user) {
+      toast("سجّل دخولك أولاً لإنشاء ملف", "info");
+      openAuth("signin");
+      return;
+    }
     photoUrl = null; cvUrl = null; cvName = "";
-    $("#profile-preview").innerHTML = "";
+    $("#profile-preview").innerHTML = "<span>👤</span>";
     $("#cv-name").textContent = "";
     $$("#skills-chips .chip").forEach(c => c.classList.remove("active"));
     $("#profile-form").reset();
+    $("#profile-photo").value = "";
+    $("#profile-cv").value = "";
+    // Prefill from session
+    $("#profile-form [name=name]").value  = user.user?.name || "";
+    $("#profile-form [name=email]").value = user.user?.email || "";
     $("#profile-modal").classList.add("open");
   }
   function closeModal() { $("#profile-modal").classList.remove("open"); }
@@ -116,7 +207,7 @@
     cvName = file.name;
     $("#cv-name").textContent = "📄 " + cvName;
     try {
-      const res = await window.CoffeeAPI.Baristas.uploadPhoto(file); // reuse upload endpoint
+      const res = await window.CoffeeAPI.Baristas.uploadPhoto(file);
       cvUrl = res.url;
     } catch (err) {
       toast("تعذّر رفع السيرة: " + err.message, "error");
@@ -125,6 +216,12 @@
 
   async function submitForm(e) {
     e.preventDefault();
+    const currentUser = window.CoffeeAPI.Auth.current();
+    if (!currentUser) {
+      toast("سجّل دخولك أولاً", "error");
+      openAuth("signin");
+      return;
+    }
     const fd = new FormData(e.target);
     const skills = $$("#skills-chips .chip.active").map(c => c.dataset.skill);
     const data = {
@@ -139,6 +236,7 @@
       photo:      photoUrl,
       cv:         cvUrl,
       cvName,
+      ownerId:    currentUser.user?.id,
     };
     if (!data.name || !data.experience || !data.phone) {
       toast("فضلاً أكمل الحقول الأساسية", "error");
@@ -155,6 +253,21 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => {
+    renderAuthArea();
+
+    // Auth modal wiring
+    $("#close-auth").addEventListener("click", closeAuth);
+    $("#auth-modal").addEventListener("click", (e) => {
+      if (e.target.id === "auth-modal") closeAuth();
+      if (e.target.matches("[data-cancel]")) closeAuth();
+    });
+    $$("#auth-modal .tab").forEach(t =>
+      t.addEventListener("click", () => switchTab(t.dataset.tab))
+    );
+    $("#signin-form").addEventListener("submit", handleSignIn);
+    $("#signup-form").addEventListener("submit", handleSignUp);
+
+    // Profile modal wiring
     $("#new-profile-btn").addEventListener("click", openModal);
     $("#close-profile").addEventListener("click", closeModal);
     $("#cancel-profile").addEventListener("click", closeModal);

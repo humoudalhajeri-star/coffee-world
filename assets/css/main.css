@@ -527,7 +527,7 @@ input[type=range]::-moz-range-thumb {
   transform: translateY(-3px);
   box-shadow: var(--shadow);
 }
-.listing-media, .barista-media {
+.listing-media {
   aspect-ratio: 4 / 3;
   background: linear-gradient(135deg, var(--coffee-300), var(--coffee-500));
   display: grid;
@@ -536,11 +536,104 @@ input[type=range]::-moz-range-thumb {
   font-size: 36px;
   overflow: hidden;
 }
-.listing-media img, .barista-media img {
+.listing-media img {
   width: 100%; height: 100%; object-fit: cover;
 }
+
+/* Barista card: LinkedIn-style banner + circular avatar */
+.barista-banner {
+  height: 72px;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(212,175,55,.45), transparent 45%),
+    linear-gradient(135deg, var(--coffee-700), var(--coffee-900));
+}
+.barista-avatar {
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--coffee-300), var(--coffee-500));
+  border: 4px solid var(--cream-50);
+  margin: -56px auto 8px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: var(--coffee-900);
+  font-size: 40px;
+  box-shadow: 0 6px 18px rgba(62,39,22,.18);
+}
+.barista-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.barista-card { text-align: center; }
+.barista-card .meta-row { justify-content: center; }
+
 .listing-body, .barista-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
 .listing-body h3, .barista-body h3 { margin: 0; font-size: 17px; color: var(--coffee-900); }
+
+/* Avatar preview inside the form (circular) */
+.avatar-preview {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin: 10px auto 0;
+  background: var(--coffee-200);
+  border: 4px solid var(--cream-50);
+  box-shadow: 0 4px 12px rgba(62,39,22,.15);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  color: var(--coffee-700);
+  font-size: 36px;
+}
+.avatar-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* Auth toolbar chip */
+.auth-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--coffee-200);
+  color: var(--coffee-900);
+  font-weight: 700;
+  font-size: 14px;
+}
+.auth-chip .av {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--coffee-700); color: var(--gold);
+  display: grid; place-items: center;
+  font-weight: 900;
+}
+
+/* Auth tabs */
+.tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--coffee-200);
+  padding: 4px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--coffee-800);
+  user-select: none;
+  transition: background .15s ease, color .15s ease;
+}
+.tab.active {
+  background: var(--cream-50);
+  color: var(--coffee-900);
+  box-shadow: var(--shadow-sm);
+}
 .price {
   color: var(--gold-dark);
   font-weight: 900;
@@ -621,6 +714,7 @@ input[type=range]::-moz-range-thumb {
   text-align: center;
   padding: 50px 20px;
   color: var(--muted);
+  grid-column: 1 / -1;
 }
 .empty h3 { color: var(--coffee-900); margin: 0 0 6px; }
 

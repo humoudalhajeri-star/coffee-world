@@ -1,138 +1,329 @@
 /**
- * Stage 1 — Recipe builder logic (recipe.html only).
+ * Stage 1 — Recipe builder (redesigned, card-based).
  */
 (function () {
   const { $, $$, toast, escapeHTML, formatDate } = window.CW;
-  const { COFFEE_TYPES, SIZE_LABELS, TEMP_LABELS, ICE_LABELS } = window.RECIPE_META;
+  const M = window.RECIPE_META;
 
-  // per-type sensible defaults (quantities) — separate from display labels
-  const TYPE_DEFAULTS = {
-    "espresso":       { shots: 2, milk: 0,   water: 0,   ice: 0, temp: "hot",  size: "S" },
-    "americano":      { shots: 2, milk: 0,   water: 200, ice: 0, temp: "hot",  size: "M" },
-    "cappuccino":     { shots: 2, milk: 150, water: 0,   ice: 0, temp: "hot",  size: "M" },
-    "latte":          { shots: 2, milk: 220, water: 0,   ice: 0, temp: "hot",  size: "M" },
-    "flat-white":     { shots: 2, milk: 140, water: 0,   ice: 0, temp: "hot",  size: "S" },
-    "macchiato":      { shots: 2, milk: 40,  water: 0,   ice: 0, temp: "hot",  size: "S" },
-    "mocha":          { shots: 2, milk: 200, water: 0,   ice: 0, temp: "hot",  size: "M" },
-    "cortado":        { shots: 2, milk: 60,  water: 0,   ice: 0, temp: "hot",  size: "S" },
-    "iced-latte":     { shots: 2, milk: 180, water: 0,   ice: 4, temp: "iced", size: "L" },
-    "iced-americano": { shots: 2, milk: 0,   water: 180, ice: 4, temp: "iced", size: "L" },
-    "spanish-latte":  { shots: 2, milk: 200, water: 0,   ice: 0, temp: "hot",  size: "M" },
-    "turkish":        { shots: 0, milk: 0,   water: 120, ice: 0, temp: "hot",  size: "S" },
-    "v60":            { shots: 0, milk: 0,   water: 250, ice: 0, temp: "hot",  size: "M" },
-    "cold-brew":      { shots: 0, milk: 0,   water: 250, ice: 3, temp: "iced", size: "L" },
-    "affogato":       { shots: 1, milk: 0,   water: 0,   ice: 0, temp: "hot",  size: "S" },
-  };
-
-  // Only run the builder on the recipe page
-  if (!document.getElementById("type-chips")) return;
+  if (!document.getElementById("drink-grid")) return;
 
   const state = {
-    type: "cappuccino",
-    size: "M",
-    temp: "hot",
-    shots: 2,
-    water: 0,
-    milk: 150,
-    milkType: "full",
-    ice: 0,
-    sugar: 0,
-    pumps: [],
-    notes: "",
+    type:     "latte",
+    size:     "M",
+    temp:     "hot",
+    shots:    1,
+    milk:     80,
+    milkType: "regular",
+    sugar:    0,
+    foam:     "light",
+    ice:      "none",
+    water:    "none",
+    pumps:    [],   // [{ key, count }]
+    notes:    "",
   };
 
-  function renderTypeChips() {
-    const wrap = $("#type-chips");
-    wrap.innerHTML = COFFEE_TYPES.map(t =>
-      `<span class="chip${t.key === state.type ? " active" : ""}" data-type="${t.key}">${t.name}</span>`
-    ).join("");
-    wrap.addEventListener("click", (e) => {
-      const chip = e.target.closest(".chip");
-      if (!chip) return;
-      $$("#type-chips .chip").forEach(c => c.classList.remove("active"));
-      chip.classList.add("active");
-      state.type = chip.dataset.type;
-      applyDefaultsFor(state.type);
+  /* ============================================================
+   * Renderers (build initial DOM)
+   * ============================================================ */
+  function renderDrinks() {
+    $("#drink-grid").innerHTML = M.DRINKS.map(d => `
+      <div class="drink-card${d.key === state.type ? " active" : ""}" data-key="${d.key}">
+        <div class="drink-icon">${d.icon}</div>
+        <div class="drink-name">${escapeHTML(d.name)}</div>
+        <div class="drink-sub">${escapeHTML(d.sub)}</div>
+      </div>
+    `).join("");
+  }
+
+  function renderSizes() {
+    $("#size-row").innerHTML = M.SIZES.map(s => `
+      <div class="pick-card${s.key === state.size ? " active" : ""}" data-size="${s.key}">
+        <span class="pick-icon">🥤</span>
+        <div class="pick-name">${escapeHTML(s.name)} (${s.key})</div>
+        <div class="pick-sub">${s.ml}ml</div>
+      </div>
+    `).join("");
+  }
+
+  function renderTemps() {
+    $("#temp-row").innerHTML = M.TEMPS.map(t => `
+      <div class="pick-card${t.key === state.temp ? " active" : ""}" data-temp="${t.key}">
+        <span class="pick-icon">${t.icon}</span>
+        <div class="pick-name">${escapeHTML(t.name)}</div>
+      </div>
+    `).join("");
+  }
+
+  function renderPills(containerSel, items, stateKey) {
+    $(containerSel).innerHTML = items.map(it => `
+      <button class="pill${state[stateKey] === it.key ? " active" : ""}" data-key="${it.key}">
+        ${it.icon ? `<span>${it.icon}</span>` : ""}${escapeHTML(it.name)}
+      </button>
+    `).join("");
+  }
+
+  function renderPumpsTable() {
+    const rows = state.pumps.map(p => {
+      const meta = findPumpMeta(p.key);
+      if (!meta) return "";
+      const steps = [1, 2, 3, 4].map(n => `
+        <button class="pump-step${p.count === n ? " active" : ""}" data-key="${p.key}" data-n="${n}">${n}</button>
+      `).join("");
+      return `
+        <div class="pump-row">
+          <div class="pump-name">
+            <span style="font-size:22px;">${meta.icon}</span>
+            <div>
+              <span class="pump-label">${escapeHTML(meta.name)}</span>
+              <span class="pump-en">${escapeHTML(meta.en)}</span>
+              ${meta.tag ? `<span class="pump-tag">${escapeHTML(meta.tag)}</span>` : ""}
+            </div>
+          </div>
+          <div class="pump-steps">
+            <button class="pump-step clear" data-key="${p.key}" data-n="0" title="إزالة">×</button>
+            ${steps}
+          </div>
+          <button class="pump-delete" data-remove="${p.key}" title="حذف">–</button>
+        </div>
+      `;
+    }).join("");
+
+    $("#pumps-table").innerHTML = rows || `
+      <div style="text-align:center; color:var(--ord-muted); padding: 12px 0;">
+        لم تُضف أي نكهات بعد. اضغط "+ نكهات إضافية" لإضافة أول نكهة.
+      </div>`;
+  }
+
+  function findPumpMeta(key) {
+    return M.PUMPS.find(p => p.key === key) || M.EXTRA_PUMPS.find(p => p.key === key);
+  }
+
+  /* ============================================================
+   * Meter helpers (pill text + cup fill visual)
+   * ============================================================ */
+  function updateShotsMeter() {
+    const v = state.shots;
+    $("#shots-pill").textContent = v === 0 ? "Shot 0" : `Shot (30ml) ${v}`;
+    $("#shots").value = v;
+    setSliderFill("#shots");
+    const cup = $("#cup-shots");
+    cup.style.setProperty("--fill", (v / 4) * 100 + "%");
+    cup.querySelector("span").textContent = v === 0 ? "—" : `${v}S`;
+  }
+  function updateMilkMeter() {
+    const v = state.milk;
+    $("#milk-pill").textContent = `${v}ml`;
+    $("#milk").value = v;
+    setSliderFill("#milk");
+    const cup = $("#cup-milk");
+    cup.style.setProperty("--fill", (v / 300) * 100 + "%");
+    cup.querySelector("span").textContent = v === 0 ? "—" : `${v}ml`;
+  }
+  function updateSugarMeter() {
+    const v = state.sugar;
+    $("#sugar-pill").textContent = `Spoon ${v}`;
+    $("#sugar").value = v;
+    setSliderFill("#sugar");
+    const cup = $("#cup-sugar");
+    cup.style.setProperty("--fill", (v / 5) * 100 + "%");
+    cup.querySelector("span").textContent = v === 0 ? "—" : `×${v}`;
+  }
+
+  function setSliderFill(sel) {
+    const el = $(sel);
+    const min = Number(el.min);
+    const max = Number(el.max);
+    const val = Number(el.value);
+    const pct = max === min ? 0 : ((val - min) / (max - min)) * 100;
+    el.style.setProperty("--pct", pct + "%");
+  }
+
+  /* ============================================================
+   * Wiring
+   * ============================================================ */
+  function wire() {
+    // Drinks
+    $("#drink-grid").addEventListener("click", (e) => {
+      const card = e.target.closest(".drink-card");
+      if (!card) return;
+      state.type = card.dataset.key;
+      $$("#drink-grid .drink-card").forEach(c => c.classList.toggle("active", c.dataset.key === state.type));
+      applyDefaults();
+    });
+
+    // Size / Temp (generic)
+    function wirePickRow(sel, stateKey, attr) {
+      $(sel).addEventListener("click", (e) => {
+        const card = e.target.closest(".pick-card");
+        if (!card) return;
+        state[stateKey] = card.dataset[attr];
+        $$(`${sel} .pick-card`).forEach(c => c.classList.toggle("active", c.dataset[attr] === state[stateKey]));
+      });
+    }
+    wirePickRow("#size-row", "size", "size");
+    wirePickRow("#temp-row", "temp", "temp");
+
+    // Pill groups
+    function wirePills(sel, stateKey) {
+      $(sel).addEventListener("click", (e) => {
+        const pill = e.target.closest(".pill");
+        if (!pill) return;
+        state[stateKey] = pill.dataset.key;
+        $$(`${sel} .pill`).forEach(p => p.classList.toggle("active", p.dataset.key === state[stateKey]));
+      });
+    }
+    wirePills("#milk-type-chips", "milkType");
+    wirePills("#foam-chips",      "foam");
+    wirePills("#ice-chips",       "ice");
+    wirePills("#water-chips",     "water");
+
+    // Sliders
+    $("#shots").addEventListener("input", (e) => { state.shots = Number(e.target.value); updateShotsMeter(); });
+    $("#milk").addEventListener("input",  (e) => { state.milk  = Number(e.target.value); updateMilkMeter();  });
+    $("#sugar").addEventListener("input", (e) => { state.sugar = Number(e.target.value); updateSugarMeter(); });
+
+    // Pumps table
+    $("#pumps-table").addEventListener("click", (e) => {
+      const step = e.target.closest(".pump-step");
+      const rm   = e.target.closest("[data-remove]");
+      if (step) {
+        const key = step.dataset.key;
+        const n = Number(step.dataset.n);
+        const pump = state.pumps.find(p => p.key === key);
+        if (!pump) return;
+        if (n === 0) {
+          state.pumps = state.pumps.filter(p => p.key !== key);
+        } else {
+          pump.count = n;
+        }
+        renderPumpsTable();
+      } else if (rm) {
+        state.pumps = state.pumps.filter(p => p.key !== rm.dataset.remove);
+        renderPumpsTable();
+      }
+    });
+
+    // Add more pumps modal
+    $("#add-more-pumps").addEventListener("click", openPumpModal);
+    $("#close-pump-modal").addEventListener("click", closePumpModal);
+    $("#pump-modal").addEventListener("click", (e) => {
+      if (e.target.id === "pump-modal") closePumpModal();
+    });
+
+    // Tabs
+    $$(".order-tab").forEach(t =>
+      t.addEventListener("click", () => switchView(t.dataset.view))
+    );
+
+    // Buttons
+    $("#done-btn").addEventListener("click", () => {
+      const recipe = collect();
+      sessionStorage.setItem("cw.currentRecipe", JSON.stringify(recipe));
+      window.location.href = "cup.html";
+    });
+    $("#save-btn").addEventListener("click", handleSave);
+    $("#reset-btn").addEventListener("click", () => {
+      applyDefaults();
+      state.pumps = [];
+      renderPumpsTable();
+      renderPills("#milk-type-chips", M.MILK_TYPES, "milkType");
+      toast("تم إعادة الضبط", "info");
     });
   }
 
-  function applyDefaultsFor(typeKey) {
-    const def = TYPE_DEFAULTS[typeKey];
+  function applyDefaults() {
+    const def = M.DRINK_DEFAULTS[state.type];
     if (!def) return;
     Object.assign(state, def);
-    setSlider("shots", state.shots, v => `${v}`);
-    setSlider("water", state.water, v => `${v} مل`);
-    setSlider("milk",  state.milk,  v => `${v} مل`);
-    setSlider("ice",   state.ice,   v => ICE_LABELS[v] ?? v);
-    $$("#size-chips .chip").forEach(c => c.classList.toggle("active", c.dataset.size === state.size));
-    $$("#temp-chips .chip").forEach(c => c.classList.toggle("active", c.dataset.temp === state.temp));
+    // update all visuals
+    renderSizes();
+    renderTemps();
+    renderPills("#milk-type-chips", M.MILK_TYPES, "milkType");
+    renderPills("#foam-chips",      M.FOAM_LEVELS,  "foam");
+    renderPills("#ice-chips",       M.ICE_LEVELS,   "ice");
+    renderPills("#water-chips",     M.WATER_LEVELS, "water");
+    updateShotsMeter();
+    updateMilkMeter();
+    updateSugarMeter();
   }
 
-  function setSlider(id, value, fmt) {
-    const input = document.getElementById(id);
-    const out   = document.getElementById(`${id}-out`);
-    input.value = value;
-    out.textContent = fmt ? fmt(value) : value;
+  /* ============================================================
+   * Extra pumps modal
+   * ============================================================ */
+  function openPumpModal() {
+    const all = [...M.PUMPS, ...M.EXTRA_PUMPS];
+    const chips = all.map(p => {
+      const added = state.pumps.some(pp => pp.key === p.key);
+      return `<button class="pill${added ? " active" : ""}" data-key="${p.key}">${p.icon} ${escapeHTML(p.name)}</button>`;
+    }).join("");
+    $("#extra-pumps-chips").innerHTML = chips;
+    $("#pump-modal").classList.add("open");
+    $("#extra-pumps-chips").onclick = (e) => {
+      const pill = e.target.closest(".pill");
+      if (!pill) return;
+      const key = pill.dataset.key;
+      const idx = state.pumps.findIndex(p => p.key === key);
+      if (idx >= 0) {
+        state.pumps.splice(idx, 1);
+        pill.classList.remove("active");
+      } else {
+        state.pumps.push({ key, count: 1 });
+        pill.classList.add("active");
+      }
+      renderPumpsTable();
+    };
+  }
+  function closePumpModal() { $("#pump-modal").classList.remove("open"); }
+
+  /* ============================================================
+   * Tabs: Build / Saved
+   * ============================================================ */
+  function switchView(view) {
+    $$(".order-tab").forEach(t => t.classList.toggle("active", t.dataset.view === view));
+    $("#build-view").hidden = view !== "build";
+    $("#saved-view").hidden = view !== "saved";
+    if (view === "saved") renderSaved();
   }
 
-  function wireSlider(id, key, fmt) {
-    const input = document.getElementById(id);
-    const out   = document.getElementById(`${id}-out`);
-    input.addEventListener("input", () => {
-      const v = Number(input.value);
-      state[key] = v;
-      out.textContent = fmt ? fmt(v) : v;
-    });
-  }
-
-  function wireChipsGroup(sel, key) {
-    const root = $(sel);
-    root.addEventListener("click", (e) => {
-      const chip = e.target.closest(".chip");
-      if (!chip) return;
-      $$(`${sel} .chip`).forEach(c => c.classList.remove("active"));
-      chip.classList.add("active");
-      state[key] = chip.dataset[key];
-    });
-  }
-
-  function wirePumps() {
-    $("#pump-chips").addEventListener("click", (e) => {
-      const chip = e.target.closest(".chip");
-      if (!chip) return;
-      chip.classList.toggle("active");
-      state.pumps = $$("#pump-chips .chip.active").map(c => c.dataset.pump);
-    });
-  }
-
+  /* ============================================================
+   * Collect + persistence
+   * ============================================================ */
   function collect() {
-    state.milkType = $("#milk-type").value;
-    state.sugar    = Number($("#sugar").value);
-    state.notes    = $("#notes").value.trim();
-    const name     = $("#recipe-name").value.trim();
-    const typeName = COFFEE_TYPES.find(t => t.key === state.type)?.name || state.type;
+    const name = $("#recipe-name").value.trim();
+    const drink = M.DRINKS.find(d => d.key === state.type);
     return {
       ...state,
-      name: name || `${typeName} — ${SIZE_LABELS[state.size]}`,
-      typeName,
+      typeName: drink?.name || state.type,
+      name: name || `${drink?.name || state.type} — ${state.size}`,
     };
+  }
+
+  async function handleSave() {
+    const recipe = collect();
+    try {
+      await window.CoffeeAPI.Recipes.create(recipe);
+      toast("تم حفظ الوصفة ✓", "success");
+      $("#recipe-name").value = "";
+    } catch (err) {
+      toast("تعذّر الحفظ: " + err.message, "error");
+    }
   }
 
   async function renderSaved() {
     const list = await window.CoffeeAPI.Recipes.list();
     const wrap = $("#saved-list");
     if (!list.length) {
-      wrap.innerHTML = `<div class="empty"><h3>لا توجد وصفات محفوظة بعد</h3><p>ابنِ وصفتك أعلاه ثم اضغط "حفظ".</p></div>`;
+      wrap.innerHTML = `<div class="empty"><h3>لا توجد وصفات محفوظة</h3><p>ابنِ وصفة ثم اضغط "حفظ".</p></div>`;
       return;
     }
     wrap.innerHTML = list.map(r => `
       <div class="saved-item">
         <h4>${escapeHTML(r.name)}</h4>
         <small>${escapeHTML(r.typeName || "")} · ${formatDate(r.createdAt)}</small>
-        <div class="meta-row">
-          <span class="tag">${SIZE_LABELS[r.size] || r.size}</span>
-          <span class="tag">${TEMP_LABELS[r.temp] || r.temp}</span>
-          <span class="tag">${r.shots} شوت</span>
+        <div class="meta-row" style="margin-top:6px;">
+          <span class="tag">${r.size}</span>
+          <span class="tag">${escapeHTML(r.temp || "")}</span>
+          <span class="tag">${r.shots} Shot</span>
         </div>
         <div class="actions">
           <button class="btn btn-outline" data-open="${r.id}">عرض</button>
@@ -144,63 +335,38 @@
 
   function wireSavedList() {
     $("#saved-list").addEventListener("click", async (e) => {
-      const openBtn = e.target.closest("[data-open]");
-      const delBtn  = e.target.closest("[data-delete]");
-      if (openBtn) {
-        window.location.href = `cup.html?id=${encodeURIComponent(openBtn.dataset.open)}`;
-      } else if (delBtn) {
+      const open = e.target.closest("[data-open]");
+      const del  = e.target.closest("[data-delete]");
+      if (open) {
+        window.location.href = `cup.html?id=${encodeURIComponent(open.dataset.open)}`;
+      } else if (del) {
         if (!confirm("حذف هذه الوصفة؟")) return;
         try {
-          await window.CoffeeAPI.Recipes.remove(delBtn.dataset.delete);
+          await window.CoffeeAPI.Recipes.remove(del.dataset.delete);
           toast("تم الحذف", "success");
           renderSaved();
-        } catch (err) {
-          toast("تعذّر الحذف", "error");
-        }
+        } catch { toast("تعذّر الحذف", "error"); }
       }
     });
   }
 
-  function wireButtons() {
-    $("#done-btn").addEventListener("click", () => {
-      const recipe = collect();
-      sessionStorage.setItem("cw.currentRecipe", JSON.stringify(recipe));
-      window.location.href = "cup.html";
-    });
-
-    $("#save-btn").addEventListener("click", async () => {
-      const recipe = collect();
-      try {
-        await window.CoffeeAPI.Recipes.create(recipe);
-        toast("تم حفظ الوصفة ✓", "success");
-        $("#recipe-name").value = "";
-        renderSaved();
-      } catch (err) {
-        toast("تعذّر الحفظ: " + err.message, "error");
-      }
-    });
-
-    $("#reset-btn").addEventListener("click", () => {
-      applyDefaultsFor(state.type);
-      $("#sugar").value = 0; $("#sugar-out").textContent = "0"; state.sugar = 0;
-      $$("#pump-chips .chip").forEach(c => c.classList.remove("active"));
-      state.pumps = [];
-      $("#notes").value = ""; state.notes = "";
-    });
-  }
-
+  /* ============================================================
+   * Init
+   * ============================================================ */
   document.addEventListener("DOMContentLoaded", () => {
-    renderTypeChips();
-    wireChipsGroup("#size-chips", "size");
-    wireChipsGroup("#temp-chips", "temp");
-    wirePumps();
-    wireSlider("shots", "shots", v => `${v}`);
-    wireSlider("water", "water", v => `${v} مل`);
-    wireSlider("milk",  "milk",  v => `${v} مل`);
-    wireSlider("ice",   "ice",   v => ICE_LABELS[v] ?? v);
-    wireSlider("sugar", "sugar", v => `${v}`);
-    wireButtons();
+    renderDrinks();
+    renderSizes();
+    renderTemps();
+    renderPills("#milk-type-chips", M.MILK_TYPES, "milkType");
+    renderPills("#foam-chips",      M.FOAM_LEVELS,  "foam");
+    renderPills("#ice-chips",       M.ICE_LEVELS,   "ice");
+    renderPills("#water-chips",     M.WATER_LEVELS, "water");
+    renderPumpsTable();
+    wire();
     wireSavedList();
-    renderSaved();
+    // sync meter visuals to initial state
+    updateShotsMeter();
+    updateMilkMeter();
+    updateSugarMeter();
   });
 })();

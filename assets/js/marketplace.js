@@ -89,6 +89,7 @@
     imageQueue = [];
     $("#listing-preview").innerHTML = "";
     $("#listing-form").reset();
+    $("#listing-files").value = "";
     $("#listing-modal").classList.add("open");
   }
   function closeModal() {

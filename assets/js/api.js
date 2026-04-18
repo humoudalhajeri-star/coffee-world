@@ -21,6 +21,8 @@
     recipes:  "cw.recipes",
     listings: "cw.listings",
     baristas: "cw.baristas",
+    users:    "cw.users",
+    session:  "cw.session",
   };
 
   /* ============= low-level HTTP ============= */
@@ -58,7 +60,28 @@
       catch { return []; }
     },
     write(key, value) {
-      localStorage.setItem(key, JSON.stringify(value));
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch (err) {
+        // QuotaExceededError: common when storing large images as data URLs.
+        // Free space by stripping image payloads from older entries.
+        if (Array.isArray(value)) {
+          const trimmed = value.map((entry, i) => {
+            if (i === 0) return entry; // keep the newest one whole
+            const clone = { ...entry };
+            if (Array.isArray(clone.images)) clone.images = [];
+            if (clone.photo && clone.photo.startsWith && clone.photo.startsWith("data:")) clone.photo = null;
+            if (clone.cv && clone.cv.startsWith && clone.cv.startsWith("data:")) clone.cv = null;
+            return clone;
+          });
+          try {
+            localStorage.setItem(key, JSON.stringify(trimmed));
+            console.warn("LocalStorage quota hit — older media stripped.");
+            return;
+          } catch {}
+        }
+        throw new Error("تجاوز حجم التخزين المحلي. فعّل الـ API أو قلل حجم الصور.");
+      }
     },
     uid() {
       return "id_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -240,5 +263,84 @@
     });
   }
 
-  global.CoffeeAPI = { CONFIG, Recipes, Listings, Baristas };
+  /* ============= Auth ============= */
+  async function sha256(text) {
+    const buf = new TextEncoder().encode(text);
+    const digest = await crypto.subtle.digest("SHA-256", buf);
+    return Array.from(new Uint8Array(digest))
+      .map(b => b.toString(16).padStart(2, "0")).join("");
+  }
+
+  function readSession() {
+    try { return JSON.parse(sessionStorage.getItem(LS_KEYS.session) || "null"); }
+    catch { return null; }
+  }
+  function writeSession(session) {
+    if (session) sessionStorage.setItem(LS_KEYS.session, JSON.stringify(session));
+    else sessionStorage.removeItem(LS_KEYS.session);
+  }
+
+  const Auth = {
+    current() {
+      return readSession();
+    },
+    isAuthed() {
+      return !!readSession();
+    },
+    async signUp({ name, email, password }) {
+      if (!name || !email || !password) throw new Error("الاسم والبريد وكلمة المرور مطلوبة");
+      if (password.length < 6) throw new Error("كلمة المرور يجب أن تكون 6 أحرف على الأقل");
+      email = email.trim().toLowerCase();
+      return withFallback(
+        () => http("POST", "/auth/signup", { name, email, password }).then(res => {
+          writeSession(res);
+          return res;
+        }),
+        async () => {
+          const users = LS.read(LS_KEYS.users);
+          if (users.some(u => u.email === email)) {
+            throw new Error("هذا البريد مسجّل مسبقاً");
+          }
+          const passwordHash = await sha256(password);
+          const user = { id: LS.uid(), name: name.trim(), email, passwordHash, createdAt: new Date().toISOString() };
+          users.push(user);
+          LS.write(LS_KEYS.users, users);
+          const session = { user: publicUser(user), token: "local" };
+          writeSession(session);
+          return session;
+        }
+      );
+    },
+    async signIn({ email, password }) {
+      if (!email || !password) throw new Error("البريد وكلمة المرور مطلوبة");
+      email = email.trim().toLowerCase();
+      return withFallback(
+        () => http("POST", "/auth/signin", { email, password }).then(res => {
+          writeSession(res);
+          return res;
+        }),
+        async () => {
+          const users = LS.read(LS_KEYS.users);
+          const user = users.find(u => u.email === email);
+          if (!user) throw new Error("لا يوجد حساب بهذا البريد");
+          const hash = await sha256(password);
+          if (hash !== user.passwordHash) throw new Error("كلمة المرور غير صحيحة");
+          const session = { user: publicUser(user), token: "local" };
+          writeSession(session);
+          return session;
+        }
+      );
+    },
+    async signOut() {
+      try { await http("POST", "/auth/signout"); } catch {}
+      writeSession(null);
+      return { ok: true };
+    },
+  };
+
+  function publicUser(u) {
+    return { id: u.id, name: u.name, email: u.email };
+  }
+
+  global.CoffeeAPI = { CONFIG, Recipes, Listings, Baristas, Auth };
 })(window);
