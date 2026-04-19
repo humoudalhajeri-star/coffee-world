@@ -190,7 +190,10 @@
           fd.append("file", file);
           return http("POST", "/uploads", fd, { isForm: true });
         },
-        () => fileToDataURL(file).then(url => ({ url }))
+        async () => {
+          const url = await compressImageFile(file, { maxDim: 1200, quality: 0.82 });
+          return { url, size: bytesOfDataURL(url) };
+        }
       );
     },
   };
@@ -249,7 +252,16 @@
           fd.append("file", file);
           return http("POST", "/uploads", fd, { isForm: true });
         },
-        () => fileToDataURL(file).then(url => ({ url }))
+        async () => {
+          const isImage = file.type && file.type.startsWith("image/");
+          if (isImage) {
+            const url = await compressImageFile(file, { maxDim: 800, quality: 0.82 });
+            return { url, size: bytesOfDataURL(url) };
+          }
+          // PDFs / non-images: keep as-is (needs a real backend for big files)
+          const url = await fileToDataURL(file);
+          return { url, size: bytesOfDataURL(url) };
+        }
       );
     },
   };
@@ -261,6 +273,49 @@
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
+  }
+
+  /**
+   * Compress an image file client-side before storing it.
+   * Downscales to fit within maxDim px on the longer side and re-encodes
+   * as JPEG — a typical 4MB phone photo shrinks to ~150KB while still
+   * looking good on a listing card. Non-images (PDFs) pass through
+   * untouched — those need a real backend to persist.
+   */
+  async function compressImageFile(file, { maxDim = 1200, quality = 0.82 } = {}) {
+    if (!file.type || !file.type.startsWith("image/")) {
+      return fileToDataURL(file);
+    }
+    const dataURL = await fileToDataURL(file);
+    const img = await loadImage(dataURL);
+    let { naturalWidth: w, naturalHeight: h } = img;
+    const scale = Math.min(maxDim / w, maxDim / h, 1);
+    w = Math.max(1, Math.round(w * scale));
+    h = Math.max(1, Math.round(h * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    // White background so transparent PNGs don't become black after JPEG
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(img, 0, 0, w, h);
+    return canvas.toDataURL("image/jpeg", quality);
+  }
+
+  function loadImage(src) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error("الصورة غير صالحة"));
+      img.src = src;
+    });
+  }
+
+  function bytesOfDataURL(url) {
+    // Rough size in bytes for a data URL (base64 overhead ~4/3).
+    if (!url || !url.startsWith("data:")) return 0;
+    const base64 = url.split(",")[1] || "";
+    return Math.ceil(base64.length * 0.75);
   }
 
   /* ============= Auth ============= */
