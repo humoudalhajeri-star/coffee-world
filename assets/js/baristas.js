@@ -17,9 +17,10 @@
     senior: "خبير",
   };
 
-  let photoUrl = null;
-  let cvUrl    = null;
-  let cvName   = "";
+  let photoUrl    = null;
+  let cvUrl       = null;
+  let cvName      = "";
+  let editingId   = null;    // when set, submit updates this profile instead of creating
 
   /* ============ Auth UI ============ */
   function renderAuthArea() {
@@ -103,15 +104,26 @@
     try {
       let items = await window.CoffeeAPI.Baristas.list(search);
       if (exp) items = items.filter(b => b.experience === exp);
+      const currentUser = window.CoffeeAPI.Auth.current();
+      // Update the "new profile" button label based on whether the current
+      // user already has a profile in the list.
+      refreshNewProfileButton(items, currentUser);
       if (!items.length) {
         grid.innerHTML = `<div class="empty"><h3>لا توجد ملفات بعد</h3><p>سجّل حسابك ثم اضغط "ملف جديد".</p></div>`;
         return;
       }
-      const currentUser = window.CoffeeAPI.Auth.current();
       grid.innerHTML = items.map(b => cardHTML(b, currentUser)).join("");
     } catch (err) {
       grid.innerHTML = `<div class="empty"><h3>تعذّر التحميل</h3><p>${escapeHTML(err.message)}</p></div>`;
     }
+  }
+
+  function refreshNewProfileButton(items, currentUser) {
+    const btn = $("#new-profile-btn");
+    if (!btn) return;
+    const uid = currentUser?.user?.id;
+    const hasProfile = uid && (items || []).some(b => b.ownerId === uid);
+    btn.innerHTML = hasProfile ? "✎ تحديث ملفي" : "＋ ملف جديد";
   }
 
   function cardHTML(b, currentUser) {
@@ -123,15 +135,16 @@
     const more = (b.skills || []).length > 4 ? `<span class="tag">+${(b.skills || []).length - 4}</span>` : "";
     const city = b.city ? `<span>📍 ${escapeHTML(b.city)}</span>` : "";
     const years = b.years ? `<span>⌛ ${escapeHTML(String(b.years))} سنة</span>` : "";
-    const phoneHref = b.phone ? `tel:${encodeURIComponent(b.phone)}` : "#";
-    const waHref    = b.phone ? `https://wa.me/${(b.phone || "").replace(/[^\d]/g,"")}` : "#";
-    const cvBtn     = b.cv ? `<a class="btn btn-outline" href="${escapeHTML(b.cv)}" target="_blank" rel="noopener">📄 السيرة</a>` : "";
+    const phoneClean = normalizePhone(b.phone);
+    const phoneHref = b.phone ? `tel:+${phoneClean}` : "#";
+    const waHref    = b.phone ? `https://wa.me/${phoneClean}` : "#";
+    const cvBtn     = b.cv ? `<a class="btn btn-outline" href="${escapeHTML(b.cv)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">📄 السيرة</a>` : "";
     const canDelete = currentUser?.user?.id && b.ownerId === currentUser.user.id;
     const deleteBtn = canDelete
-      ? `<button class="btn btn-danger" data-delete="${b.id}" title="حذف">🗑️</button>`
+      ? `<button class="btn btn-danger" data-delete="${b.id}" title="حذف" onclick="event.stopPropagation()">🗑️</button>`
       : "";
     return `
-      <article class="barista-card">
+      <article class="barista-card" data-open="${b.id}" role="button" tabindex="0">
         <div class="barista-banner"></div>
         <div class="barista-avatar">${avatar}</div>
         <div class="barista-body">
@@ -146,56 +159,145 @@
           <small style="color:var(--muted);">🗓️ ${formatDate(b.createdAt)}</small>
         </div>
         <div class="barista-actions">
-          <a class="btn btn-gold"    href="${waHref}" target="_blank" rel="noopener">💬 واتساب</a>
-          <a class="btn btn-outline" href="${phoneHref}">☎️</a>
+          <a class="btn btn-gold"    href="${waHref}" target="_blank" rel="noopener" onclick="event.stopPropagation()">💬 واتساب</a>
+          <a class="btn btn-outline" href="${phoneHref}" onclick="event.stopPropagation()">☎️</a>
           ${cvBtn}
           ${deleteBtn}
         </div>
       </article>`;
   }
 
+  /**
+   * Normalize a phone number to international format without leading +.
+   * Handles Saudi (05x → 9665x), Kuwait (9xxxxxxx → 965…), UAE, and
+   * already-prefixed numbers. Used for tel: and wa.me links.
+   */
+  function normalizePhone(phone) {
+    if (!phone) return "";
+    let d = String(phone).replace(/[^\d]/g, "");
+    if (!d) return "";
+    // Strip leading country-code indicators
+    if (d.startsWith("00")) d = d.slice(2);
+    // Saudi local "05xxxxxxxx" (10 digits)
+    if (d.startsWith("0") && d.length === 10) return "966" + d.slice(1);
+    // Kuwait local "9xxxxxxx" or "5xxxxxxx" (8 digits)
+    if (d.length === 8 && /^[569]/.test(d)) return "965" + d;
+    // Already has a plausible country code
+    return d;
+  }
+
   function wireGridActions() {
     $("#baristas").addEventListener("click", async (e) => {
       const delBtn = e.target.closest("[data-delete]");
-      if (!delBtn) return;
-      if (!confirm("حذف هذا الملف؟")) return;
-      try {
-        await window.CoffeeAPI.Baristas.remove(delBtn.dataset.delete);
-        toast("تم الحذف", "success");
-        loadAndRender();
-      } catch (err) {
-        toast("تعذّر الحذف", "error");
+      if (delBtn) {
+        if (!confirm("حذف هذا الملف؟")) return;
+        try {
+          await window.CoffeeAPI.Baristas.remove(delBtn.dataset.delete);
+          toast("تم الحذف", "success");
+          loadAndRender();
+        } catch (err) {
+          toast("تعذّر الحذف", "error");
+        }
+        return;
       }
+      // Clicking anywhere else on the card opens the detail page
+      const card = e.target.closest(".barista-card[data-open]");
+      if (card) {
+        window.location.href = `barista.html?id=${encodeURIComponent(card.dataset.open)}`;
+      }
+    });
+    // Keyboard access (Enter on focused card)
+    $("#baristas").addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      const card = e.target.closest?.(".barista-card[data-open]");
+      if (card) window.location.href = `barista.html?id=${encodeURIComponent(card.dataset.open)}`;
     });
   }
 
   /* ============ Profile modal ============ */
-  function openModal() {
+  async function openModal() {
     const user = window.CoffeeAPI.Auth.current();
     if (!user) {
       toast("سجّل دخولك أولاً لإنشاء ملف", "info");
       openAuth("signin");
       return;
     }
-    photoUrl = null; cvUrl = null; cvName = "";
+
+    // Reset
+    photoUrl = null; cvUrl = null; cvName = ""; editingId = null;
     $("#profile-preview").innerHTML = "<span>👤</span>";
     $("#cv-name").textContent = "";
     $$("#skills-chips .chip").forEach(c => c.classList.remove("active"));
     $("#profile-form").reset();
     $("#profile-photo").value = "";
     $("#profile-cv").value = "";
-    // Prefill from session
-    $("#profile-form [name=name]").value  = user.user?.name || "";
-    $("#profile-form [name=email]").value = user.user?.email || "";
+
+    // Does the user already have a barista profile? If yes, open in edit mode.
+    const mine = await findMyProfile(user.user?.id);
+    if (mine) {
+      editingId = mine.id;
+      setModalTitle("تحديث ملفي");
+      fillFormFromProfile(mine);
+    } else {
+      setModalTitle("ملف بريستا جديد");
+      // Prefill name + email from the session
+      $("#profile-form [name=name]").value  = user.user?.name || "";
+      $("#profile-form [name=email]").value = user.user?.email || "";
+    }
+
     $("#profile-modal").classList.add("open");
   }
   function closeModal() { $("#profile-modal").classList.remove("open"); }
 
+  function setModalTitle(text) {
+    const header = document.querySelector("#profile-modal .modal header h3");
+    if (header) header.textContent = text;
+  }
+
+  async function findMyProfile(userId) {
+    if (!userId) return null;
+    try {
+      const list = await window.CoffeeAPI.Baristas.list();
+      return list.find(b => b.ownerId === userId) || null;
+    } catch { return null; }
+  }
+
+  function fillFormFromProfile(p) {
+    $("#profile-form [name=name]").value       = p.name || "";
+    $("#profile-form [name=city]").value       = p.city || "";
+    $("#profile-form [name=years]").value      = p.years || "";
+    $("#profile-form [name=experience]").value = p.experience || "";
+    $("#profile-form [name=phone]").value      = p.phone || "";
+    $("#profile-form [name=email]").value      = p.email || "";
+    $("#profile-form [name=bio]").value        = p.bio || "";
+    // Skills
+    $$("#skills-chips .chip").forEach(c => {
+      c.classList.toggle("active", (p.skills || []).includes(c.dataset.skill));
+    });
+    // Photo + CV previews
+    photoUrl = p.photo || null;
+    cvUrl    = p.cv || null;
+    cvName   = p.cvName || "";
+    if (photoUrl) {
+      $("#profile-preview").innerHTML = `<img src="${escapeHTML(photoUrl)}" alt="">`;
+    }
+    if (cvName) {
+      $("#cv-name").textContent = "📄 " + cvName;
+    }
+  }
+
   async function handlePhoto(file) {
     if (!file) return;
+    // Show a local preview immediately so the user sees their choice
+    // even while the upload is still in progress.
+    try {
+      const localPreview = URL.createObjectURL(file);
+      $("#profile-preview").innerHTML = `<img src="${localPreview}" alt="">`;
+    } catch {}
     try {
       const res = await window.CoffeeAPI.Baristas.uploadPhoto(file);
       photoUrl = res.url;
+      // Swap to the final URL (server/firestore) once upload completes.
       $("#profile-preview").innerHTML = `<img src="${escapeHTML(photoUrl)}" alt="">`;
     } catch (err) {
       toast("تعذّر رفع الصورة: " + err.message, "error");
@@ -243,12 +345,17 @@
       return;
     }
     try {
-      await window.CoffeeAPI.Baristas.create(data);
-      toast("تم نشر الملف ✓", "success");
+      if (editingId) {
+        await window.CoffeeAPI.Baristas.update(editingId, data);
+        toast("تم تحديث الملف ✓", "success");
+      } else {
+        await window.CoffeeAPI.Baristas.create(data);
+        toast("تم نشر الملف ✓", "success");
+      }
       closeModal();
       loadAndRender();
     } catch (err) {
-      toast("تعذّر النشر: " + err.message, "error");
+      toast("تعذّر الحفظ: " + err.message, "error");
     }
   }
 
