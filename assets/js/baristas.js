@@ -252,8 +252,18 @@
     }
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
+    // Wait for Firebase auth to settle before first render so the "sign in"
+    // UI doesn't flash before detecting an already-logged-in user.
+    if (window.CW_FB) {
+      try { await window.CW_FB.ready; } catch {}
+    }
     renderAuthArea();
+    // Re-render when Firebase auth state changes (sign in/out from another tab etc.)
+    window.addEventListener("cw-auth-changed", () => {
+      renderAuthArea();
+      loadAndRender();
+    });
 
     // Auth modal wiring
     $("#close-auth").addEventListener("click", closeAuth);
