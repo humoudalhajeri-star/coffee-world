@@ -17,10 +17,12 @@
     senior: "خبير",
   };
 
-  let photoUrl    = null;
-  let cvUrl       = null;
-  let cvName      = "";
-  let editingId   = null;    // when set, submit updates this profile instead of creating
+  let photoUrl       = null;
+  let cvUrl          = null;
+  let cvName         = "";
+  let editingId      = null;    // when set, submit updates this profile instead of creating
+  let uploadingPhoto = false;
+  let uploadingCv    = false;
 
   /* ============ Auth UI ============ */
   function renderAuthArea() {
@@ -225,6 +227,8 @@
 
     // Reset
     photoUrl = null; cvUrl = null; cvName = ""; editingId = null;
+    uploadingPhoto = false; uploadingCv = false;
+    updateSubmitLock();
     $("#profile-preview").innerHTML = "<span>👤</span>";
     $("#cv-name").textContent = "";
     $$("#skills-chips .chip").forEach(c => c.classList.remove("active"));
@@ -292,8 +296,12 @@
     // even while the upload is still in progress.
     try {
       const localPreview = URL.createObjectURL(file);
-      $("#profile-preview").innerHTML = `<img src="${localPreview}" alt="">`;
+      $("#profile-preview").innerHTML = `
+        <img src="${localPreview}" alt="">
+        <div class="upload-overlay">⏳ جارٍ الرفع...</div>`;
     } catch {}
+    uploadingPhoto = true;
+    updateSubmitLock();
     try {
       const res = await window.CoffeeAPI.Baristas.uploadPhoto(file);
       photoUrl = res.url;
@@ -301,23 +309,55 @@
       $("#profile-preview").innerHTML = `<img src="${escapeHTML(photoUrl)}" alt="">`;
     } catch (err) {
       toast("تعذّر رفع الصورة: " + err.message, "error");
+      $("#profile-preview").innerHTML = `<span>👤</span>`;
+    } finally {
+      uploadingPhoto = false;
+      updateSubmitLock();
     }
   }
 
   async function handleCV(file) {
     if (!file) return;
     cvName = file.name;
-    $("#cv-name").textContent = "📄 " + cvName;
+    $("#cv-name").textContent = "⏳ جارٍ الرفع: " + cvName;
+    uploadingCv = true;
+    updateSubmitLock();
     try {
       const res = await window.CoffeeAPI.Baristas.uploadPhoto(file);
       cvUrl = res.url;
+      $("#cv-name").textContent = "✓ " + cvName;
     } catch (err) {
       toast("تعذّر رفع السيرة: " + err.message, "error");
+      $("#cv-name").textContent = "✗ فشل الرفع: " + cvName;
+    } finally {
+      uploadingCv = false;
+      updateSubmitLock();
+    }
+  }
+
+  /**
+   * Keep the submit button disabled while any file is still uploading,
+   * so the profile never saves with a missing (null) photo/cv URL.
+   */
+  function updateSubmitLock() {
+    const btn = document.querySelector("#profile-form button[type=submit]");
+    if (!btn) return;
+    const busy = uploadingPhoto || uploadingCv;
+    btn.disabled = busy;
+    if (busy) {
+      btn.dataset.originalText = btn.dataset.originalText || btn.textContent;
+      btn.textContent = "⏳ جارٍ رفع الملفات...";
+    } else if (btn.dataset.originalText) {
+      btn.textContent = btn.dataset.originalText;
     }
   }
 
   async function submitForm(e) {
     e.preventDefault();
+    if (uploadingPhoto || uploadingCv) {
+      toast("انتظر اكتمال رفع الملفات...", "info");
+      return;
+    }
     const currentUser = window.CoffeeAPI.Auth.current();
     if (!currentUser) {
       toast("سجّل دخولك أولاً", "error");
