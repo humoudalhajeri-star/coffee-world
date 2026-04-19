@@ -21,6 +21,51 @@
 }
 .back-link:hover { background: #DCC89D; }
 
+/* ===== Share modal ===== */
+.share-preview {
+  background: #FBF4DF;
+  border: 1px dashed #D4BC85;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 14px 0;
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+  color: var(--ord-text, #1B1A18);
+  white-space: pre-wrap;
+  max-height: 180px;
+  overflow-y: auto;
+  line-height: 1.7;
+  direction: rtl;
+}
+.share-channels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+.share-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 12px;
+  border-radius: 14px;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 14px;
+  text-decoration: none;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: transform .05s ease, box-shadow .15s ease, filter .15s ease;
+}
+.share-btn:active { transform: translateY(1px); }
+.share-btn:hover { box-shadow: 0 4px 10px rgba(0,0,0,.12); }
+.share-btn .icon { font-size: 20px; line-height: 1; }
+.share-btn.whatsapp { background: #25D366; color: #fff; }
+.share-btn.sms      { background: #2563EB; color: #fff; }
+.share-btn.email    { background: #4B5563; color: #fff; }
+.share-btn.copy     { background: var(--ord-gold, #E7C47A); color: #2B1603; border-color: #B58758; }
+
 .cup-main {
   max-width: 780px;
   margin: 0 auto;
@@ -265,7 +310,10 @@
   justify-content: space-between;
   align-items: baseline;
 }
-.section-heading .ar { font-family: "Tajawal", sans-serif; letter-spacing: 0; font-size: 13px; }
+.section-heading.ar { font-family: "Tajawal", sans-serif; letter-spacing: 0; font-size: 13px; }
+.section-heading[hidden],
+.r-row[hidden],
+.r-pump[hidden] { display: none !important; }
 .section-heading .icon { font-size: 14px; margin-inline-end: 4px; }
 
 .r-row {
