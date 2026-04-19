@@ -73,6 +73,22 @@
   box-shadow: 0 4px 10px rgba(199,154,61,.35);
 }
 
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #EBDDBE;
+  color: var(--ord-blue);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 13px;
+  transition: background .15s ease;
+  white-space: nowrap;
+}
+.back-link:hover { background: #DCC89D; }
+
 .order-tabs {
   display: flex;
   gap: 6px;
@@ -228,6 +244,24 @@
   box-shadow: 0 0 0 2px rgba(224,91,79,.18), var(--ord-shadow-lg);
 }
 .pick-card[data-temp="hot"].active .pick-name { color: var(--ord-red); }
+
+/* Disabled pick (unavailable for current drink) */
+.pick-card.disabled {
+  opacity: 0.35;
+  pointer-events: none;
+  filter: grayscale(80%);
+  box-shadow: none;
+}
+
+/* Disabled pill (unavailable for current drink) */
+.pill.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+  filter: grayscale(60%);
+}
+
+/* Hidden sections / meters */
+.order-section[hidden], .meter[hidden] { display: none !important; }
 
 /* ===== Meters card ===== */
 .meters-card {
@@ -508,9 +542,12 @@
 
 /* ===== Responsive ===== */
 @media (max-width: 600px) {
-  .order-header-inner { flex-direction: row; }
-  .order-brand-text h1 { font-size: 22px; }
-  .order-brand-circle { width: 46px; height: 46px; font-size: 22px; }
+  .order-header-inner { flex-direction: row; gap: 6px; }
+  .order-brand-text { display: none; }
+  .order-brand-circle { width: 42px; height: 42px; font-size: 20px; }
+  .back-link .back-label { display: none; }
+  .back-link { padding: 8px 10px; }
+  .order-tab { padding: 6px 12px; font-size: 12px; }
   .order-hero-title { font-size: 32px; }
   .drink-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
   .drink-card { padding: 14px 8px; }

@@ -106,8 +106,32 @@
     { key: "lavender",   name: "لافندر",    en: "Lavender",   icon: "💜", tag: "" },
   ];
 
+  // Barista rules: which fields are relevant for each drink, which temperatures
+  // are allowed, and the default pumps that typically come with it.
+  // Fields omitted are hidden entirely from the builder.
+  const DRINK_FIELDS = {
+    "espresso":         { shots: true,  water: false, milk: false, foam: false, ice: false, sugar: true,  pumps: true,  temps: ["hot"] },
+    "americano":        { shots: true,  water: true,  milk: false, foam: false, ice: false, sugar: true,  pumps: true,  temps: ["hot", "warm"] },
+    "cappuccino":       { shots: true,  water: false, milk: true,  foam: true,  ice: false, sugar: true,  pumps: true,  temps: ["hot", "warm"] },
+    "latte":            { shots: true,  water: false, milk: true,  foam: true,  ice: false, sugar: true,  pumps: true,  temps: ["hot", "warm"] },
+    "flat-white":       { shots: true,  water: false, milk: true,  foam: true,  ice: false, sugar: true,  pumps: true,  temps: ["hot"] },
+    "macchiato":        { shots: true,  water: false, milk: true,  foam: true,  ice: false, sugar: true,  pumps: true,  temps: ["hot"] },
+    "cortado":          { shots: true,  water: false, milk: true,  foam: false, ice: false, sugar: true,  pumps: true,  temps: ["hot"] },
+    "mocha":            { shots: true,  water: false, milk: true,  foam: true,  ice: false, sugar: true,  pumps: true,  temps: ["hot", "warm"], defaultPumps: [{ key: "mocha-sauce", count: 2 }] },
+    "spanish-latte":    { shots: true,  water: false, milk: true,  foam: true,  ice: false, sugar: true,  pumps: true,  temps: ["hot", "warm"] },
+    "iced-latte":       { shots: true,  water: false, milk: true,  foam: false, ice: true,  sugar: true,  pumps: true,  temps: ["cold"] },
+    "iced-americano":   { shots: true,  water: true,  milk: false, foam: false, ice: true,  sugar: true,  pumps: true,  temps: ["cold"] },
+    "iced-mocha":       { shots: true,  water: false, milk: true,  foam: false, ice: true,  sugar: true,  pumps: true,  temps: ["cold"], defaultPumps: [{ key: "mocha-sauce", count: 2 }] },
+    "iced-spanish":     { shots: true,  water: false, milk: true,  foam: false, ice: true,  sugar: true,  pumps: true,  temps: ["cold"] },
+    "iced-white-mocha": { shots: true,  water: true,  milk: false, foam: false, ice: true,  sugar: true,  pumps: true,  temps: ["cold"], defaultPumps: [{ key: "white-mocha", count: 3 }] },
+    "chocolate":        { shots: false, water: false, milk: true,  foam: true,  ice: false, sugar: true,  pumps: false, temps: ["hot", "warm"] },
+    "matcha-latte":     { shots: false, water: false, milk: true,  foam: true,  ice: true,  sugar: true,  pumps: false, temps: ["hot", "warm", "cold"] },
+    "tea":              { shots: false, water: true,  milk: false, foam: false, ice: false, sugar: true,  pumps: false, temps: ["hot", "warm"] },
+    "frappe":           { shots: true,  water: false, milk: true,  foam: false, ice: true,  sugar: true,  pumps: true,  temps: ["cold"] },
+  };
+
   global.RECIPE_META = {
-    DRINKS, DRINK_DEFAULTS, SIZES, TEMPS, MILK_TYPES,
+    DRINKS, DRINK_DEFAULTS, DRINK_FIELDS, SIZES, TEMPS, MILK_TYPES,
     FOAM_LEVELS, ICE_LEVELS, WATER_LEVELS, PUMPS, EXTRA_PUMPS,
   };
 })(window);

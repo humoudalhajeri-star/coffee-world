@@ -13,6 +13,7 @@
 <body data-page="recipe" class="order-page">
   <header class="order-header">
     <div class="order-header-inner">
+      <a href="../index.html" class="back-link" aria-label="الرئيسية"><span>←</span><span class="back-label">الرئيسية</span></a>
       <div class="order-tabs">
         <button class="order-tab active" data-view="build">بناء</button>
         <button class="order-tab" data-view="saved">محفوظات</button>
@@ -90,31 +91,31 @@
       </section>
 
       <!-- Milk type -->
-      <section class="order-section">
+      <section class="order-section" data-field="milk-type">
         <h3 class="order-section-title">نوع الحليب</h3>
         <div class="pill-chips" id="milk-type-chips"></div>
       </section>
 
       <!-- Foam -->
-      <section class="order-section">
+      <section class="order-section" data-field="foam">
         <h3 class="order-section-title">مستوى الرغوة</h3>
         <div class="pill-chips" id="foam-chips"></div>
       </section>
 
       <!-- Ice -->
-      <section class="order-section">
+      <section class="order-section" data-field="ice">
         <h3 class="order-section-title">مستوى الثلج</h3>
         <div class="pill-chips" id="ice-chips"></div>
       </section>
 
       <!-- Water -->
-      <section class="order-section">
+      <section class="order-section" data-field="water">
         <h3 class="order-section-title">مستوى الماء <small>WATER LEVEL</small></h3>
         <div class="pill-chips" id="water-chips"></div>
       </section>
 
       <!-- Pumps -->
-      <section class="order-section">
+      <section class="order-section" data-field="pumps">
         <h3 class="order-section-title">نكهات البمب <small>FLAVOR PUMPS</small></h3>
         <div class="pumps-table" id="pumps-table"></div>
         <button class="add-more-btn" id="add-more-pumps">
