@@ -172,13 +172,47 @@
         <span>💾</span> <span>احفظ الطلب</span>
       </button>
       <button class="btn-big btn-share" id="share-btn">
-        <span>📤</span> <span>شارك الكوب</span>
+        <span>📱</span> <span>أرسل لصديق</span>
       </button>
       <button class="btn-big btn-share" id="print-btn" style="background:#F0E3BD;">
         <span>🖨️</span> <span>طباعة</span>
       </button>
     </div>
   </main>
+
+  <!-- Share modal -->
+  <div class="modal-backdrop" id="share-modal">
+    <div class="modal" style="max-width: 480px;">
+      <header>
+        <h3>📱 أرسل طلبك لصديق</h3>
+        <button class="close" id="close-share">×</button>
+      </header>
+      <p style="color: var(--ord-muted); margin-top: 0;">
+        صديقك في المقهى؟ أرسل له طلبك ليشتريه لك. الرابط يعرض كل المقادير تماماً كما بنيتها.
+      </p>
+
+      <div class="share-preview" id="share-preview"></div>
+
+      <div class="share-channels">
+        <a class="share-btn whatsapp" id="share-whatsapp" target="_blank" rel="noopener">
+          <span class="icon">💬</span>
+          <span>واتساب</span>
+        </a>
+        <a class="share-btn sms" id="share-sms">
+          <span class="icon">💌</span>
+          <span>رسالة نصية</span>
+        </a>
+        <a class="share-btn email" id="share-email">
+          <span class="icon">✉️</span>
+          <span>إيميل</span>
+        </a>
+        <button class="share-btn copy" id="share-copy">
+          <span class="icon">🔗</span>
+          <span>نسخ الرابط</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/app.js"></script>

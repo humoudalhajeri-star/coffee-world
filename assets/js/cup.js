@@ -47,8 +47,48 @@
         if (r) return r;
       } catch (err) { console.error(err); }
     }
+    const encoded = qs("r");
+    if (encoded) {
+      const r = decodeRecipe(encoded);
+      if (r) return r;
+    }
     const cached = sessionStorage.getItem("cw.currentRecipe");
     return cached ? JSON.parse(cached) : null;
+  }
+
+  /**
+   * Compact base64 (URL-safe) encoding of a recipe so it can ride in a URL.
+   * This lets a friend receive a link that reproduces the exact order
+   * without needing a backend or shared account.
+   */
+  function encodeRecipe(r) {
+    const compact = {
+      t: r.type,  sz: r.size, tp: r.temp,
+      sh: r.shots, mk: r.milk, mt: r.milkType,
+      sg: r.sugar, fm: r.foam,  ic: r.ice, wt: r.water,
+      pm: (r.pumps || []).map(p => [p.key, p.count]),
+      nm: r.name, tn: r.typeName, nt: r.notes || "",
+    };
+    const json = JSON.stringify(compact);
+    // base64url — safe for query strings
+    return btoa(unescape(encodeURIComponent(json)))
+      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+
+  function decodeRecipe(s) {
+    try {
+      const b64 = s.replace(/-/g, "+").replace(/_/g, "/") +
+        "=".repeat((4 - (s.length % 4)) % 4);
+      const json = decodeURIComponent(escape(atob(b64)));
+      const c = JSON.parse(json);
+      return {
+        type: c.t, size: c.sz, temp: c.tp,
+        shots: c.sh, milk: c.mk, milkType: c.mt,
+        sugar: c.sg, foam: c.fm, ice: c.ic, water: c.wt,
+        pumps: (c.pm || []).map(p => ({ key: p[0], count: p[1] })),
+        name: c.nm, typeName: c.tn, notes: c.nt || "",
+      };
+    } catch { return null; }
   }
 
   /* ====== Title + specs ====== */
@@ -311,27 +351,56 @@
       });
     }
 
-    $("#share-btn").addEventListener("click", async () => {
-      const drink = lookup(M.DRINKS, recipe.type);
-      const title = `${drink?.name || recipe.typeName || "وصفة"} — Coffee World`;
-      const text  = buildShareText(recipe);
-      const url   = window.location.href;
-      if (navigator.share) {
-        try {
-          await navigator.share({ title, text, url });
-          return;
-        } catch (err) { /* user cancelled */ }
-      }
-      try {
-        await navigator.clipboard.writeText(`${title}\n\n${text}\n\n${url}`);
-        toast("تم نسخ الوصفة للحافظة ✓", "success");
-      } catch {
-        toast("تعذّر المشاركة", "error");
-      }
+    $("#share-btn").addEventListener("click", () => openShareModal(recipe));
+    $("#close-share").addEventListener("click", closeShareModal);
+    $("#share-modal").addEventListener("click", (e) => {
+      if (e.target.id === "share-modal") closeShareModal();
     });
 
     $("#print-btn").addEventListener("click", () => window.print());
   }
+
+  /* ====== Share modal ====== */
+  function buildShareableURL(recipe) {
+    const base = window.location.origin + window.location.pathname;
+    return `${base}?r=${encodeRecipe(recipe)}`;
+  }
+
+  function openShareModal(recipe) {
+    const drink = lookup(M.DRINKS, recipe.type);
+    const title = drink?.name || recipe.typeName || "وصفتك";
+    const body  = buildShareText(recipe);
+    const url   = buildShareableURL(recipe);
+    const msg   = `☕ ${title}\n\n${body}\n\n${url}`;
+
+    $("#share-preview").textContent = msg;
+
+    // Build channel URLs
+    $("#share-whatsapp").href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+    $("#share-sms").href      = `sms:?&body=${encodeURIComponent(msg)}`;
+    $("#share-email").href    = `mailto:?subject=${encodeURIComponent("طلبي من Coffee World")}&body=${encodeURIComponent(msg)}`;
+
+    // Copy button (one-time listener per open)
+    const copyBtn = $("#share-copy");
+    copyBtn.onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(url);
+        toast("تم نسخ الرابط ✓", "success");
+      } catch {
+        // Fallback: select-and-copy via a hidden textarea
+        const ta = document.createElement("textarea");
+        ta.value = url;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        ta.remove();
+        toast("تم نسخ الرابط ✓", "success");
+      }
+    };
+
+    $("#share-modal").classList.add("open");
+  }
+  function closeShareModal() { $("#share-modal").classList.remove("open"); }
 
   function buildShareText(r) {
     const lines = [];
