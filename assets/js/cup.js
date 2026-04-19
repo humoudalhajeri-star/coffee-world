@@ -377,43 +377,29 @@
 
     $("#share-preview").textContent = msg;
 
-    // WhatsApp: the api.whatsapp.com endpoint works reliably across iOS,
-    // Android, and desktop (wa.me sometimes fails on iOS Safari).
-    // We also attach a click handler that tries the native scheme first
-    // and falls back to the universal URL.
+    // SMS / Email / Copy — text only (these channels can't reliably attach images)
     const encoded = encodeURIComponent(msg);
-    const waUniversal = `https://api.whatsapp.com/send?text=${encoded}`;
-    const waNative    = `whatsapp://send?text=${encoded}`;
+    $("#share-sms").href   = `sms:?&body=${encoded}`;
+    $("#share-email").href = `mailto:?subject=${encodeURIComponent("طلبي من Coffee World")}&body=${encoded}`;
+
+    // WhatsApp — send the actual receipt as an image so the colors,
+    // sections, and layout arrive intact (plain text is ugly for WA).
+    // Strategy: render the #receipt DOM to a PNG via html2canvas, then
+    // share via the Web Share API (files). Fall back to downloading the
+    // image + opening WA with text for browsers without file sharing.
     const waEl = $("#share-whatsapp");
-    waEl.href = waUniversal;
-    waEl.onclick = (e) => {
-      // On mobile, try the deep-link first; the browser will fall back
-      // to the href (universal URL) if WhatsApp isn't installed.
-      if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-        e.preventDefault();
-        const start = Date.now();
-        window.location.href = waNative;
-        setTimeout(() => {
-          // If the app didn't open (page still visible after 800ms),
-          // open the universal URL in a new tab instead.
-          if (!document.hidden && Date.now() - start < 1200) {
-            window.open(waUniversal, "_blank", "noopener");
-          }
-        }, 800);
-      }
+    waEl.onclick = async (e) => {
+      e.preventDefault();
+      await shareAsWhatsApp(recipe, msg, url);
     };
 
-    $("#share-sms").href      = `sms:?&body=${encoded}`;
-    $("#share-email").href    = `mailto:?subject=${encodeURIComponent("طلبي من Coffee World")}&body=${encoded}`;
-
-    // Copy button (one-time listener per open)
+    // Copy link
     const copyBtn = $("#share-copy");
     copyBtn.onclick = async () => {
       try {
         await navigator.clipboard.writeText(url);
         toast("تم نسخ الرابط ✓", "success");
       } catch {
-        // Fallback: select-and-copy via a hidden textarea
         const ta = document.createElement("textarea");
         ta.value = url;
         document.body.appendChild(ta);
@@ -427,6 +413,87 @@
     $("#share-modal").classList.add("open");
   }
   function closeShareModal() { $("#share-modal").classList.remove("open"); }
+
+  /* ============================================================
+   * WhatsApp sharing as an image — render the receipt DOM into a
+   * PNG so the colors, sections, and layout arrive intact.
+   * ============================================================ */
+
+  async function renderReceiptAsBlob() {
+    if (typeof html2canvas !== "function") {
+      throw new Error("مكتبة توليد الصور لم تُحمَّل — تحقق من الاتصال");
+    }
+    const target = document.getElementById("receipt");
+    // Wait for fonts so Tajawal renders in the snapshot
+    if (document.fonts?.ready) {
+      try { await document.fonts.ready; } catch {}
+    }
+    const canvas = await html2canvas(target, {
+      backgroundColor: "#F3E8D1",
+      scale: Math.min(window.devicePixelRatio || 1, 2) * 1.5,
+      useCORS: true,
+      logging: false,
+      windowWidth: Math.max(target.scrollWidth, 600),
+    });
+    return await new Promise((resolve, reject) => {
+      canvas.toBlob(b => b ? resolve(b) : reject(new Error("toBlob failed")), "image/png", 0.92);
+    });
+  }
+
+  function downloadBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }
+
+  async function shareAsWhatsApp(recipe, fallbackText, shareUrl) {
+    const waEl = $("#share-whatsapp");
+    const original = waEl.innerHTML;
+    waEl.innerHTML = '<span class="icon">⏳</span><span>جارٍ تحضير الصورة...</span>';
+    waEl.style.pointerEvents = "none";
+
+    const drink = lookup(M.DRINKS, recipe.type);
+    const title = drink?.name || recipe.typeName || "طلبي";
+    const caption = `☕ ${title}\n${shareUrl}`;
+    const encodedCaption = encodeURIComponent(caption);
+
+    try {
+      const blob = await renderReceiptAsBlob();
+      const file = new File([blob], `coffee-order-${Date.now()}.png`, { type: "image/png" });
+
+      // Preferred: Web Share API with file attachment (iOS 16.4+, Android Chrome, etc.)
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: "طلبي من Coffee World",
+          text: caption,
+        });
+        toast("تمت المشاركة ✓", "success");
+        return;
+      }
+
+      // Fallback: download the image and open WhatsApp with the text caption
+      downloadBlob(blob, `coffee-order-${title}.png`);
+      toast("تم حفظ صورة الإيصال — أرفقها يدوياً في المحادثة", "info", 4500);
+      const waURL = `https://api.whatsapp.com/send?text=${encodedCaption}`;
+      // Small delay so the download notification lands before WA opens
+      setTimeout(() => window.open(waURL, "_blank", "noopener"), 400);
+    } catch (err) {
+      console.error(err);
+      // Last resort: plain text share (original behaviour)
+      const waURL = `https://api.whatsapp.com/send?text=${encodeURIComponent(fallbackText)}`;
+      window.open(waURL, "_blank", "noopener");
+      toast("تعذّر توليد الصورة — أُرسل النص بدلاً منها", "info");
+    } finally {
+      waEl.innerHTML = original;
+      waEl.style.pointerEvents = "";
+    }
+  }
 
   /**
    * Build a receipt-style text for sharing — matches the visual receipt
