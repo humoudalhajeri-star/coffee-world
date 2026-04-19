@@ -61,16 +61,17 @@
    * This lets a friend receive a link that reproduces the exact order
    * without needing a backend or shared account.
    */
+  // Compact keys for the URL payload. typeName is skipped — it's derivable
+  // from `type` via the DRINKS table, which saves ~40 bytes per link.
   function encodeRecipe(r) {
     const compact = {
-      t: r.type,  sz: r.size, tp: r.temp,
-      sh: r.shots, mk: r.milk, mt: r.milkType,
-      sg: r.sugar, fm: r.foam,  ic: r.ice, wt: r.water,
+      t: r.type, s: r.size, p: r.temp,
+      h: r.shots, m: r.milk, mt: r.milkType,
+      sg: r.sugar, f: r.foam, i: r.ice, w: r.water,
       pm: (r.pumps || []).map(p => [p.key, p.count]),
-      nm: r.name, tn: r.typeName, nt: r.notes || "",
+      n: r.notes || "",
     };
     const json = JSON.stringify(compact);
-    // base64url — safe for query strings
     return btoa(unescape(encodeURIComponent(json)))
       .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   }
@@ -81,12 +82,15 @@
         "=".repeat((4 - (s.length % 4)) % 4);
       const json = decodeURIComponent(escape(atob(b64)));
       const c = JSON.parse(json);
+      const drink = lookup(M.DRINKS, c.t);
       return {
-        type: c.t, size: c.sz, temp: c.tp,
-        shots: c.sh, milk: c.mk, milkType: c.mt,
-        sugar: c.sg, foam: c.fm, ice: c.ic, water: c.wt,
+        type: c.t, size: c.s, temp: c.p,
+        shots: c.h, milk: c.m, milkType: c.mt,
+        sugar: c.sg, foam: c.f, ice: c.i, water: c.w,
         pumps: (c.pm || []).map(p => ({ key: p[0], count: p[1] })),
-        name: c.nm, typeName: c.tn, notes: c.nt || "",
+        name: drink?.name || c.t,
+        typeName: drink?.name || c.t,
+        notes: c.n || "",
       };
     } catch { return null; }
   }
@@ -367,18 +371,40 @@
   }
 
   function openShareModal(recipe) {
-    const drink = lookup(M.DRINKS, recipe.type);
-    const title = drink?.name || recipe.typeName || "وصفتك";
-    const body  = buildShareText(recipe);
-    const url   = buildShareableURL(recipe);
-    const msg   = `☕ ${title}\n\n${body}\n\n${url}`;
+    const body = buildShareText(recipe);
+    const url  = buildShareableURL(recipe);
+    const msg  = `${body}\n\n📱 اعرض الكوب بالتفصيل:\n${url}`;
 
     $("#share-preview").textContent = msg;
 
-    // Build channel URLs
-    $("#share-whatsapp").href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-    $("#share-sms").href      = `sms:?&body=${encodeURIComponent(msg)}`;
-    $("#share-email").href    = `mailto:?subject=${encodeURIComponent("طلبي من Coffee World")}&body=${encodeURIComponent(msg)}`;
+    // WhatsApp: the api.whatsapp.com endpoint works reliably across iOS,
+    // Android, and desktop (wa.me sometimes fails on iOS Safari).
+    // We also attach a click handler that tries the native scheme first
+    // and falls back to the universal URL.
+    const encoded = encodeURIComponent(msg);
+    const waUniversal = `https://api.whatsapp.com/send?text=${encoded}`;
+    const waNative    = `whatsapp://send?text=${encoded}`;
+    const waEl = $("#share-whatsapp");
+    waEl.href = waUniversal;
+    waEl.onclick = (e) => {
+      // On mobile, try the deep-link first; the browser will fall back
+      // to the href (universal URL) if WhatsApp isn't installed.
+      if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        e.preventDefault();
+        const start = Date.now();
+        window.location.href = waNative;
+        setTimeout(() => {
+          // If the app didn't open (page still visible after 800ms),
+          // open the universal URL in a new tab instead.
+          if (!document.hidden && Date.now() - start < 1200) {
+            window.open(waUniversal, "_blank", "noopener");
+          }
+        }, 800);
+      }
+    };
+
+    $("#share-sms").href      = `sms:?&body=${encoded}`;
+    $("#share-email").href    = `mailto:?subject=${encodeURIComponent("طلبي من Coffee World")}&body=${encoded}`;
 
     // Copy button (one-time listener per open)
     const copyBtn = $("#share-copy");
@@ -402,24 +428,96 @@
   }
   function closeShareModal() { $("#share-modal").classList.remove("open"); }
 
+  /**
+   * Build a receipt-style text for sharing — matches the visual receipt
+   * with sections, separators, and bilingual labels so the friend
+   * receiving it can read the order clearly and show it to the barista.
+   */
   function buildShareText(r) {
-    const lines = [];
-    const s = sizeMeta(r.size);
-    const t = tempMeta(r.temp);
-    lines.push(`${s.name} ${s.ml}ml · ${t.name} ${t.icon || ""}`);
-    if (r.shots) lines.push(`• إسبريسو: ${r.shots} شوت`);
-    if (r.milk)  lines.push(`• حليب: ${r.milk}ml ${milkMeta(r.milkType).name}`);
-    if (r.foam && r.foam !== "none") lines.push(`• رغوة: ${foamMeta(r.foam).name}`);
-    if (r.water && r.water !== "none") lines.push(`• ماء: ${waterMeta(r.water).name}`);
-    if (r.ice && r.ice !== "none" && r.ice !== 0) lines.push(`• ثلج: ${iceMeta(r.ice).name}`);
-    if (r.sugar) lines.push(`• سكر: ${r.sugar} ملاعق`);
+    const drink = lookup(M.DRINKS, r.type);
+    const drinkAr = drink?.name || r.typeName || "";
+    const drinkEn = (englishForDrink(r.type) || "").toUpperCase();
+    const sizeM  = sizeMeta(r.size);
+    const tempM  = tempMeta(r.temp);
+
+    const owner = window.CoffeeAPI.Auth?.current?.()?.user?.name || "طلبي";
+    const SEP = "━━━━━━━━━━━━━━━━━━━━";
+    const out = [];
+
+    out.push(`☕ ${drinkAr}${drinkEn ? ` · ${drinkEn}` : ""}`);
+    out.push(SEP);
+    out.push(`📋 ORDER FOR · ${owner}`);
+    out.push(`🥤 ${sizeM.name} (${enSize(sizeM.key)}) · ${sizeM.ml}ml`);
+    out.push(`${tempM.icon || "🔥"} ${tempM.name} · ${enTemp(tempM.key) || tempM.key}`);
+
+    // COFFEE
+    if (r.shots > 0) {
+      const ml = r.shots * 30;
+      out.push("", SEP, "☕ COFFEE · القهوة", SEP);
+      out.push(`● Espresso · إسبريسو`);
+      out.push(`   ${r.shots} Shot${r.shots > 1 ? "s" : ""} (${ml}ml) · 9 Bar`);
+    }
+    // WATER
+    const wv = waterMl(r.water);
+    if (wv > 0) {
+      const wm = waterMeta(r.water);
+      out.push("", SEP, "💧 WATER · الماء", SEP);
+      out.push(`● Water · ماء`);
+      out.push(`   ${wm.name} (${enWater(r.water)}) · ${wv}ml`);
+    }
+    // MILK
+    if ((r.milk || 0) > 0) {
+      const mm = milkMeta(r.milkType || "regular");
+      const steamed = r.temp === "cold" || r.temp === "iced" ? "Cold" : "Steamed";
+      out.push("", SEP, "🥛 MILK · الحليب", SEP);
+      out.push(`● ${mm.name} · ${enMilk(r.milkType || "regular")}`);
+      out.push(`   ${r.milk}ml · ${steamed}`);
+    }
+    // FOAM
+    const fv = foamMl(r.foam);
+    if (fv > 0) {
+      const fm = foamMeta(r.foam);
+      out.push("", SEP, "☁️ FOAM · الرغوة", SEP);
+      out.push(`○ ${fm.name} · ${enFoam(r.foam)}`);
+      out.push(`   ${fv}ml · ${enFoam(r.foam)}`);
+    }
+    // ICE
+    if (r.ice && r.ice !== "none" && r.ice !== 0) {
+      const im = iceMeta(r.ice);
+      out.push("", SEP, "🧊 ICE · الثلج", SEP);
+      out.push(`● ${im.name} · ${enIce(r.ice)}`);
+    }
+    // SUGAR
+    if ((r.sugar || 0) > 0) {
+      out.push("", SEP, "🍭 SUGAR · السكر", SEP);
+      out.push(`● ${r.sugar} Spoon${r.sugar > 1 ? "s" : ""} · ${r.sugar} ملعقة`);
+    }
+    // PUMPS
     const pumps = normalizePumps(r.pumps);
     if (pumps.length) {
-      const txt = pumps.map(p => `${pumpMeta(p.key).name} ×${p.count}`).join("، ");
-      lines.push(`• نكهات: ${txt}`);
+      out.push("", SEP, "✨ SYRUPS & PUMPS · السيروب", SEP);
+      for (const p of pumps) {
+        const meta = pumpMeta(p.key);
+        const ml = p.count * 8;
+        const tag = meta.tag ? ` [${meta.tag}]` : "";
+        out.push(`${p.count >= 3 ? "●" : "○"} ${meta.en || meta.name} · ${meta.name}${tag}`);
+        out.push(`   ${p.count} Pump${p.count > 1 ? "s" : ""} (${ml}ml)`);
+      }
     }
-    if (r.notes) lines.push(`• ملاحظات: ${r.notes}`);
-    return lines.join("\n");
+    // NOTES
+    if (r.notes) {
+      out.push("", SEP, "📝 NOTES · ملاحظات", SEP);
+      out.push(r.notes);
+    }
+
+    // footer
+    const d = r.createdAt ? new Date(r.createdAt) : new Date();
+    const time = d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
+    const date = d.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "2-digit" });
+    out.push("", SEP, `⏰ ${date} · ${time}`, SEP);
+    out.push("— Coffee World ☕ —");
+
+    return out.join("\n");
   }
 
   /* ====== Init ====== */
