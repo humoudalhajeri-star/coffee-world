@@ -22,7 +22,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBZb8JUuzrDwR__koCZw7sFBWDGFyw_Slg",
+  apiKey: "AIzaSyBZb8JJUzrDwR__koCZw7sFBWDGFyw_Slg",
   authDomain: "coffee-world-52a27.firebaseapp.com",
   projectId: "coffee-world-52a27",
   storageBucket: "coffee-world-52a27.firebasestorage.app",
