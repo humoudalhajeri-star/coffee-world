@@ -97,21 +97,38 @@
     }
   }
 
+  /**
+   * Firebase bridge — if firebase-init.js has populated `window.CW_FB`,
+   * `fb()` returns it (after auth settles). Otherwise returns null and
+   * the caller falls through to HTTP + localStorage.
+   */
+  async function fb() {
+    if (!window.CW_FB) return null;
+    try { await window.CW_FB.ready; } catch {}
+    return window.CW_FB;
+  }
+
   /* ============= Recipes (Stage 1) ============= */
   const Recipes = {
     async list() {
+      const f = await fb();
+      if (f) return f.listDocs("recipes", { ownerOnly: true });
       return withFallback(
         () => http("GET", "/recipes"),
         () => LS.read(LS_KEYS.recipes)
       );
     },
     async get(id) {
+      const f = await fb();
+      if (f) return f.getDocById("recipes", id);
       return withFallback(
         () => http("GET", `/recipes/${encodeURIComponent(id)}`),
         () => LS.read(LS_KEYS.recipes).find(r => r.id === id) || null
       );
     },
     async create(recipe) {
+      const f = await fb();
+      if (f) return f.createDoc("recipes", recipe);
       return withFallback(
         () => http("POST", "/recipes", recipe),
         () => {
@@ -124,6 +141,8 @@
       );
     },
     async remove(id) {
+      const f = await fb();
+      if (f) return f.deleteDoc("recipes", id);
       return withFallback(
         () => http("DELETE", `/recipes/${encodeURIComponent(id)}`),
         () => {
@@ -137,13 +156,18 @@
 
   /* ============= Marketplace (Stage 2) ============= */
   const Listings = {
-    async list(query = "") {
+    async list(searchText = "") {
+      const f = await fb();
+      if (f) return f.listDocs("listings", {
+        searchFields: ["title", "description", "category", "city"],
+        searchText,
+      });
       return withFallback(
-        () => http("GET", `/listings${query ? `?q=${encodeURIComponent(query)}` : ""}`),
+        () => http("GET", `/listings${searchText ? `?q=${encodeURIComponent(searchText)}` : ""}`),
         () => {
           let items = LS.read(LS_KEYS.listings);
-          if (query) {
-            const q = query.trim().toLowerCase();
+          if (searchText) {
+            const q = searchText.trim().toLowerCase();
             items = items.filter(it =>
               (it.title || "").toLowerCase().includes(q) ||
               (it.description || "").toLowerCase().includes(q) ||
@@ -155,12 +179,16 @@
       );
     },
     async get(id) {
+      const f = await fb();
+      if (f) return f.getDocById("listings", id);
       return withFallback(
         () => http("GET", `/listings/${encodeURIComponent(id)}`),
         () => LS.read(LS_KEYS.listings).find(l => l.id === id) || null
       );
     },
     async create(listing) {
+      const f = await fb();
+      if (f) return f.createDoc("listings", listing);
       return withFallback(
         () => http("POST", "/listings", listing),
         () => {
@@ -173,6 +201,8 @@
       );
     },
     async remove(id) {
+      const f = await fb();
+      if (f) return f.deleteDoc("listings", id);
       return withFallback(
         () => http("DELETE", `/listings/${encodeURIComponent(id)}`),
         () => {
@@ -184,26 +214,36 @@
     },
     /** Upload an image file. Server should return { url }. */
     async uploadImage(file) {
+      const f = await fb();
+      if (f) return f.uploadImage(file);
       return withFallback(
         () => {
           const fd = new FormData();
           fd.append("file", file);
           return http("POST", "/uploads", fd, { isForm: true });
         },
-        () => fileToDataURL(file).then(url => ({ url }))
+        async () => {
+          const url = await compressImageFile(file, { maxDim: 1200, quality: 0.82 });
+          return { url, size: bytesOfDataURL(url) };
+        }
       );
     },
   };
 
   /* ============= Baristas (Stage 3) ============= */
   const Baristas = {
-    async list(query = "") {
+    async list(searchText = "") {
+      const f = await fb();
+      if (f) return f.listDocs("baristas", {
+        searchFields: ["name", "city", "bio"],
+        searchText,
+      });
       return withFallback(
-        () => http("GET", `/baristas${query ? `?q=${encodeURIComponent(query)}` : ""}`),
+        () => http("GET", `/baristas${searchText ? `?q=${encodeURIComponent(searchText)}` : ""}`),
         () => {
           let items = LS.read(LS_KEYS.baristas);
-          if (query) {
-            const q = query.trim().toLowerCase();
+          if (searchText) {
+            const q = searchText.trim().toLowerCase();
             items = items.filter(b =>
               (b.name || "").toLowerCase().includes(q) ||
               (b.city || "").toLowerCase().includes(q) ||
@@ -215,12 +255,16 @@
       );
     },
     async get(id) {
+      const f = await fb();
+      if (f) return f.getDocById("baristas", id);
       return withFallback(
         () => http("GET", `/baristas/${encodeURIComponent(id)}`),
         () => LS.read(LS_KEYS.baristas).find(b => b.id === id) || null
       );
     },
     async create(profile) {
+      const f = await fb();
+      if (f) return f.createDoc("baristas", profile);
       return withFallback(
         () => http("POST", "/baristas", profile),
         () => {
@@ -233,6 +277,8 @@
       );
     },
     async remove(id) {
+      const f = await fb();
+      if (f) return f.deleteDoc("baristas", id);
       return withFallback(
         () => http("DELETE", `/baristas/${encodeURIComponent(id)}`),
         () => {
@@ -243,13 +289,23 @@
       );
     },
     async uploadPhoto(file) {
+      const f = await fb();
+      if (f) return f.uploadPhoto(file);
       return withFallback(
         () => {
           const fd = new FormData();
           fd.append("file", file);
           return http("POST", "/uploads", fd, { isForm: true });
         },
-        () => fileToDataURL(file).then(url => ({ url }))
+        async () => {
+          const isImage = file.type && file.type.startsWith("image/");
+          if (isImage) {
+            const url = await compressImageFile(file, { maxDim: 800, quality: 0.82 });
+            return { url, size: bytesOfDataURL(url) };
+          }
+          const url = await fileToDataURL(file);
+          return { url, size: bytesOfDataURL(url) };
+        }
       );
     },
   };
@@ -261,6 +317,49 @@
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
+  }
+
+  /**
+   * Compress an image file client-side before storing it.
+   * Downscales to fit within maxDim px on the longer side and re-encodes
+   * as JPEG — a typical 4MB phone photo shrinks to ~150KB while still
+   * looking good on a listing card. Non-images (PDFs) pass through
+   * untouched — those need a real backend to persist.
+   */
+  async function compressImageFile(file, { maxDim = 1200, quality = 0.82 } = {}) {
+    if (!file.type || !file.type.startsWith("image/")) {
+      return fileToDataURL(file);
+    }
+    const dataURL = await fileToDataURL(file);
+    const img = await loadImage(dataURL);
+    let { naturalWidth: w, naturalHeight: h } = img;
+    const scale = Math.min(maxDim / w, maxDim / h, 1);
+    w = Math.max(1, Math.round(w * scale));
+    h = Math.max(1, Math.round(h * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    // White background so transparent PNGs don't become black after JPEG
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(img, 0, 0, w, h);
+    return canvas.toDataURL("image/jpeg", quality);
+  }
+
+  function loadImage(src) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error("الصورة غير صالحة"));
+      img.src = src;
+    });
+  }
+
+  function bytesOfDataURL(url) {
+    // Rough size in bytes for a data URL (base64 overhead ~4/3).
+    if (!url || !url.startsWith("data:")) return 0;
+    const base64 = url.split(",")[1] || "";
+    return Math.ceil(base64.length * 0.75);
   }
 
   /* ============= Auth ============= */
@@ -282,15 +381,27 @@
 
   const Auth = {
     current() {
+      // Synchronous current-user read. When Firebase is loaded, it has
+      // its own user cache that we read through here; otherwise we read
+      // the localStorage session.
+      if (window.CW_FB?.auth) return window.CW_FB.auth.current();
       return readSession();
     },
     isAuthed() {
-      return !!readSession();
+      return !!this.current();
     },
     async signUp({ name, email, password }) {
       if (!name || !email || !password) throw new Error("الاسم والبريد وكلمة المرور مطلوبة");
       if (password.length < 6) throw new Error("كلمة المرور يجب أن تكون 6 أحرف على الأقل");
       email = email.trim().toLowerCase();
+      const f = await fb();
+      if (f) {
+        try {
+          return await f.auth.signUp({ name: name.trim(), email, password });
+        } catch (err) {
+          throw new Error(mapFirebaseAuthError(err));
+        }
+      }
       return withFallback(
         () => http("POST", "/auth/signup", { name, email, password }).then(res => {
           writeSession(res);
@@ -314,6 +425,14 @@
     async signIn({ email, password }) {
       if (!email || !password) throw new Error("البريد وكلمة المرور مطلوبة");
       email = email.trim().toLowerCase();
+      const f = await fb();
+      if (f) {
+        try {
+          return await f.auth.signIn({ email, password });
+        } catch (err) {
+          throw new Error(mapFirebaseAuthError(err));
+        }
+      }
       return withFallback(
         () => http("POST", "/auth/signin", { email, password }).then(res => {
           writeSession(res);
@@ -332,11 +451,27 @@
       );
     },
     async signOut() {
+      const f = await fb();
+      if (f) return f.auth.signOut();
       try { await http("POST", "/auth/signout"); } catch {}
       writeSession(null);
       return { ok: true };
     },
   };
+
+  function mapFirebaseAuthError(err) {
+    const code = err?.code || "";
+    return ({
+      "auth/email-already-in-use": "هذا البريد مسجّل مسبقاً",
+      "auth/invalid-email": "البريد الإلكتروني غير صحيح",
+      "auth/weak-password": "كلمة المرور ضعيفة — 6 أحرف على الأقل",
+      "auth/user-not-found": "لا يوجد حساب بهذا البريد",
+      "auth/wrong-password": "كلمة المرور غير صحيحة",
+      "auth/invalid-credential": "بيانات الدخول غير صحيحة",
+      "auth/too-many-requests": "محاولات كثيرة — انتظر قليلاً ثم حاول مجدداً",
+      "auth/network-request-failed": "تعذّر الاتصال — تحقق من الإنترنت",
+    })[code] || err?.message || "حدث خطأ في المصادقة";
+  }
 
   function publicUser(u) {
     return { id: u.id, name: u.name, email: u.email };

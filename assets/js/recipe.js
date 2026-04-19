@@ -369,7 +369,13 @@
     const list = await window.CoffeeAPI.Recipes.list();
     const wrap = $("#saved-list");
     if (!list.length) {
-      wrap.innerHTML = `<div class="empty"><h3>لا توجد وصفات محفوظة</h3><p>ابنِ وصفة ثم اضغط "حفظ".</p></div>`;
+      const usingFB = !!window.CW_FB;
+      const signedIn = !!window.CoffeeAPI.Auth.current();
+      if (usingFB && !signedIn) {
+        wrap.innerHTML = `<div class="empty"><h3>سجّل دخولك لحفظ ومشاهدة وصفاتك</h3><p>اذهب لصفحة <a href="baristas.html">البريستا</a> وسجّل دخولك، ثم ارجع هنا لحفظ الوصفات على حسابك.</p></div>`;
+      } else {
+        wrap.innerHTML = `<div class="empty"><h3>لا توجد وصفات محفوظة</h3><p>ابنِ وصفة ثم اضغط "حفظ".</p></div>`;
+      }
       return;
     }
     const sizeName = k => (M.SIZES.find(s => s.key === k) || {}).name || k || "";

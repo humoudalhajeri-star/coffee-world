@@ -98,15 +98,29 @@
 
   async function handleFiles(files) {
     const arr = Array.from(files).slice(0, 6 - imageQueue.length);
+    let totalSaved = 0, totalAfter = 0;
     for (const f of arr) {
       try {
+        const before = f.size || 0;
         const res = await window.CoffeeAPI.Listings.uploadImage(f);
         imageQueue.push(res.url);
+        const after = res.size || (res.url ? res.url.length * 0.75 : 0);
+        totalSaved += Math.max(0, before - after);
+        totalAfter += after;
       } catch (err) {
         toast("تعذّر رفع صورة: " + err.message, "error");
       }
     }
     renderPreviews();
+    if (totalAfter > 0 && totalSaved > 100_000) {
+      toast(`تم ضغط الصور · الحجم النهائي ${fmtKB(totalAfter)}`, "success", 3200);
+    }
+  }
+
+  function fmtKB(bytes) {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+    return `${(bytes / (1024*1024)).toFixed(1)} MB`;
   }
   function renderPreviews() {
     $("#listing-preview").innerHTML = imageQueue
