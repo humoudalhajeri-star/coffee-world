@@ -215,7 +215,18 @@
     /** Upload an image file. Server should return { url }. */
     async uploadImage(file) {
       const f = await fb();
-      if (f) return f.uploadImage(file);
+      if (f) {
+        try {
+          return await f.uploadImage(file);
+        } catch (err) {
+          // Firebase Storage not ready yet (common while Blaze billing
+          // propagates, can take up to 24h) — fall back to embedding a
+          // compressed copy directly inside the Firestore document.
+          console.warn("Firebase Storage unavailable, embedding compressed image instead:", err?.message);
+          const url = await compressImageFile(file, { maxDim: 900, quality: 0.75 });
+          return { url, size: bytesOfDataURL(url) };
+        }
+      }
       return withFallback(
         () => {
           const fd = new FormData();
@@ -290,7 +301,20 @@
     },
     async uploadPhoto(file) {
       const f = await fb();
-      if (f) return f.uploadPhoto(file);
+      if (f) {
+        try {
+          return await f.uploadPhoto(file);
+        } catch (err) {
+          console.warn("Firebase Storage unavailable, embedding compressed image instead:", err?.message);
+          const isImage = file.type && file.type.startsWith("image/");
+          if (isImage) {
+            const url = await compressImageFile(file, { maxDim: 700, quality: 0.75 });
+            return { url, size: bytesOfDataURL(url) };
+          }
+          // PDFs can't be embedded (~1MB Firestore doc limit). Tell the user.
+          throw new Error("تعذّر رفع الملف. فعّل Firebase Storage أو استخدم صورة بدلاً من PDF.");
+        }
+      }
       return withFallback(
         () => {
           const fd = new FormData();
