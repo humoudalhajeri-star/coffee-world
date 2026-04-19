@@ -209,6 +209,10 @@
     $("#pump-modal").addEventListener("click", (e) => {
       if (e.target.id === "pump-modal") closePumpModal();
     });
+    $("#extra-pumps-chips").addEventListener("click", (e) => {
+      const pill = e.target.closest(".pill");
+      if (pill) togglePump(pill.dataset.key, pill);
+    });
 
     // Tabs
     $$(".order-tab").forEach(t =>
@@ -223,10 +227,9 @@
     });
     $("#save-btn").addEventListener("click", handleSave);
     $("#reset-btn").addEventListener("click", () => {
-      applyDefaults();
       state.pumps = [];
+      applyDefaults();
       renderPumpsTable();
-      renderPills("#milk-type-chips", M.MILK_TYPES, "milkType");
       toast("تم إعادة الضبط", "info");
     });
   }
@@ -258,22 +261,20 @@
     }).join("");
     $("#extra-pumps-chips").innerHTML = chips;
     $("#pump-modal").classList.add("open");
-    $("#extra-pumps-chips").onclick = (e) => {
-      const pill = e.target.closest(".pill");
-      if (!pill) return;
-      const key = pill.dataset.key;
-      const idx = state.pumps.findIndex(p => p.key === key);
-      if (idx >= 0) {
-        state.pumps.splice(idx, 1);
-        pill.classList.remove("active");
-      } else {
-        state.pumps.push({ key, count: 1 });
-        pill.classList.add("active");
-      }
-      renderPumpsTable();
-    };
   }
   function closePumpModal() { $("#pump-modal").classList.remove("open"); }
+
+  function togglePump(key, pill) {
+    const idx = state.pumps.findIndex(p => p.key === key);
+    if (idx >= 0) {
+      state.pumps.splice(idx, 1);
+      pill.classList.remove("active");
+    } else {
+      state.pumps.push({ key, count: 1 });
+      pill.classList.add("active");
+    }
+    renderPumpsTable();
+  }
 
   /* ============================================================
    * Tabs: Build / Saved
@@ -316,14 +317,16 @@
       wrap.innerHTML = `<div class="empty"><h3>لا توجد وصفات محفوظة</h3><p>ابنِ وصفة ثم اضغط "حفظ".</p></div>`;
       return;
     }
+    const sizeName = k => (M.SIZES.find(s => s.key === k) || {}).name || k || "";
+    const tempName = k => (M.TEMPS.find(t => t.key === k) || {}).name || k || "";
     wrap.innerHTML = list.map(r => `
       <div class="saved-item">
         <h4>${escapeHTML(r.name)}</h4>
         <small>${escapeHTML(r.typeName || "")} · ${formatDate(r.createdAt)}</small>
         <div class="meta-row" style="margin-top:6px;">
-          <span class="tag">${r.size}</span>
-          <span class="tag">${escapeHTML(r.temp || "")}</span>
-          <span class="tag">${r.shots} Shot</span>
+          <span class="tag">${escapeHTML(sizeName(r.size))}</span>
+          <span class="tag">${escapeHTML(tempName(r.temp))}</span>
+          <span class="tag">${r.shots || 0} شوت</span>
         </div>
         <div class="actions">
           <button class="btn btn-outline" data-open="${r.id}">عرض</button>
@@ -355,18 +358,9 @@
    * ============================================================ */
   document.addEventListener("DOMContentLoaded", () => {
     renderDrinks();
-    renderSizes();
-    renderTemps();
-    renderPills("#milk-type-chips", M.MILK_TYPES, "milkType");
-    renderPills("#foam-chips",      M.FOAM_LEVELS,  "foam");
-    renderPills("#ice-chips",       M.ICE_LEVELS,   "ice");
-    renderPills("#water-chips",     M.WATER_LEVELS, "water");
+    applyDefaults();      // syncs sizes/temps/pills/meters to the initial drink
     renderPumpsTable();
     wire();
     wireSavedList();
-    // sync meter visuals to initial state
-    updateShotsMeter();
-    updateMilkMeter();
-    updateSugarMeter();
   });
 })();

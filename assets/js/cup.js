@@ -123,17 +123,18 @@
       </div>`;
     }).join("") || `<div class="cup-layer milk" style="height:100%"><span>—</span></div>`;
 
-    // Ticks on the left: cumulative ml markers
+    // Ticks on the left: cumulative ml markers at actual layer boundaries
     const ticks = $("#cup-ticks");
     ticks.innerHTML = "";
     let acc = 0;
-    // Show ticks at boundaries between layers (from bottom up)
     const bottomUp = [...layers].reverse();
     for (const l of bottomUp) {
       acc += l.volume;
+      const pct = Math.min(100, (acc / total) * 100);
       const tick = document.createElement("div");
       tick.className = "tick";
       tick.textContent = `${acc}ml`;
+      tick.style.bottom = `${pct.toFixed(2)}%`;
       ticks.appendChild(tick);
     }
   }
@@ -290,11 +291,11 @@
     const saveBtn = $("#save-btn");
     if (recipe.id) {
       saveBtn.innerHTML = '<span>✓</span> <span>محفوظ</span>';
-      saveBtn.classList.add("ready");
       saveBtn.disabled = true;
     } else {
       saveBtn.classList.add("ready");
       saveBtn.addEventListener("click", async () => {
+        saveBtn.disabled = true;
         try {
           const saved = await window.CoffeeAPI.Recipes.create(recipe);
           toast("تم حفظ الطلب ✓", "success");
@@ -302,9 +303,10 @@
           url.searchParams.set("id", saved.id);
           history.replaceState(null, "", url);
           saveBtn.innerHTML = '<span>✓</span> <span>محفوظ</span>';
-          saveBtn.disabled = true;
+          saveBtn.classList.remove("ready");
         } catch (err) {
           toast("تعذّر الحفظ: " + err.message, "error");
+          saveBtn.disabled = false;
         }
       });
     }

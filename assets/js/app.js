@@ -32,6 +32,9 @@
     const list = $(".nav-links");
     if (!toggle || !list) return;
     toggle.addEventListener("click", () => list.classList.toggle("open"));
+    $$(".nav-links a").forEach(link =>
+      link.addEventListener("click", () => list.classList.remove("open"))
+    );
   }
 
   function formatDate(iso) {

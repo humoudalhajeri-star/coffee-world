@@ -6,6 +6,21 @@
 .cup-page { background: var(--ord-bg, #F3E8D1); color: var(--ord-text, #1B1A18); min-height: 100vh; }
 .cup-page .site-header { display: none; }
 
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #EBDDBE;
+  color: var(--ord-blue, #1E63C8);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 13px;
+  transition: background .15s ease;
+}
+.back-link:hover { background: #DCC89D; }
+
 .cup-main {
   max-width: 780px;
   margin: 0 auto;
@@ -49,11 +64,8 @@
   position: relative;
 }
 .cup-ticks {
-  display: flex;
-  flex-direction: column-reverse;
-  justify-content: space-between;
-  align-items: flex-end;
-  padding: 60px 0 30px;
+  position: relative;
+  padding: 34px 0 18px;
   height: 380px;
   font-size: 11px;
   color: var(--ord-muted, #7B6A4D);
@@ -61,10 +73,14 @@
   min-width: 52px;
 }
 .cup-ticks .tick {
+  position: absolute;
+  right: 0;
   display: flex;
   align-items: center;
   gap: 6px;
   line-height: 1;
+  transform: translateY(50%);
+  white-space: nowrap;
 }
 .cup-ticks .tick::after {
   content: "";

@@ -81,9 +81,9 @@
   ];
 
   const WATER_LEVELS = [
-    { key: "none", name: "بدون ماي" },
-    { key: "half", name: "نص ماي" },
-    { key: "full", name: "ماي كامل" },
+    { key: "none", name: "بدون ماء" },
+    { key: "half", name: "نص ماء" },
+    { key: "full", name: "ماء كامل" },
   ];
 
   const PUMPS = [
