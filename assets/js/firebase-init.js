@@ -11,7 +11,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getFirestore, collection, addDoc, getDocs, doc, getDoc, deleteDoc,
-  query, orderBy, serverTimestamp,
+  updateDoc, query, orderBy, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
   getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
@@ -148,6 +148,17 @@ window.CW_FB = {
   async deleteDoc(collName, id) {
     await deleteDoc(doc(db, collName, id));
     return { ok: true };
+  },
+
+  async updateDoc(collName, id, data) {
+    const clean = { ...data };
+    // never overwrite immutable metadata on updates
+    delete clean.id;
+    delete clean.ownerId;
+    delete clean.createdAt;
+    clean.updatedAt = serverTimestamp();
+    await updateDoc(doc(db, collName, id), clean);
+    return { id, ...data, updatedAt: new Date().toISOString() };
   },
 
   /* ---- Storage uploads ---- */

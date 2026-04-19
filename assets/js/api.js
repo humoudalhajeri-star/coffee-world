@@ -287,6 +287,23 @@
         }
       );
     },
+    async update(id, profile) {
+      const f = await fb();
+      if (f) return f.updateDoc("baristas", id, profile);
+      return withFallback(
+        () => http("PATCH", `/baristas/${encodeURIComponent(id)}`, profile),
+        () => {
+          const items = LS.read(LS_KEYS.baristas);
+          const i = items.findIndex(b => b.id === id);
+          if (i >= 0) {
+            items[i] = { ...items[i], ...profile, updatedAt: new Date().toISOString() };
+            LS.write(LS_KEYS.baristas, items);
+            return items[i];
+          }
+          throw new Error("الملف غير موجود");
+        }
+      );
+    },
     async remove(id) {
       const f = await fb();
       if (f) return f.deleteDoc("baristas", id);
