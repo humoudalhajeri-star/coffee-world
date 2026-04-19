@@ -46,12 +46,17 @@
   }
 
   function renderTemps() {
-    $("#temp-row").innerHTML = M.TEMPS.map(t => `
-      <div class="pick-card${t.key === state.temp ? " active" : ""}" data-temp="${t.key}">
+    const f = M.DRINK_FIELDS[state.type] || {};
+    const allowed = f.temps || ["hot", "warm", "cold"];
+    $("#temp-row").innerHTML = M.TEMPS.map(t => {
+      const cls = ["pick-card"];
+      if (t.key === state.temp) cls.push("active");
+      if (!allowed.includes(t.key)) cls.push("disabled");
+      return `<div class="${cls.join(" ")}" data-temp="${t.key}">
         <span class="pick-icon">${t.icon}</span>
         <div class="pick-name">${escapeHTML(t.name)}</div>
-      </div>
-    `).join("");
+      </div>`;
+    }).join("");
   }
 
   function renderPills(containerSel, items, stateKey) {
@@ -238,7 +243,7 @@
     const def = M.DRINK_DEFAULTS[state.type];
     if (!def) return;
     Object.assign(state, def);
-    // update all visuals
+    applyBaristaRules();
     renderSizes();
     renderTemps();
     renderPills("#milk-type-chips", M.MILK_TYPES, "milkType");
@@ -248,6 +253,56 @@
     updateShotsMeter();
     updateMilkMeter();
     updateSugarMeter();
+    renderPumpsTable();
+  }
+
+  /**
+   * Barista rules — reconcile the drink with the customiser:
+   *   1. Hide sections that do not apply (e.g. milk on espresso).
+   *   2. Zero out hidden state values so they are not persisted.
+   *   3. Gray-out temperatures that don't suit the drink and snap
+   *      selection to the first allowed one when needed.
+   *   4. Seed signature pumps for drinks that need them (mocha, etc.).
+   */
+  function applyBaristaRules() {
+    const f = M.DRINK_FIELDS[state.type] || DEFAULT_FIELDS;
+
+    // 1. section + meter visibility
+    setHidden('[data-meter="shots"]', !f.shots);
+    setHidden('[data-meter="milk"]',  !f.milk);
+    setHidden('[data-meter="sugar"]', !f.sugar);
+    setHidden('[data-field="milk-type"]', !f.milk);
+    setHidden('[data-field="foam"]',      !f.foam);
+    setHidden('[data-field="ice"]',       !f.ice);
+    setHidden('[data-field="water"]',     !f.water);
+    setHidden('[data-field="pumps"]',     !f.pumps);
+
+    // 2. zero-out state for hidden fields (so the receipt doesn't show them)
+    if (!f.shots) state.shots = 0;
+    if (!f.milk)  { state.milk = 0; }
+    if (!f.foam)  state.foam = "none";
+    if (!f.ice)   state.ice  = "none";
+    if (!f.water) state.water = "none";
+    if (!f.pumps) state.pumps = [];
+
+    // 3. temperatures: snap selection to first allowed temp if current not allowed
+    const allowed = f.temps || ["hot", "warm", "cold"];
+    if (!allowed.includes(state.temp)) state.temp = allowed[0];
+
+    // 4. signature pumps (only if the drink defines defaults and user has none)
+    if (f.pumps && Array.isArray(f.defaultPumps) && (!state.pumps || !state.pumps.length)) {
+      state.pumps = f.defaultPumps.map(p => ({ ...p }));
+    }
+  }
+
+  const DEFAULT_FIELDS = {
+    shots: true, water: true, milk: true, foam: true, ice: true,
+    sugar: true, pumps: true, temps: ["hot", "warm", "cold"],
+  };
+
+  function setHidden(selector, hidden) {
+    const el = document.querySelector(selector);
+    if (el) el.hidden = hidden;
   }
 
   /* ============================================================
@@ -358,8 +413,7 @@
    * ============================================================ */
   document.addEventListener("DOMContentLoaded", () => {
     renderDrinks();
-    applyDefaults();      // syncs sizes/temps/pills/meters to the initial drink
-    renderPumpsTable();
+    applyDefaults();      // syncs sizes/temps/pills/meters/pumps + barista rules
     wire();
     wireSavedList();
   });
