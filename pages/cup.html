@@ -3,84 +3,183 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>وصفتك — Coffee World</title>
+<title>كوب الطلب — Coffee Order</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css" />
-<style>
-  @media print {
-    .site-header, .site-footer, .no-print { display: none !important; }
-    body { background: #fff; }
-    .card { box-shadow: none; border: 1px solid #ccc; }
-  }
-</style>
+<link rel="stylesheet" href="../assets/css/order.css" />
+<link rel="stylesheet" href="../assets/css/cup.css" />
 </head>
-<body data-page="recipe">
-  <header class="site-header">
-    <div class="container nav">
-      <a href="../index.html" class="brand">
-        <span class="brand-logo">CW</span>
-        <span>Coffee World</span>
+<body data-page="recipe" class="order-page cup-page">
+  <header class="order-header">
+    <div class="order-header-inner">
+      <a href="recipe.html" class="back-link">← رجوع</a>
+      <a href="../index.html" class="order-brand">
+        <div class="order-brand-text">
+          <h1>طلبي</h1>
+          <small>COFFEE ORDER</small>
+        </div>
+        <div class="order-brand-circle">☕</div>
       </a>
-      <button class="menu-toggle" aria-label="القائمة">☰</button>
-      <ul class="nav-links">
-        <li><a href="../index.html" data-page="home">الرئيسية</a></li>
-        <li><a href="recipe.html" data-page="recipe">ابتكر وصفتك</a></li>
-        <li><a href="marketplace.html" data-page="marketplace">السوق</a></li>
-        <li><a href="baristas.html" data-page="baristas">البريستا</a></li>
-      </ul>
     </div>
   </header>
 
-  <main class="container section">
-    <div class="section-title">
-      <div>
-        <h2>وصفتك جاهزة</h2>
-        <p>اعرض هذه الصفحة للبريستا، أو اطبعها، أو احفظها لاستخدامها لاحقاً.</p>
-      </div>
-      <div class="no-print" style="display:flex; gap:8px; flex-wrap:wrap;">
-        <a href="recipe.html" class="btn btn-outline">← رجوع للتعديل</a>
-        <button class="btn btn-gold" id="print-btn">🖨️ طباعة</button>
-        <button class="btn btn-primary" id="save-btn">💾 حفظ</button>
-      </div>
+  <main class="cup-main">
+    <!-- Title block -->
+    <div class="drink-title">
+      <h1 id="drink-name-ar">—</h1>
+      <span class="en" id="drink-name-en">—</span>
+      <div class="specs" id="title-specs">—</div>
     </div>
 
-    <div class="cup-stage">
-      <!-- Left: visual cup -->
-      <div class="card">
-        <h3 style="margin-top:0;color:var(--coffee-900);">الكوب</h3>
-        <div class="cup-wrap">
-          <div class="cup">
-            <div class="lid"></div>
-            <div class="notes" id="cup-notes"></div>
-            <div class="sleeve">
-              <div class="logo">COFFEE<br/>WORLD</div>
-            </div>
-            <div class="scribble" id="cup-scribble"></div>
-          </div>
+    <!-- Cup visualization with measurement ticks -->
+    <div class="cup-viz-wrap">
+      <div class="cup-ticks" id="cup-ticks"></div>
+      <div class="cup-viz">
+        <div class="cup-lid"></div>
+        <div class="cup-body">
+          <div class="cup-layers" id="cup-layers"></div>
         </div>
-        <p class="hint" id="cup-summary" style="text-align:center; color:var(--muted); margin-top:10px;"></p>
+        <div class="cup-bottom"></div>
+      </div>
+    </div>
+    <div class="cup-shadow"></div>
+
+    <!-- Receipt card -->
+    <article class="receipt" id="receipt">
+      <div class="receipt-head">
+        <h2 id="r-name-ar">—</h2>
+        <span class="en" id="r-name-en">—</span>
       </div>
 
-      <!-- Right: recipe paper -->
-      <div class="recipe-paper" id="recipe-paper">
-        <h3 id="rp-title">—</h3>
-        <div class="meta" id="rp-meta">—</div>
-        <ul id="rp-list"></ul>
-        <p id="rp-notes" style="margin-top:10px; color:var(--coffee-800);"></p>
-        <div style="margin-top:12px; font-size:12px; color:var(--muted);">
-          رمز الوصفة: <b id="rp-id">—</b>
+      <div class="order-for-card">
+        <small>ORDER FOR · صاحب الطلب</small>
+        <strong id="r-owner">طلبي</strong>
+      </div>
+
+      <div class="specs-pill" id="r-specs">—</div>
+
+      <!-- Coffee -->
+      <div class="section-heading" data-sec="coffee" hidden>
+        <span><span class="icon">☕</span><span class="ar">القهوة</span></span>
+        <span>COFFEE</span>
+      </div>
+      <div class="r-row" data-sec-row="coffee" hidden>
+        <div class="title"><span>إسبريسو</span> <span class="en">Espresso</span></div>
+        <div class="main">
+          <span class="left-badge"><span class="dot filled"></span><span id="r-coffee-ml">60ml</span></span>
+          <div class="bilingual"><span id="r-coffee-count">—</span> <b id="r-coffee-label">Shots</b> <span class="right-icon">☕</span></div>
+        </div>
+        <div class="sub" id="r-coffee-sub">—</div>
+      </div>
+
+      <!-- Water -->
+      <div class="section-heading" data-sec="water" hidden>
+        <span><span class="icon">💧</span><span class="ar">الماء</span></span>
+        <span>WATER</span>
+      </div>
+      <div class="r-row" data-sec-row="water" hidden>
+        <div class="title"><span>ماء</span> <span class="en">Water</span></div>
+        <div class="main">
+          <span class="left-badge"><span class="dot" style="background:#BFD9E0;"></span><span id="r-water-ml">—</span></span>
+          <div class="bilingual"><span id="r-water-ar">—</span> <b id="r-water-en">—</b> <span class="right-icon">💧</span></div>
         </div>
       </div>
+
+      <!-- Milk -->
+      <div class="section-heading" data-sec="milk" hidden>
+        <span><span class="icon">🥛</span><span class="ar">الحليب</span></span>
+        <span>MILK</span>
+      </div>
+      <div class="r-row" data-sec-row="milk" hidden>
+        <div class="title"><span>حليب</span> <span class="en">Milk</span></div>
+        <div class="main">
+          <span class="left-badge"><span class="dot milk"></span><span id="r-milk-ml">80ml</span></span>
+          <div class="bilingual"><span id="r-milk-ar">—</span> / <b id="r-milk-en">—</b> <span class="right-icon">🥛</span></div>
+        </div>
+        <div class="sub" id="r-milk-sub">—</div>
+      </div>
+
+      <!-- Foam -->
+      <div class="section-heading" data-sec="foam" hidden>
+        <span><span class="icon">☁️</span><span class="ar">الرغوة</span></span>
+        <span>FOAM</span>
+      </div>
+      <div class="r-row" data-sec-row="foam" hidden>
+        <div class="title"><span>رغوة</span> <span class="en">Foam</span></div>
+        <div class="main">
+          <span class="left-badge"><span class="dot foam"></span><span id="r-foam-ml">15ml</span></span>
+          <div class="bilingual"><span id="r-foam-ar">—</span> / <b id="r-foam-en">—</b> <span class="right-icon">☁️</span></div>
+        </div>
+        <div class="sub" id="r-foam-sub">—</div>
+      </div>
+
+      <!-- Ice -->
+      <div class="section-heading" data-sec="ice" hidden>
+        <span><span class="icon">🧊</span><span class="ar">الثلج</span></span>
+        <span>ICE</span>
+      </div>
+      <div class="r-row" data-sec-row="ice" hidden>
+        <div class="title"><span>ثلج</span> <span class="en">Ice</span></div>
+        <div class="main">
+          <span class="left-badge"><span class="dot" style="background:#C8E4EF;"></span><span id="r-ice-level">—</span></span>
+          <div class="bilingual"><span id="r-ice-ar">—</span> <span class="right-icon">🧊</span></div>
+        </div>
+      </div>
+
+      <!-- Sugar -->
+      <div class="section-heading" data-sec="sugar" hidden>
+        <span><span class="icon">🍭</span><span class="ar">السكر</span></span>
+        <span>SUGAR</span>
+      </div>
+      <div class="r-row" data-sec-row="sugar" hidden>
+        <div class="title"><span>سكر</span> <span class="en">Sugar</span></div>
+        <div class="main">
+          <span class="left-badge"><span class="dot gold"></span><span id="r-sugar-n">—</span></span>
+          <div class="bilingual"><span id="r-sugar-ar">—</span> <span class="right-icon">🍭</span></div>
+        </div>
+      </div>
+
+      <!-- Pumps -->
+      <div class="section-heading" data-sec="pumps" hidden>
+        <span><span class="icon">✨</span><span class="ar">السيروب</span></span>
+        <span>SYRUPS &amp; PUMPS</span>
+      </div>
+      <div id="r-pumps-list"></div>
+
+      <!-- Notes -->
+      <div class="section-heading" data-sec="notes" hidden>
+        <span><span class="icon">📝</span><span class="ar">ملاحظات</span></span>
+        <span>NOTES</span>
+      </div>
+      <div class="r-row" data-sec-row="notes" hidden>
+        <div style="text-align:center; color:var(--ord-text); font-size:14px; white-space:pre-wrap;" id="r-notes-text">—</div>
+      </div>
+
+      <!-- Footer -->
+      <div class="receipt-foot">
+        <div class="stamp" id="r-stamp">—</div>
+        <div class="barcode" aria-hidden="true"></div>
+      </div>
+    </article>
+
+    <div class="wavy">~~~~~~~</div>
+
+    <!-- Actions -->
+    <div class="cup-actions">
+      <button class="btn-big btn-save" id="save-btn">
+        <span>💾</span> <span>احفظ الطلب</span>
+      </button>
+      <button class="btn-big btn-share" id="share-btn">
+        <span>📤</span> <span>شارك الكوب</span>
+      </button>
+      <button class="btn-big btn-share" id="print-btn" style="background:#F0E3BD;">
+        <span>🖨️</span> <span>طباعة</span>
+      </button>
     </div>
   </main>
 
-  <footer class="site-footer">
-    <div class="container">© <span id="year"></span> Coffee World</div>
-  </footer>
-
-  <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/app.js"></script>
   <script src="../assets/js/recipe-data.js"></script>

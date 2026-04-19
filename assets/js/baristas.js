@@ -107,13 +107,14 @@
         grid.innerHTML = `<div class="empty"><h3>لا توجد ملفات بعد</h3><p>سجّل حسابك ثم اضغط "ملف جديد".</p></div>`;
         return;
       }
-      grid.innerHTML = items.map(cardHTML).join("");
+      const currentUser = window.CoffeeAPI.Auth.current();
+      grid.innerHTML = items.map(b => cardHTML(b, currentUser)).join("");
     } catch (err) {
       grid.innerHTML = `<div class="empty"><h3>تعذّر التحميل</h3><p>${escapeHTML(err.message)}</p></div>`;
     }
   }
 
-  function cardHTML(b) {
+  function cardHTML(b, currentUser) {
     const avatar = b.photo
       ? `<img src="${escapeHTML(b.photo)}" alt="${escapeHTML(b.name)}">`
       : `<span>👤</span>`;
@@ -125,7 +126,6 @@
     const phoneHref = b.phone ? `tel:${encodeURIComponent(b.phone)}` : "#";
     const waHref    = b.phone ? `https://wa.me/${(b.phone || "").replace(/[^\d]/g,"")}` : "#";
     const cvBtn     = b.cv ? `<a class="btn btn-outline" href="${escapeHTML(b.cv)}" target="_blank" rel="noopener">📄 السيرة</a>` : "";
-    const currentUser = window.CoffeeAPI.Auth.current();
     const canDelete = currentUser?.user?.id && b.ownerId === currentUser.user.id;
     const deleteBtn = canDelete
       ? `<button class="btn btn-danger" data-delete="${b.id}" title="حذف">🗑️</button>`
