@@ -378,6 +378,7 @@
 }
 .listing-contact-bar .btn-call    { background: #fff; color: var(--coffee-800); border: 2px solid var(--coffee-700); }
 .listing-contact-bar .btn-whatsapp{ background: #25D366; color: #fff; }
+.listing-contact-bar .btn-share-listing{ background: var(--gold); color: #2E1B10; flex: 0 0 auto; padding: 13px 14px; font-weight: 800; }
 
 /* Seller block on listing detail */
 .seller-avatar {

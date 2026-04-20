@@ -133,19 +133,28 @@
         const listingsCount = allListings.filter(x => x.ownerId === uid).length;
         const hasBarista = allBaristas.some(x => x.ownerId === uid);
         const isAdm = ADMIN_EMAILS.map(e => e.toLowerCase()).includes((u.email || "").toLowerCase());
+        const isBanned = u.banned === true;
+        const banChip = isBanned ? `<span class="tbl-chip" style="background:#FDECEA; color:var(--danger); margin-right:6px;">محظور</span>` : "";
+        const banBtn = isAdm ? "" : (isBanned
+          ? `<button class="btn btn-outline btn-sm" data-unban-user="${escapeHTML(uid)}">إلغاء الحظر</button>`
+          : `<button class="btn btn-outline btn-sm" data-ban-user="${escapeHTML(uid)}" style="border-color:var(--danger); color:var(--danger);">🚫 حظر</button>`
+        );
         return `
           <tr>
             <td>
               <b>${escapeHTML(u.name || "—")}</b>
               ${isAdm ? `<span class="tbl-chip" style="background:var(--gold); color:#2E1B10; margin-right:6px;">مشرف</span>` : ""}
+              ${banChip}
             </td>
             <td>${escapeHTML(u.email || "")}</td>
             <td class="tbl-muted">${u.createdAt ? formatDate(u.createdAt) : "—"}</td>
             <td>${listingsCount}</td>
             <td>${hasBarista ? "✓" : "—"}</td>
             <td class="tbl-actions">
-              ${isAdm ? `<span class="tbl-muted">—</span>` :
-                `<button class="btn btn-danger btn-sm" data-del-user="${escapeHTML(uid)}">حذف بياناته</button>`}
+              ${isAdm ? `<span class="tbl-muted">—</span>` : `
+                ${banBtn}
+                <button class="btn btn-danger btn-sm" data-del-user="${escapeHTML(uid)}">حذف</button>
+              `}
             </td>
           </tr>`;
       }).join("");
@@ -282,16 +291,38 @@
     const table = document.getElementById(tableId);
     if (!table) return;
     table.addEventListener("click", async (e) => {
-      const btn = e.target.closest("button[data-del-user], button[data-del-listing], button[data-del-barista], button[data-del-recipe]");
+      const btn = e.target.closest(
+        "button[data-del-user], button[data-del-listing], button[data-del-barista], button[data-del-recipe], button[data-ban-user], button[data-unban-user]"
+      );
       if (!btn) return;
       handler(btn);
     });
   }
 
+  async function setUserBanned(uid, banned) {
+    if (!window.CW_FB) {
+      toast("هذه الميزة تحتاج Firebase", "error");
+      return;
+    }
+    try {
+      await window.CW_FB.updateDoc("users", uid, { banned });
+      toast(banned ? "تم حظر المستخدم" : "تم إلغاء الحظر", "success");
+      loadAllData();
+    } catch (err) {
+      toast("تعذّرت العملية: " + err.message, "error");
+    }
+  }
+
   function wireAllDeletes() {
     wireDelete("users-table", async (btn) => {
-      const uid = btn.dataset.delUser;
-      if (uid) await deleteUserCascade(uid);
+      if (btn.dataset.delUser) {
+        await deleteUserCascade(btn.dataset.delUser);
+      } else if (btn.dataset.banUser) {
+        if (!confirm("حظر هذا المستخدم؟ سيُمنع من تسجيل الدخول حتى يُلغى الحظر.")) return;
+        await setUserBanned(btn.dataset.banUser, true);
+      } else if (btn.dataset.unbanUser) {
+        await setUserBanned(btn.dataset.unbanUser, false);
+      }
     });
     wireDelete("listings-table", async (btn) => {
       const id = btn.dataset.delListing;
