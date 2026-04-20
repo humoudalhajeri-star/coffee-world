@@ -174,6 +174,47 @@
           <span class="hint">يمكن اختيار أكثر من مهارة.</span>
         </div>
 
+        <div class="field" style="margin-top:14px;">
+          <label>💼 الخبرات السابقة</label>
+          <div id="experiences-list" class="dyn-list"></div>
+          <button type="button" class="btn btn-outline btn-sm" id="add-experience">＋ إضافة خبرة</button>
+        </div>
+
+        <div class="field" style="margin-top:14px;">
+          <label>🏆 الشهادات</label>
+          <div id="certifications-list" class="dyn-list"></div>
+          <button type="button" class="btn btn-outline btn-sm" id="add-certification">＋ إضافة شهادة</button>
+        </div>
+
+        <div class="field" style="margin-top:14px;">
+          <label>🌍 اللغات</label>
+          <div id="languages-list" class="dyn-list"></div>
+          <button type="button" class="btn btn-outline btn-sm" id="add-language">＋ إضافة لغة</button>
+        </div>
+
+        <!-- Datalists for helpful suggestions -->
+        <datalist id="cert-suggestions">
+          <option value="SCA Barista Foundation"></option>
+          <option value="SCA Barista Intermediate"></option>
+          <option value="SCA Barista Professional"></option>
+          <option value="SCA Brewing Foundation"></option>
+          <option value="Q-Grader"></option>
+          <option value="CQI Q-Arabica"></option>
+          <option value="Authorized SCA Trainer"></option>
+          <option value="شهادة الصحة والسلامة الغذائية"></option>
+        </datalist>
+        <datalist id="lang-suggestions">
+          <option value="العربية"></option>
+          <option value="الإنجليزية"></option>
+          <option value="الفرنسية"></option>
+          <option value="التركية"></option>
+          <option value="الأردية"></option>
+          <option value="الفارسية"></option>
+          <option value="الهندية"></option>
+          <option value="الإسبانية"></option>
+          <option value="الإيطالية"></option>
+        </datalist>
+
         <div class="field" style="margin-top:10px;">
           <label>الصورة الشخصية</label>
           <label class="upload" for="profile-photo">
