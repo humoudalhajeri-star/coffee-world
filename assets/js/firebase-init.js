@@ -104,9 +104,17 @@ async function compressImageToBlob(file, { maxDim = 1200, quality = 0.82 } = {})
   });
 }
 
+// Once Storage fails once in a session, skip it entirely for the rest
+// of the session and go straight to the Firestore-embed fallback.
+// Saves the user from waiting 6 seconds per upload when Storage is broken.
+let storageBroken = false;
+
 async function uploadFile(file, folder, onProgress) {
+  if (storageBroken) {
+    throw new Error("STORAGE_SKIPPED: known broken this session");
+  }
+
   const userId = currentUser?.uid || "anonymous";
-  // Compress images first so the actual upload is tiny
   const blob = await compressImageToBlob(file, { maxDim: 1000, quality: 0.78 });
   const isJpeg = blob !== file && blob.type === "image/jpeg";
   const baseName = (file.name || "file").replace(/\.[^.]+$/, "");
@@ -122,19 +130,21 @@ async function uploadFile(file, folder, onProgress) {
     // broken/unreachable and fail fast so the caller can fall back to
     // embedding the file in Firestore.
     let lastActivity = Date.now();
-    const NO_PROGRESS_MS = 12_000;   // abort if stuck for 12s
-    const TOTAL_MS      = 45_000;    // hard cap 45s
+    const NO_PROGRESS_MS = 6_000;    // abort if stuck for 6s
+    const TOTAL_MS      = 30_000;    // hard cap 30s
     const watchdog = setInterval(() => {
       if (Date.now() - lastActivity > NO_PROGRESS_MS) {
         cleanup();
+        storageBroken = true; // remember for the rest of the session
         try { task.cancel(); } catch {}
-        reject(new Error("STORAGE_STUCK: Firebase Storage لم يستجب — تم التحويل للتخزين البديل"));
+        reject(new Error("STORAGE_STUCK"));
       }
-    }, 2_000);
+    }, 1_500);
     const total = setTimeout(() => {
       cleanup();
+      storageBroken = true;
       try { task.cancel(); } catch {}
-      reject(new Error("STORAGE_TIMEOUT: تجاوز الرفع الحد الزمني"));
+      reject(new Error("STORAGE_TIMEOUT"));
     }, TOTAL_MS);
     function cleanup() { clearInterval(watchdog); clearTimeout(total); }
 
@@ -146,7 +156,14 @@ async function uploadFile(file, folder, onProgress) {
           onProgress(Math.round((snap.bytesTransferred / snap.totalBytes) * 100));
         }
       },
-      (err) => { cleanup(); reject(err); },
+      (err) => {
+        cleanup();
+        // Permission / config errors are not transient — mark broken
+        if (err?.code && /permission|unauthorized|object-not-found|unknown/i.test(err.code)) {
+          storageBroken = true;
+        }
+        reject(err);
+      },
       async () => {
         cleanup();
         try {
