@@ -380,7 +380,7 @@
     // SMS / Email / Copy — text only (these channels can't reliably attach images)
     const encoded = encodeURIComponent(msg);
     $("#share-sms").href   = `sms:?&body=${encoded}`;
-    $("#share-email").href = `mailto:?subject=${encodeURIComponent("طلبي من Coffee World")}&body=${encoded}`;
+    $("#share-email").href = `mailto:?subject=${encodeURIComponent("طلبي من CoffeZ")}&body=${encoded}`;
 
     // WhatsApp — send the actual receipt as an image so the colors,
     // sections, and layout arrive intact (plain text is ugly for WA).
@@ -470,7 +470,7 @@
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: "طلبي من Coffee World",
+          title: "طلبي من CoffeZ",
           text: caption,
         });
         toast("تمت المشاركة ✓", "success");
@@ -582,7 +582,7 @@
     const time = d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
     const date = d.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "2-digit" });
     out.push("", SEP, `⏰ ${date} · ${time}`, SEP);
-    out.push("— Coffee World ☕ —");
+    out.push("— CoffeZ ☕ —");
 
     return out.join("\n");
   }

@@ -78,7 +78,7 @@
 
   function render(listing, currentUser, seller) {
     const photos = Array.isArray(listing.images) ? listing.images.filter(Boolean) : [];
-    document.title = `${listing.title || "إعلان"} — Coffee World`;
+    document.title = `${listing.title || "إعلان"} — CoffeZ`;
 
     const slidesHTML = photos.length
       ? photos.map(src => `<div class="slide"><img src="${escapeHTML(src)}" alt="${escapeHTML(listing.title || "")}"></div>`).join("")
@@ -187,7 +187,7 @@
     // Share button — uses native share sheet on mobile, falls back to clipboard
     $("#ld-share")?.addEventListener("click", async () => {
       const url   = window.location.href;
-      const title = listing.title || "إعلان من Coffee World";
+      const title = listing.title || "إعلان من CoffeZ";
       const lines = [`☕ ${title}`];
       if (listing.price) lines.push(`💰 ${Number(listing.price).toLocaleString("ar-SA")} ${curr}`);
       if (listing.city || listing.country) {

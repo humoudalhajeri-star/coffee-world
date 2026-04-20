@@ -1,5 +1,5 @@
 /**
- * Coffee World — shared UI utilities.
+ * CoffeZ — shared UI utilities.
  */
 (function (global) {
   function $(sel, root = document) { return root.querySelector(sel); }
