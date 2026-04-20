@@ -40,6 +40,16 @@
   };
   const DEFAULT_COUNTRY = "KW";
 
+  /** Major cities for each Gulf country — keep ordering rough by population. */
+  const CITIES = {
+    KW: ["مدينة الكويت", "السالمية", "حولي", "الفروانية", "الأحمدي", "الجهراء", "مبارك الكبير", "الفحيحيل", "صباح السالم"],
+    SA: ["الرياض", "جدة", "مكة المكرمة", "المدينة المنورة", "الدمام", "الخبر", "الظهران", "الأحساء", "الطائف", "أبها", "تبوك", "بريدة", "خميس مشيط", "حائل", "نجران", "ينبع", "جازان"],
+    AE: ["دبي", "أبوظبي", "الشارقة", "العين", "عجمان", "رأس الخيمة", "الفجيرة", "أم القيوين"],
+    QA: ["الدوحة", "الريان", "الوكرة", "أم صلال", "الخور", "الشحانية", "الضعاين"],
+    BH: ["المنامة", "المحرق", "الرفاع", "مدينة عيسى", "مدينة حمد", "سترة", "جدحفص", "الزلاق"],
+    OM: ["مسقط", "صلالة", "صحار", "نزوى", "صور", "البريمي", "الرستاق", "إبراء", "بهلاء"],
+  };
+
   /** Convert Arabic/Persian digits (٠-٩ or ۰-۹) into standard 0-9. */
   function normalizeDigits(str) {
     if (str == null) return "";
@@ -320,15 +330,26 @@
     $("#listing-files").value = "";
     renderPreviews();
 
-    // Pre-fill phone and city from the user's barista profile if one exists.
-    // This saves them retyping details they already provided elsewhere.
+    // Pre-fill phone (and city if it matches a known Gulf city) from the
+    // user's barista profile if they have one — saves retyping.
     try {
       const mine = await findMyBaristaProfile(session.user?.id);
       if (mine) {
         const phoneInput = $("#listing-form [name=phone]");
         const cityInput  = $("#listing-form [name=city]");
         if (phoneInput && !phoneInput.value) phoneInput.value = mine.phone || "";
-        if (cityInput  && !cityInput.value)  cityInput.value  = mine.city  || "";
+        if (cityInput && mine.city) {
+          // Find which country contains this city; pre-select country + city
+          const matchedCountry = Object.keys(CITIES).find(c => CITIES[c].includes(mine.city));
+          if (matchedCountry) {
+            const countrySel = $("#listing-country");
+            if (countrySel) {
+              countrySel.value = matchedCountry;
+              countrySel.dispatchEvent(new Event("change"));
+            }
+            cityInput.value = mine.city;
+          }
+        }
       }
     } catch {}
 
@@ -424,8 +445,22 @@
     $("#listing-files").addEventListener("change", (e) => handleFiles(e.target.files));
     $("#listing-form").addEventListener("submit", submitForm);
 
-    // Live currency suffix: update price label when country changes
+    // Live currency + city options: update both when country changes
     const countrySel = $("#listing-country");
+    const citySel    = $("#listing-city");
+
+    const populateCities = () => {
+      if (!citySel) return;
+      const code = countrySel?.value || DEFAULT_COUNTRY;
+      const cities = CITIES[code] || [];
+      const previous = citySel.value;
+      citySel.innerHTML = cities.map(c =>
+        `<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`
+      ).join("");
+      // Try to keep previously selected city if it exists in the new country.
+      if (cities.includes(previous)) citySel.value = previous;
+    };
+
     const updateCurrencySuffix = () => {
       const code = countrySel?.value || DEFAULT_COUNTRY;
       const curr = currencyOf(code);
@@ -434,8 +469,13 @@
       if (suffix) suffix.textContent = curr;
       if (hint) hint.textContent = `(${curr})`;
     };
-    countrySel?.addEventListener("change", updateCurrencySuffix);
+
+    countrySel?.addEventListener("change", () => {
+      updateCurrencySuffix();
+      populateCities();
+    });
     updateCurrencySuffix();
+    populateCities();
 
     // Accept Arabic digits in the price input — mirror them back as Western
     // digits live so the value sent on submit is always numeric.

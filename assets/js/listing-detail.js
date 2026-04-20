@@ -160,6 +160,7 @@
       ${ownerBar}
 
       <div class="listing-contact-bar">
+        <button class="btn btn-share-listing" id="ld-share" type="button">📤 مشاركة</button>
         <a class="btn btn-call" href="${phoneHref}">☎️ اتصال</a>
         <a class="btn btn-whatsapp" href="${waHref}" target="_blank" rel="noopener">💬 واتساب</a>
       </div>
@@ -182,6 +183,31 @@
         slides.scrollTo({ left: i * slides.clientWidth, behavior: "smooth" });
       }));
     }
+
+    // Share button — uses native share sheet on mobile, falls back to clipboard
+    $("#ld-share")?.addEventListener("click", async () => {
+      const url   = window.location.href;
+      const title = listing.title || "إعلان من Coffee World";
+      const lines = [`☕ ${title}`];
+      if (listing.price) lines.push(`💰 ${Number(listing.price).toLocaleString("ar-SA")} ${curr}`);
+      if (listing.city || listing.country) {
+        const loc = [listing.city, COUNTRIES[listing.country]?.name].filter(Boolean).join(" · ");
+        if (loc) lines.push(`📍 ${loc}`);
+      }
+      lines.push("", url);
+      const text = lines.join("\n");
+
+      if (navigator.share) {
+        try { await navigator.share({ title, text, url }); return; }
+        catch { /* user cancelled */ }
+      }
+      try {
+        await navigator.clipboard.writeText(text);
+        toast("تم نسخ رابط الإعلان ✓", "success");
+      } catch {
+        toast("تعذّرت المشاركة — انسخ الرابط من المتصفح", "info");
+      }
+    });
 
     if (isOwner) {
       $("#ld-delete").addEventListener("click", async () => {

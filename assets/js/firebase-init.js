@@ -217,6 +217,20 @@ window.CW_FB = {
     async signIn({ email, password }) {
       const cred = await signInWithEmailAndPassword(auth, email, password);
       currentUser = cred.user;
+      // Refuse banned accounts: sign them out immediately.
+      try {
+        const userDoc = await getDoc(doc(db, "users", cred.user.uid));
+        if (userDoc.exists() && userDoc.data().banned === true) {
+          await fbSignOut(auth);
+          currentUser = null;
+          throw new Error("BANNED");
+        }
+      } catch (err) {
+        if (err?.message === "BANNED") {
+          throw new Error("هذا الحساب محظور من المنصّة. للاستفسار راسل الإدارة.");
+        }
+        // Other errors here (network etc.) shouldn't block sign-in
+      }
       return this.current();
     },
     async signOut() {
