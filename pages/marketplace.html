@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css" />
+<link rel="stylesheet" href="../assets/css/marketplace.css" />
 </head>
 <body data-page="marketplace">
   <header class="site-header">
@@ -27,17 +28,16 @@
   </header>
 
   <main class="container section">
-    <div class="section-title">
+    <div class="market-hero">
       <div>
-        <h2>المرحلة 2 — سوق القهوة</h2>
-        <p>منصة إعلانات مخصصة للقهوة ومستلزماتها. تصفّح، أو أضف إعلانك.</p>
+        <h2>سوق القهوة ☕</h2>
+        <p>تصفّح الإعلانات أو أضف إعلانك الجديد بصور احترافية.</p>
       </div>
-      <button class="btn btn-gold" id="new-listing-btn">＋ إعلان جديد</button>
     </div>
 
-    <div class="toolbar">
-      <input id="search" class="input search" placeholder="ابحث بالعنوان، الوصف، أو الفئة..." />
-      <select id="filter-category" class="select" style="max-width: 220px;">
+    <div class="market-toolbar">
+      <input id="search" class="input" placeholder="🔍 ابحث بالعنوان، الوصف، الفئة أو المدينة..." />
+      <select id="filter-category" class="select">
         <option value="">كل الفئات</option>
         <option value="beans">حبوب قهوة</option>
         <option value="machines">مكائن وإسبريسو</option>
@@ -49,10 +49,16 @@
       </select>
     </div>
 
-    <div id="listings" class="listings-grid"></div>
+    <div id="listings" class="market-grid"></div>
   </main>
 
-  <!-- Modal: New listing -->
+  <!-- Floating "Add listing" button (Haraj-style) -->
+  <button class="market-fab" id="new-listing-btn">
+    <span style="font-size:20px; line-height:1;">＋</span>
+    <span>أضف إعلانك</span>
+  </button>
+
+  <!-- Modal: New listing (photo-first, Haraj-style) -->
   <div class="modal-backdrop" id="listing-modal">
     <div class="modal">
       <header>
@@ -60,13 +66,21 @@
         <button class="close" id="close-listing">×</button>
       </header>
       <form id="listing-form">
-        <div class="form-grid full">
-          <div class="field">
-            <label>العنوان *</label>
-            <input name="title" class="input" required maxlength="80" placeholder="مثال: مكينة إسبريسو شبه أوتوماتيكية" />
-          </div>
+        <!-- Photos FIRST — like Haraj -->
+        <div class="field">
+          <label>الصور <small class="hint">(أول صورة هي الرئيسية)</small></label>
+          <div class="photo-uploader" id="listing-preview"></div>
+          <input type="file" id="listing-files" accept="image/*" multiple style="display:none;" />
+          <p class="photo-count-hint" id="photo-count-hint">اضغط + لإضافة صور (حتى 10)</p>
         </div>
-        <div class="form-grid">
+
+        <!-- Basic info -->
+        <div class="field" style="margin-top:14px;">
+          <label>العنوان *</label>
+          <input name="title" class="input" required maxlength="80" placeholder="مثال: مكينة إسبريسو شبه أوتوماتيكية" />
+        </div>
+
+        <div class="form-grid" style="margin-top:10px;">
           <div class="field">
             <label>السعر (ر.س)</label>
             <input name="price" type="number" min="0" class="input" placeholder="0" />
@@ -93,24 +107,15 @@
             <input name="phone" class="input" required placeholder="05xxxxxxxx" />
           </div>
         </div>
+
         <div class="field" style="margin-top:10px;">
           <label>الوصف</label>
-          <textarea name="description" class="textarea" maxlength="600" placeholder="اذكر حالة المنتج، السنة، الضمان، ..."></textarea>
+          <textarea name="description" class="textarea" maxlength="600" placeholder="اذكر حالة المنتج، السنة، الضمان..."></textarea>
         </div>
 
-        <div class="field" style="margin-top:10px;">
-          <label>الصور</label>
-          <label class="upload" for="listing-files">
-            <div>📷 اضغط لاختيار صور — أو اسحبها هنا</div>
-            <small class="hint">يمكن اختيار أكثر من صورة (حتى 6)</small>
-            <input type="file" id="listing-files" accept="image/*" multiple />
-          </label>
-          <div class="preview" id="listing-preview" style="margin-top:10px;"></div>
-        </div>
-
-        <div style="display:flex; gap:10px; margin-top:16px; justify-content:flex-end;">
+        <div style="display:flex; gap:10px; margin-top:18px; justify-content:flex-end;">
           <button type="button" class="btn btn-outline" id="cancel-listing">إلغاء</button>
-          <button type="submit" class="btn btn-primary">نشر الإعلان</button>
+          <button type="submit" class="btn btn-gold">نشر الإعلان</button>
         </div>
       </form>
     </div>
