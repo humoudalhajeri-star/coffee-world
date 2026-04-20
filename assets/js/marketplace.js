@@ -98,40 +98,52 @@
 
   async function handleFiles(files) {
     const arr = Array.from(files).slice(0, 6 - imageQueue.length);
-    let totalSaved = 0, totalAfter = 0;
     for (const f of arr) {
+      // Optimistic preview while the upload is in flight
+      const localUrl = URL.createObjectURL(f);
+      const placeholderIdx = imageQueue.push({ pending: true, url: localUrl }) - 1;
+      renderPreviews();
       try {
-        const before = f.size || 0;
-        const res = await window.CoffeeAPI.Listings.uploadImage(f);
-        imageQueue.push(res.url);
-        const after = res.size || (res.url ? res.url.length * 0.75 : 0);
-        totalSaved += Math.max(0, before - after);
-        totalAfter += after;
+        const res = await window.CoffeeAPI.Listings.uploadImage(f, (pct) => {
+          imageQueue[placeholderIdx] = { pending: true, url: localUrl, pct };
+          renderPreviews();
+        });
+        imageQueue[placeholderIdx] = res.url;
+        renderPreviews();
       } catch (err) {
+        imageQueue.splice(placeholderIdx, 1);
+        renderPreviews();
         toast("تعذّر رفع صورة: " + err.message, "error");
       }
     }
-    renderPreviews();
-    if (totalAfter > 0 && totalSaved > 100_000) {
-      toast(`تم ضغط الصور · الحجم النهائي ${fmtKB(totalAfter)}`, "success", 3200);
-    }
   }
 
-  function fmtKB(bytes) {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
-    return `${(bytes / (1024*1024)).toFixed(1)} MB`;
-  }
   function renderPreviews() {
-    $("#listing-preview").innerHTML = imageQueue
-      .map(url => `<img src="${escapeHTML(url)}" alt="">`)
-      .join("");
+    $("#listing-preview").innerHTML = imageQueue.map((entry) => {
+      if (typeof entry === "string") {
+        return `<img src="${escapeHTML(entry)}" alt="">`;
+      }
+      // Pending upload — show local preview with progress overlay
+      const pct = entry.pct != null ? `${entry.pct}%` : "...";
+      return `
+        <div class="upload-tile">
+          <img src="${escapeHTML(entry.url)}" alt="">
+          <div class="upload-overlay">⏳ ${pct}</div>
+        </div>`;
+    }).join("");
   }
 
   async function submitForm(e) {
     e.preventDefault();
     const form = e.target;
     const fd = new FormData(form);
+    // Only include images whose upload finished (string URLs).
+    const finalImages = imageQueue.filter((x) => typeof x === "string");
+    const stillUploading = imageQueue.length - finalImages.length;
+    if (stillUploading > 0) {
+      toast(`انتظر اكتمال رفع ${stillUploading} صورة...`, "info");
+      return;
+    }
     const data = {
       title:       fd.get("title").toString().trim(),
       price:       Number(fd.get("price")) || 0,
@@ -139,7 +151,7 @@
       city:        fd.get("city").toString().trim(),
       phone:       fd.get("phone").toString().trim(),
       description: fd.get("description").toString().trim(),
-      images:      imageQueue.slice(),
+      images:      finalImages,
     };
     if (!data.title || !data.category || !data.phone) {
       toast("فضلاً أكمل الحقول الأساسية", "error");

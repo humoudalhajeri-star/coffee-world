@@ -702,13 +702,34 @@ input[type=range]::-moz-range-thumb {
 }
 .upload:hover { background: var(--coffee-200); border-color: var(--coffee-700); }
 .upload input { display: none; }
-.upload .preview {
+.upload .preview,
+.preview {
   margin-top: 12px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 8px;
 }
-.upload .preview img { border-radius: 10px; aspect-ratio: 1/1; object-fit: cover; }
+.upload .preview img,
+.preview > img { border-radius: 10px; aspect-ratio: 1/1; object-fit: cover; }
+
+/* Pending upload tile in marketplace previews */
+.upload-tile {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  aspect-ratio: 1/1;
+}
+.upload-tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.upload-tile .upload-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  display: grid;
+  place-items: center;
+}
 
 /* ===== Toast ===== */
 .toast-container {

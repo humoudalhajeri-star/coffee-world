@@ -18,7 +18,7 @@ import {
   signOut as fbSignOut, onAuthStateChanged, updateProfile,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import {
-  getStorage, ref as storageRef, uploadBytes, getDownloadURL,
+  getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig = {
@@ -64,14 +64,75 @@ function toSerializableDoc(snapDoc) {
 /* ============================================================
  * Storage
  * ============================================================ */
-async function uploadFile(file, folder) {
+
+/**
+ * Compress an image File into a JPEG Blob — drastically faster uploads
+ * on mobile networks. A typical 5MB phone photo shrinks to ~100KB.
+ * Non-images and small images bypass compression.
+ */
+async function compressImageToBlob(file, { maxDim = 1200, quality = 0.82 } = {}) {
+  if (!file.type || !file.type.startsWith("image/") || file.size < 200_000) {
+    return file;
+  }
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const scale = Math.min(maxDim / img.naturalWidth, maxDim / img.naturalHeight, 1);
+          const w = Math.max(1, Math.round(img.naturalWidth * scale));
+          const h = Math.max(1, Math.round(img.naturalHeight * scale));
+          const canvas = document.createElement("canvas");
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          ctx.fillStyle = "#fff";
+          ctx.fillRect(0, 0, w, h);
+          ctx.drawImage(img, 0, 0, w, h);
+          canvas.toBlob(
+            (blob) => resolve(blob || file),
+            "image/jpeg",
+            quality
+          );
+        } catch { resolve(file); }
+      };
+      img.onerror = () => resolve(file);
+      img.src = reader.result;
+    };
+    reader.onerror = () => resolve(file);
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadFile(file, folder, onProgress) {
   const userId = currentUser?.uid || "anonymous";
-  const safeName = encodeURIComponent(file.name || "file");
+  // Compress images first so the actual upload is tiny
+  const blob = await compressImageToBlob(file, { maxDim: 1200, quality: 0.82 });
+  const isJpeg = blob !== file && blob.type === "image/jpeg";
+  const baseName = (file.name || "file").replace(/\.[^.]+$/, "");
+  const safeName = encodeURIComponent(isJpeg ? `${baseName}.jpg` : (file.name || "file"));
   const path = `${folder}/${userId}/${Date.now()}-${safeName}`;
   const ref = storageRef(storage, path);
-  await uploadBytes(ref, file, { contentType: file.type || "application/octet-stream" });
-  const url = await getDownloadURL(ref);
-  return { url, path };
+  const contentType = blob.type || file.type || "application/octet-stream";
+
+  return new Promise((resolve, reject) => {
+    const task = uploadBytesResumable(ref, blob, { contentType });
+    task.on(
+      "state_changed",
+      (snap) => {
+        if (typeof onProgress === "function" && snap.totalBytes > 0) {
+          onProgress(Math.round((snap.bytesTransferred / snap.totalBytes) * 100));
+        }
+      },
+      (err) => reject(err),
+      async () => {
+        try {
+          const url = await getDownloadURL(task.snapshot.ref);
+          resolve({ url, path });
+        } catch (err) { reject(err); }
+      }
+    );
+  });
 }
 
 /* ============================================================
@@ -162,12 +223,12 @@ window.CW_FB = {
   },
 
   /* ---- Storage uploads ---- */
-  async uploadImage(file) {
-    return uploadFile(file, "listings");
+  async uploadImage(file, onProgress) {
+    return uploadFile(file, "listings", onProgress);
   },
-  async uploadPhoto(file) {
+  async uploadPhoto(file, onProgress) {
     const folder = (file.type || "").startsWith("image/") ? "baristas/photos" : "baristas/cv";
-    return uploadFile(file, folder);
+    return uploadFile(file, folder, onProgress);
   },
 };
 

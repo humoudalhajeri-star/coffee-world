@@ -294,16 +294,20 @@
     if (!file) return;
     // Show a local preview immediately so the user sees their choice
     // even while the upload is still in progress.
+    let localPreview = "";
     try {
-      const localPreview = URL.createObjectURL(file);
+      localPreview = URL.createObjectURL(file);
       $("#profile-preview").innerHTML = `
         <img src="${localPreview}" alt="">
-        <div class="upload-overlay">⏳ جارٍ الرفع...</div>`;
+        <div class="upload-overlay" id="photo-progress">⏳ جارٍ التحضير...</div>`;
     } catch {}
     uploadingPhoto = true;
     updateSubmitLock();
     try {
-      const res = await window.CoffeeAPI.Baristas.uploadPhoto(file);
+      const res = await window.CoffeeAPI.Baristas.uploadPhoto(file, (pct) => {
+        const el = document.getElementById("photo-progress");
+        if (el) el.textContent = `⏳ ${pct}%`;
+      });
       photoUrl = res.url;
       // Swap to the final URL (server/firestore) once upload completes.
       $("#profile-preview").innerHTML = `<img src="${escapeHTML(photoUrl)}" alt="">`;
@@ -319,11 +323,13 @@
   async function handleCV(file) {
     if (!file) return;
     cvName = file.name;
-    $("#cv-name").textContent = "⏳ جارٍ الرفع: " + cvName;
+    $("#cv-name").textContent = "⏳ جارٍ التحضير: " + cvName;
     uploadingCv = true;
     updateSubmitLock();
     try {
-      const res = await window.CoffeeAPI.Baristas.uploadPhoto(file);
+      const res = await window.CoffeeAPI.Baristas.uploadPhoto(file, (pct) => {
+        $("#cv-name").textContent = `⏳ ${pct}% — ${cvName}`;
+      });
       cvUrl = res.url;
       $("#cv-name").textContent = "✓ " + cvName;
     } catch (err) {

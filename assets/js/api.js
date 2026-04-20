@@ -213,11 +213,11 @@
       );
     },
     /** Upload an image file. Server should return { url }. */
-    async uploadImage(file) {
+    async uploadImage(file, onProgress) {
       const f = await fb();
       if (f) {
         try {
-          return await f.uploadImage(file);
+          return await f.uploadImage(file, onProgress);
         } catch (err) {
           // Firebase Storage not ready yet (common while Blaze billing
           // propagates, can take up to 24h) — fall back to embedding a
@@ -316,11 +316,11 @@
         }
       );
     },
-    async uploadPhoto(file) {
+    async uploadPhoto(file, onProgress) {
       const f = await fb();
       if (f) {
         try {
-          return await f.uploadPhoto(file);
+          return await f.uploadPhoto(file, onProgress);
         } catch (err) {
           console.warn("Firebase Storage unavailable, embedding compressed image instead:", err?.message);
           const isImage = file.type && file.type.startsWith("image/");
