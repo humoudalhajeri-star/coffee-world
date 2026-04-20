@@ -1,8 +1,18 @@
 /**
- * Stage 2 — Coffee marketplace.
+ * Stage 2 — Coffee marketplace (Haraj-inspired).
+ *
+ * Browse: image-focused cards in a 2/3/4-column grid. Tap a card to
+ * open the detail page (`listing.html?id=…`) with a swipeable gallery.
+ *
+ * Sell: photo-first uploader — the first tile is a big "+" add button
+ * and newly-picked images appear as thumbnails with upload progress
+ * overlays. Title/price/description follow the photos, matching the
+ * flow in familiar classifieds apps.
  */
 (function () {
-  const { $, $$, toast, escapeHTML, formatDate } = window.CW;
+  const { $, $$, toast, escapeHTML } = window.CW;
+
+  const MAX_PHOTOS = 10;
 
   const CATEGORIES = {
     beans: "حبوب قهوة",
@@ -19,7 +29,26 @@
     accessories: "🧰", cups: "☕", syrups: "🍯", other: "📦",
   };
 
-  let imageQueue = []; // {url} entries for the current form
+  /** Arabic relative-time like "قبل 3 ساعات". */
+  function relativeTime(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    const diff = Date.now() - d.getTime();
+    const min = Math.floor(diff / 60_000);
+    if (min < 1)  return "الآن";
+    if (min < 60) return `قبل ${min} د`;
+    const hrs = Math.floor(min / 60);
+    if (hrs < 24) return `قبل ${hrs} س`;
+    const days = Math.floor(hrs / 24);
+    if (days < 30) return `قبل ${days} يوم`;
+    const months = Math.floor(days / 30);
+    if (months < 12) return `قبل ${months} شهر`;
+    return `قبل ${Math.floor(months / 12)} سنة`;
+  }
+
+  /* ============ Grid ============ */
+  let imageQueue = []; // current form's photo state
 
   async function loadAndRender() {
     const search = $("#search").value.trim();
@@ -30,7 +59,7 @@
       let items = await window.CoffeeAPI.Listings.list(search);
       if (cat) items = items.filter(i => i.category === cat);
       if (!items.length) {
-        grid.innerHTML = `<div class="empty"><h3>لا توجد إعلانات بعد</h3><p>كن أول من يضيف إعلاناً بالضغط على "إعلان جديد".</p></div>`;
+        grid.innerHTML = `<div class="empty" style="grid-column:1/-1;"><h3>لا توجد إعلانات بعد</h3><p>كن أول من يضيف إعلاناً — اضغط "أضف إعلانك".</p></div>`;
         return;
       }
       grid.innerHTML = items.map(cardHTML).join("");
@@ -40,66 +69,83 @@
   }
 
   function cardHTML(it) {
-    const img = (it.images && it.images[0]) || null;
-    const media = img
-      ? `<img src="${escapeHTML(img)}" alt="${escapeHTML(it.title)}">`
-      : `<span>${CATEGORY_ICONS[it.category] || "☕"}</span>`;
-    const price = it.price ? `<div class="price">${Number(it.price).toLocaleString("ar-SA")} ر.س</div>` : "";
-    const city = it.city ? `<span>📍 ${escapeHTML(it.city)}</span>` : "";
-    const phoneHref = it.phone ? `tel:${encodeURIComponent(it.phone)}` : "#";
-    const waHref    = it.phone ? `https://wa.me/${(it.phone || "").replace(/[^\d]/g,"")}` : "#";
+    const photos = Array.isArray(it.images) ? it.images.filter(Boolean) : [];
+    const img = photos[0];
+    const mediaBody = img
+      ? `<img src="${escapeHTML(img)}" alt="${escapeHTML(it.title)}" loading="lazy">`
+      : `<span class="fallback">${CATEGORY_ICONS[it.category] || "☕"}</span>`;
+    const countBadge = photos.length > 1
+      ? `<span class="market-count-badge">📷 ${photos.length}</span>` : "";
+    const priceBadge = it.price
+      ? `<span class="market-price-badge">${Number(it.price).toLocaleString("ar-SA")} ر.س</span>`
+      : `<span class="market-price-badge" style="background:#6b6b6b;">للتواصل</span>`;
+    const cityBit = it.city ? `📍 ${escapeHTML(it.city)}` : "";
+    const timeBit = relativeTime(it.createdAt);
+    const metaParts = [cityBit, timeBit].filter(Boolean);
+    const metaRow = metaParts.map((p, i) =>
+      (i === 0 ? p : `<span class="dot">·</span>${p}`)
+    ).join(" ");
+
     return `
-      <article class="listing-card">
-        <div class="listing-media">${media}</div>
-        <div class="listing-body">
-          <h3>${escapeHTML(it.title)}</h3>
-          ${price}
-          <div class="meta-row">
-            <span class="tag">${escapeHTML(CATEGORIES[it.category] || it.category || "")}</span>
-            ${city}
-            <span>🗓️ ${formatDate(it.createdAt)}</span>
-          </div>
-          <p>${escapeHTML((it.description || "").slice(0, 120))}${(it.description || "").length > 120 ? "..." : ""}</p>
+      <article class="market-card" data-open="${escapeHTML(it.id)}" role="button" tabindex="0">
+        <div class="market-media">
+          ${mediaBody}
+          ${priceBadge}
+          ${countBadge}
         </div>
-        <div class="listing-actions">
-          <a class="btn btn-outline" href="${phoneHref}">☎️ اتصال</a>
-          <a class="btn btn-gold"    href="${waHref}" target="_blank" rel="noopener">💬 واتساب</a>
-          <button class="btn btn-danger" data-delete="${it.id}" title="حذف">🗑️</button>
+        <div class="market-body">
+          <h3 class="market-title">${escapeHTML(it.title || "بدون عنوان")}</h3>
+          <div class="market-meta">${metaRow}</div>
         </div>
       </article>`;
   }
 
-  function wireGridActionsOnce() {
-    $("#listings").addEventListener("click", async (e) => {
-      const delBtn = e.target.closest("[data-delete]");
-      if (!delBtn) return;
-      if (!confirm("حذف هذا الإعلان؟")) return;
-      try {
-        await window.CoffeeAPI.Listings.remove(delBtn.dataset.delete);
-        toast("تم الحذف", "success");
-        loadAndRender();
-      } catch (err) {
-        toast("تعذّر الحذف", "error");
-      }
+  function wireGridOnce() {
+    $("#listings").addEventListener("click", (e) => {
+      const card = e.target.closest(".market-card[data-open]");
+      if (!card) return;
+      window.location.href = `listing.html?id=${encodeURIComponent(card.dataset.open)}`;
+    });
+    $("#listings").addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      const card = e.target.closest?.(".market-card[data-open]");
+      if (card) window.location.href = `listing.html?id=${encodeURIComponent(card.dataset.open)}`;
     });
   }
 
-  /* ===== Modal + form ===== */
-  function openModal() {
-    imageQueue = [];
-    $("#listing-preview").innerHTML = "";
-    $("#listing-form").reset();
-    $("#listing-files").value = "";
-    $("#listing-modal").classList.add("open");
-  }
-  function closeModal() {
-    $("#listing-modal").classList.remove("open");
+  /* ============ Photo uploader (photo-first) ============ */
+  function renderPreviews() {
+    const slots = imageQueue.map((entry, idx) => {
+      const isPending = typeof entry !== "string";
+      const src = escapeHTML(isPending ? entry.url : entry);
+      const coverBadge = idx === 0 ? `<span class="cover-badge">رئيسية</span>` : "";
+      const progress = isPending
+        ? `<div class="progress">⏳ ${entry.pct != null ? entry.pct + "%" : ""}</div>`
+        : "";
+      return `
+        <div class="photo-slot">
+          <img src="${src}" alt="">
+          <button type="button" class="remove" data-remove="${idx}" aria-label="حذف">×</button>
+          ${coverBadge}
+          ${progress}
+        </div>`;
+    });
+    // Show the "+" add tile as long as we're below MAX_PHOTOS
+    if (imageQueue.length < MAX_PHOTOS) {
+      slots.unshift(`
+        <label class="photo-add-tile" for="listing-files" aria-label="إضافة صور">
+          <span class="icon">＋</span>
+          <span>أضف صور</span>
+          <small>حتى ${MAX_PHOTOS}</small>
+        </label>`);
+    }
+    $("#listing-preview").innerHTML = slots.join("");
+    $("#photo-count-hint").textContent = `${imageQueue.length} / ${MAX_PHOTOS} صور`;
   }
 
   async function handleFiles(files) {
-    const arr = Array.from(files).slice(0, 6 - imageQueue.length);
+    const arr = Array.from(files).slice(0, MAX_PHOTOS - imageQueue.length);
     for (const f of arr) {
-      // Optimistic preview while the upload is in flight
       const localUrl = URL.createObjectURL(f);
       const placeholderIdx = imageQueue.push({ pending: true, url: localUrl }) - 1;
       renderPreviews();
@@ -116,47 +162,68 @@
         toast("تعذّر رفع صورة: " + err.message, "error");
       }
     }
+    // Clear file input so picking the same file again still fires change
+    $("#listing-files").value = "";
   }
 
-  function renderPreviews() {
-    $("#listing-preview").innerHTML = imageQueue.map((entry) => {
-      if (typeof entry === "string") {
-        return `<img src="${escapeHTML(entry)}" alt="">`;
+  function wirePreviewActions() {
+    $("#listing-preview").addEventListener("click", (e) => {
+      const removeBtn = e.target.closest("[data-remove]");
+      if (!removeBtn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const idx = Number(removeBtn.dataset.remove);
+      if (!Number.isNaN(idx)) {
+        imageQueue.splice(idx, 1);
+        renderPreviews();
       }
-      // Pending upload — show local preview with progress overlay
-      const pct = entry.pct != null ? `${entry.pct}%` : "...";
-      return `
-        <div class="upload-tile">
-          <img src="${escapeHTML(entry.url)}" alt="">
-          <div class="upload-overlay">⏳ ${pct}</div>
-        </div>`;
-    }).join("");
+    });
   }
+
+  /* ============ Modal ============ */
+  function openModal() {
+    imageQueue = [];
+    $("#listing-form").reset();
+    $("#listing-files").value = "";
+    renderPreviews();
+    $("#listing-modal").classList.add("open");
+  }
+  function closeModal() { $("#listing-modal").classList.remove("open"); }
 
   async function submitForm(e) {
-    e.preventDefault();
+    if (e) e.preventDefault();
     const form = e.target;
     const fd = new FormData(form);
-    // Only include images whose upload finished (string URLs).
-    const finalImages = imageQueue.filter((x) => typeof x === "string");
+
+    const finalImages = imageQueue.filter(x => typeof x === "string");
     const stillUploading = imageQueue.length - finalImages.length;
     if (stillUploading > 0) {
-      toast(`انتظر اكتمال رفع ${stillUploading} صورة...`, "info");
+      toast(`انتظر اكتمال رفع ${stillUploading} صورة...`, "info", 4000);
       return;
     }
+
     const data = {
-      title:       fd.get("title").toString().trim(),
+      title:       (fd.get("title") || "").toString().trim(),
       price:       Number(fd.get("price")) || 0,
-      category:    fd.get("category"),
-      city:        fd.get("city").toString().trim(),
-      phone:       fd.get("phone").toString().trim(),
-      description: fd.get("description").toString().trim(),
+      category:    (fd.get("category") || "").toString(),
+      city:        (fd.get("city") || "").toString().trim(),
+      phone:       (fd.get("phone") || "").toString().trim(),
+      description: (fd.get("description") || "").toString().trim(),
       images:      finalImages,
     };
-    if (!data.title || !data.category || !data.phone) {
-      toast("فضلاً أكمل الحقول الأساسية", "error");
+
+    const missing = [];
+    if (!data.title)    missing.push("العنوان");
+    if (!data.category) missing.push("الفئة");
+    if (!data.phone)    missing.push("رقم التواصل");
+    if (missing.length) {
+      toast("املأ: " + missing.join("، "), "error", 4500);
       return;
     }
+
+    const submitBtn = form.querySelector("button[type=submit]");
+    const saved = submitBtn?.textContent;
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "⏳ جارٍ النشر..."; }
     try {
       await window.CoffeeAPI.Listings.create(data);
       toast("تم نشر الإعلان ✓", "success");
@@ -164,6 +231,8 @@
       loadAndRender();
     } catch (err) {
       toast("تعذّر النشر: " + err.message, "error");
+    } finally {
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = saved || "نشر الإعلان"; }
     }
   }
 
@@ -184,7 +253,8 @@
     });
     $("#filter-category").addEventListener("change", loadAndRender);
 
-    wireGridActionsOnce();
+    wireGridOnce();
+    wirePreviewActions();
     loadAndRender();
   });
 })();
