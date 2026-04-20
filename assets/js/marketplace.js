@@ -29,6 +29,39 @@
     accessories: "🧰", cups: "☕", syrups: "🍯", other: "📦",
   };
 
+  /** Gulf countries + their currencies (symbol used in Arabic UIs). */
+  const COUNTRIES = {
+    KW: { flag: "🇰🇼", name: "الكويت",   currency: "د.ك", code: "KWD" },
+    SA: { flag: "🇸🇦", name: "السعودية", currency: "ر.س", code: "SAR" },
+    AE: { flag: "🇦🇪", name: "الإمارات", currency: "د.إ", code: "AED" },
+    QA: { flag: "🇶🇦", name: "قطر",     currency: "ر.ق", code: "QAR" },
+    BH: { flag: "🇧🇭", name: "البحرين",  currency: "د.ب", code: "BHD" },
+    OM: { flag: "🇴🇲", name: "عُمان",    currency: "ر.ع", code: "OMR" },
+  };
+  const DEFAULT_COUNTRY = "KW";
+
+  /** Convert Arabic/Persian digits (٠-٩ or ۰-۹) into standard 0-9. */
+  function normalizeDigits(str) {
+    if (str == null) return "";
+    return String(str)
+      .replace(/[\u0660-\u0669]/g, d => String(d.charCodeAt(0) - 0x0660))
+      .replace(/[\u06F0-\u06F9]/g, d => String(d.charCodeAt(0) - 0x06F0));
+  }
+
+  function parsePrice(raw) {
+    const norm = normalizeDigits(raw).replace(/[^\d.]/g, "");
+    const n = parseFloat(norm);
+    return isNaN(n) ? 0 : n;
+  }
+
+  function currencyOf(country) {
+    return (COUNTRIES[country] || COUNTRIES[DEFAULT_COUNTRY]).currency;
+  }
+  function countryName(country) {
+    const c = COUNTRIES[country];
+    return c ? `${c.flag} ${c.name}` : "";
+  }
+
   /** Arabic relative-time like "قبل 3 ساعات". */
   function relativeTime(iso) {
     if (!iso) return "";
@@ -163,10 +196,14 @@
       : `<span class="fallback">${CATEGORY_ICONS[it.category] || "☕"}</span>`;
     const countBadge = photos.length > 1
       ? `<span class="market-count-badge">📷 ${photos.length}</span>` : "";
+    const curr = currencyOf(it.country);
     const priceBadge = it.price
-      ? `<span class="market-price-badge">${Number(it.price).toLocaleString("ar-SA")} ر.س</span>`
+      ? `<span class="market-price-badge">${Number(it.price).toLocaleString("ar-SA")} ${curr}</span>`
       : `<span class="market-price-badge" style="background:#6b6b6b;">للتواصل</span>`;
-    const cityBit = it.city ? `📍 ${escapeHTML(it.city)}` : "";
+    const locBits = [];
+    if (it.city) locBits.push(escapeHTML(it.city));
+    if (it.country && COUNTRIES[it.country]) locBits.push(COUNTRIES[it.country].flag);
+    const cityBit = locBits.length ? `📍 ${locBits.join(" ")}` : "";
     const timeBit = relativeTime(it.createdAt);
     const metaParts = [cityBit, timeBit].filter(Boolean);
     const metaRow = metaParts.map((p, i) =>
@@ -319,9 +356,12 @@
       return;
     }
 
+    const country = (fd.get("country") || DEFAULT_COUNTRY).toString();
     const data = {
       title:       (fd.get("title") || "").toString().trim(),
-      price:       Number(fd.get("price")) || 0,
+      price:       parsePrice(fd.get("price")),
+      currency:    currencyOf(country),
+      country,
       category:    (fd.get("category") || "").toString(),
       city:        (fd.get("city") || "").toString().trim(),
       phone:       (fd.get("phone") || "").toString().trim(),
@@ -383,6 +423,31 @@
     });
     $("#listing-files").addEventListener("change", (e) => handleFiles(e.target.files));
     $("#listing-form").addEventListener("submit", submitForm);
+
+    // Live currency suffix: update price label when country changes
+    const countrySel = $("#listing-country");
+    const updateCurrencySuffix = () => {
+      const code = countrySel?.value || DEFAULT_COUNTRY;
+      const curr = currencyOf(code);
+      const suffix = document.getElementById("price-currency-suffix");
+      const hint = document.getElementById("price-currency-hint");
+      if (suffix) suffix.textContent = curr;
+      if (hint) hint.textContent = `(${curr})`;
+    };
+    countrySel?.addEventListener("change", updateCurrencySuffix);
+    updateCurrencySuffix();
+
+    // Accept Arabic digits in the price input — mirror them back as Western
+    // digits live so the value sent on submit is always numeric.
+    const priceInput = $("#listing-price");
+    priceInput?.addEventListener("input", () => {
+      const caret = priceInput.selectionStart;
+      const normalized = normalizeDigits(priceInput.value);
+      if (normalized !== priceInput.value) {
+        priceInput.value = normalized;
+        try { priceInput.setSelectionRange(caret, caret); } catch {}
+      }
+    });
 
     let searchTimer;
     $("#search").addEventListener("input", () => {

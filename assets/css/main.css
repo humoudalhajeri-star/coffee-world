@@ -634,6 +634,36 @@ input[type=range]::-moz-range-thumb {
   font-weight: 900;
 }
 
+/* Agreement checkbox (terms + privacy) */
+.terms-check {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: var(--cream-100);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--coffee-800);
+  cursor: pointer;
+  line-height: 1.7;
+}
+.terms-check input[type="checkbox"] {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--coffee-700);
+  margin-top: 2px;
+  cursor: pointer;
+}
+.terms-check a {
+  color: var(--coffee-700);
+  font-weight: 700;
+  text-decoration: underline;
+}
+.terms-check a:hover { color: var(--coffee-900); }
+
 /* Auth tabs */
 .tabs {
   display: flex;

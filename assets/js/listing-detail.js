@@ -17,6 +17,15 @@
     beans: "🫘", machines: "⚙️", grinders: "🌀",
     accessories: "🧰", cups: "☕", syrups: "🍯", other: "📦",
   };
+  const COUNTRIES = {
+    KW: { flag: "🇰🇼", name: "الكويت",   currency: "د.ك" },
+    SA: { flag: "🇸🇦", name: "السعودية", currency: "ر.س" },
+    AE: { flag: "🇦🇪", name: "الإمارات", currency: "د.إ" },
+    QA: { flag: "🇶🇦", name: "قطر",     currency: "ر.ق" },
+    BH: { flag: "🇧🇭", name: "البحرين",  currency: "د.ب" },
+    OM: { flag: "🇴🇲", name: "عُمان",    currency: "ر.ع" },
+  };
+  const currencyOf = (country) => (COUNTRIES[country] || COUNTRIES.KW).currency;
 
   function relativeTime(iso) {
     if (!iso) return "";
@@ -81,13 +90,19 @@
 
     const counterHTML = photos.length > 1 ? `<span class="listing-counter"><span id="cur">1</span>/${photos.length}</span>` : "";
 
+    const curr = listing.currency || currencyOf(listing.country);
     const priceHTML = listing.price
-      ? `<div class="listing-price-big">${Number(listing.price).toLocaleString("ar-SA")} ر.س</div>`
+      ? `<div class="listing-price-big">${Number(listing.price).toLocaleString("ar-SA")} ${escapeHTML(curr)}</div>`
       : `<div class="listing-price-big" style="color:var(--muted);">للتواصل للسعر</div>`;
 
     const metaBits = [];
     metaBits.push(`<span class="tag">${escapeHTML(CATEGORIES[listing.category] || listing.category || "أخرى")}</span>`);
-    if (listing.city) metaBits.push(`📍 ${escapeHTML(listing.city)}`);
+    const loc = [];
+    if (listing.city) loc.push(escapeHTML(listing.city));
+    if (listing.country && COUNTRIES[listing.country]) {
+      loc.push(`${COUNTRIES[listing.country].flag} ${COUNTRIES[listing.country].name}`);
+    }
+    if (loc.length) metaBits.push(`📍 ${loc.join(" · ")}`);
     if (listing.createdAt) metaBits.push(`🕒 ${relativeTime(listing.createdAt)}`);
 
     const phoneClean = normalizePhone(listing.phone);
