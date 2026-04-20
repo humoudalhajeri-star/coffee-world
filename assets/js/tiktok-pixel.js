@@ -17,7 +17,7 @@
  */
 (function () {
   // ====== CONFIG — ضع Pixel ID هنا ======
-  const TIKTOK_PIXEL_ID = "YOUR_PIXEL_ID_HERE";
+  const TIKTOK_PIXEL_ID = "D7J4FPJC77U02SC96Q20";
   // =====================================
 
   // Safety: do nothing until user configures a real ID
