@@ -30,6 +30,11 @@
   async function render(b, currentUser) {
     const root = $("#bd-root");
     document.title = `${b.name || "بريستا"} — CoffeZ`;
+    window.CW_TRACK?.("ViewContent", {
+      content_id: b.id,
+      content_type: "barista",
+      content_name: b.name,
+    });
 
     const phoneClean = normalizePhone(b.phone);
     const phoneLink  = b.phone ? `tel:+${phoneClean}` : null;
@@ -199,6 +204,17 @@
         ${ownerActions}
       </article>
     `;
+
+    root.querySelectorAll(".bd-contact a").forEach(a => {
+      a.addEventListener("click", () => {
+        const href = a.getAttribute("href") || "";
+        let kind = "other";
+        if (href.startsWith("https://wa.me")) kind = "whatsapp";
+        else if (href.startsWith("tel:"))     kind = "call";
+        else if (href.startsWith("mailto:"))  kind = "email";
+        window.CW_TRACK?.("Contact", { description: `barista_${kind}`, content_id: b.id });
+      });
+    });
 
     if (isOwner) {
       $("#bd-delete").addEventListener("click", async () => {

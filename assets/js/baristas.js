@@ -243,6 +243,7 @@
         password: fd.get("password").toString(),
       });
       toast("مرحباً بك في CoffeZ ✓", "success");
+      window.CW_TRACK?.("CompleteRegistration", { description: "baristas_signup" });
       const continueToProfile = pendingProfileAfterAuth;
       closeAuth();
       renderAuthArea();
@@ -601,6 +602,7 @@
       } else {
         await window.CoffeeAPI.Baristas.create(data);
         toast("تم نشر الملف ✓", "success");
+        window.CW_TRACK?.("SubmitForm", { description: "new_barista_profile" });
       }
       closeModal();
       loadAndRender();

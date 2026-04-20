@@ -79,6 +79,14 @@
   function render(listing, currentUser, seller) {
     const photos = Array.isArray(listing.images) ? listing.images.filter(Boolean) : [];
     document.title = `${listing.title || "إعلان"} — CoffeZ`;
+    window.CW_TRACK?.("ViewContent", {
+      content_id: listing.id,
+      content_type: "product",
+      content_name: listing.title,
+      content_category: listing.category,
+      value: Number(listing.price) || 0,
+      currency: listing.currency || "SAR",
+    });
 
     const slidesHTML = photos.length
       ? photos.map(src => `<div class="slide"><img src="${escapeHTML(src)}" alt="${escapeHTML(listing.title || "")}"></div>`).join("")
@@ -165,6 +173,13 @@
         <a class="btn btn-whatsapp" href="${waHref}" target="_blank" rel="noopener">💬 واتساب</a>
       </div>
     `;
+
+    $("#listing-root .btn-call")?.addEventListener("click", () => {
+      window.CW_TRACK?.("Contact", { description: "listing_call", content_id: listing.id });
+    });
+    $("#listing-root .btn-whatsapp")?.addEventListener("click", () => {
+      window.CW_TRACK?.("Contact", { description: "listing_whatsapp", content_id: listing.id });
+    });
 
     // Wire gallery scroll → active dot + counter
     if (photos.length > 1) {
