@@ -60,10 +60,67 @@
     return url.searchParams.get(key) ?? fallback;
   }
 
+  /**
+   * Open or download a CV (or any file URL) reliably across browsers.
+   * iOS Safari refuses to open `data:application/pdf;…` from plain
+   * <a> tags, so we convert such URLs to a Blob URL first.
+   */
+  function openCV(url, filename) {
+    if (!url) return;
+    const name = filename || "CV.pdf";
+    let finalUrl = url;
+    let isBlob = false;
+
+    if (url.startsWith("data:")) {
+      try {
+        const [meta, base64] = url.split(",");
+        const mime = (meta.match(/:(.*?);/) || [])[1] || "application/pdf";
+        const bin = atob(base64);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        const blob = new Blob([bytes], { type: mime });
+        finalUrl = URL.createObjectURL(blob);
+        isBlob = true;
+      } catch (err) {
+        console.error("CV data URL parse failed:", err);
+      }
+    }
+
+    const a = document.createElement("a");
+    a.href = finalUrl;
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    if (isBlob) {
+      // Revoke after enough time for the tab/open-with dialog to consume it.
+      setTimeout(() => URL.revokeObjectURL(finalUrl), 60_000);
+    }
+  }
+
+  /**
+   * Page-wide interceptor: any click on an <a href="data:…"> triggers
+   * openCV() automatically, so existing CV links work without per-page
+   * wiring. Use a capture listener so it runs before default navigation.
+   */
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest?.('a[href^="data:"]');
+    if (!a) return;
+    const href = a.getAttribute("href") || "";
+    if (!href.startsWith("data:")) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const name = a.getAttribute("download") || a.dataset.filename || "file";
+    openCV(href, name);
+  }, true);
+
   document.addEventListener("DOMContentLoaded", () => {
     setActiveNav();
     wireMenuToggle();
   });
 
-  global.CW = { $, $$, toast, formatDate, escapeHTML, qs };
+  global.CW = { $, $$, toast, formatDate, escapeHTML, qs, openCV };
 })(window);

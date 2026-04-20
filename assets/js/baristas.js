@@ -151,7 +151,7 @@
     const phoneClean = normalizePhone(b.phone);
     const phoneHref = b.phone ? `tel:+${phoneClean}` : "#";
     const waHref    = b.phone ? `https://wa.me/${phoneClean}` : "#";
-    const cvBtn     = b.cv ? `<a class="btn btn-outline" href="${escapeHTML(b.cv)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">📄 السيرة</a>` : "";
+    const cvBtn     = b.cv ? `<a class="btn btn-outline" href="${escapeHTML(b.cv)}" target="_blank" rel="noopener" download="${escapeHTML(b.cvName || 'CV.pdf')}" onclick="event.stopPropagation()">📄 السيرة</a>` : "";
     const canDelete = currentUser?.user?.id && b.ownerId === currentUser.user.id;
     const deleteBtn = canDelete
       ? `<button class="btn btn-danger" data-delete="${b.id}" title="حذف" onclick="event.stopPropagation()">🗑️</button>`
