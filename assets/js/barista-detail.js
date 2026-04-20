@@ -67,11 +67,13 @@
     const cvSection = b.cv ? `
       <section class="bd-section">
         <h2><span class="icon">📄</span> السيرة الذاتية</h2>
-        <a class="bd-cv-card" href="${escapeHTML(b.cv)}" target="_blank" rel="noopener" style="text-decoration:none; color:inherit;">
+        <a class="bd-cv-card" href="${escapeHTML(b.cv)}" target="_blank" rel="noopener"
+           download="${escapeHTML(b.cvName || 'CV.pdf')}"
+           style="text-decoration:none; color:inherit;">
           <div class="icon">📄</div>
           <div class="meta">
             <div class="name">${escapeHTML(b.cvName || "السيرة الذاتية.pdf")}</div>
-            <div class="hint">اضغط للفتح في تبويب جديد</div>
+            <div class="hint">اضغط للفتح أو التحميل</div>
           </div>
           <div style="color:var(--coffee-700); font-weight:800;">تحميل ↓</div>
         </a>
