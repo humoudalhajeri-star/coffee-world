@@ -423,6 +423,14 @@
       t.addEventListener("click", () => switchTab(t.dataset.tab))
     );
 
+    // Stat cards → jump to their corresponding tab with a smooth scroll
+    $$(".stat-card[data-goto-tab]").forEach(card =>
+      card.addEventListener("click", () => {
+        switchTab(card.dataset.gotoTab);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      })
+    );
+
     // Wire searches
     debounceInput($("#users-search"),    renderUsers);
     debounceInput($("#listings-search"), renderListings);

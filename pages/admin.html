@@ -51,10 +51,38 @@
       <!-- Dashboard -->
       <section class="admin-panel active" data-panel="dashboard">
         <div class="admin-stats" id="admin-stats">
-          <div class="stat-card"><span class="stat-icon">👥</span><div class="stat-body"><div class="stat-value" id="st-users">—</div><div class="stat-label">المستخدمون</div></div></div>
-          <div class="stat-card"><span class="stat-icon">🛍</span><div class="stat-body"><div class="stat-value" id="st-listings">—</div><div class="stat-label">الإعلانات</div></div></div>
-          <div class="stat-card"><span class="stat-icon">☕</span><div class="stat-body"><div class="stat-value" id="st-baristas">—</div><div class="stat-label">ملفات البريستا</div></div></div>
-          <div class="stat-card"><span class="stat-icon">📝</span><div class="stat-body"><div class="stat-value" id="st-recipes">—</div><div class="stat-label">الوصفات</div></div></div>
+          <button class="stat-card" data-goto-tab="users" type="button">
+            <span class="stat-icon">👥</span>
+            <div class="stat-body">
+              <div class="stat-value" id="st-users">—</div>
+              <div class="stat-label">المستخدمون</div>
+            </div>
+            <span class="stat-arrow">←</span>
+          </button>
+          <button class="stat-card" data-goto-tab="listings" type="button">
+            <span class="stat-icon">🛍</span>
+            <div class="stat-body">
+              <div class="stat-value" id="st-listings">—</div>
+              <div class="stat-label">الإعلانات</div>
+            </div>
+            <span class="stat-arrow">←</span>
+          </button>
+          <button class="stat-card" data-goto-tab="baristas" type="button">
+            <span class="stat-icon">☕</span>
+            <div class="stat-body">
+              <div class="stat-value" id="st-baristas">—</div>
+              <div class="stat-label">ملفات البريستا</div>
+            </div>
+            <span class="stat-arrow">←</span>
+          </button>
+          <button class="stat-card" data-goto-tab="recipes" type="button">
+            <span class="stat-icon">📝</span>
+            <div class="stat-body">
+              <div class="stat-value" id="st-recipes">—</div>
+              <div class="stat-label">الوصفات</div>
+            </div>
+            <span class="stat-arrow">←</span>
+          </button>
         </div>
 
         <section class="admin-section">
