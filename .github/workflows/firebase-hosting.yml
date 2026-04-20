@@ -1,0 +1,39 @@
+# Auto-deploys the static site to Firebase Hosting on every push to main.
+# Once merged, the live site is reachable at:
+#   https://coffee-world-52a27.web.app
+#   https://coffee-world-52a27.firebaseapp.com
+#
+# Setup (one-time):
+#   1. Firebase Console → Project Settings → Service Accounts →
+#      "Generate new private key" → download the JSON file.
+#   2. GitHub repo → Settings → Secrets and variables → Actions →
+#      "New repository secret":
+#        Name : FIREBASE_SERVICE_ACCOUNT_COFFEE_WORLD_52A27
+#        Value: paste the entire contents of the JSON file
+#   3. Push (or re-run this workflow). Done — every future push to main
+#      will deploy automatically.
+
+name: Deploy to Firebase Hosting
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to Firebase Hosting (live channel)
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_COFFEE_WORLD_52A27 }}
+          channelId: live
+          projectId: coffee-world-52a27
