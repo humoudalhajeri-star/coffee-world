@@ -384,8 +384,9 @@
     $("#admin-gate").hidden = true;
     $("#admin-content").hidden = false;
     const chip = $("#admin-user-chip");
+    // Generic role label (no personal name) for a cleaner admin look
     chip.innerHTML = `
-      <span>👋 ${escapeHTML(user.user?.name || user.user?.email || "مشرف")}</span>
+      <span>🛡️ المشرف</span>
       <button class="logout-btn" id="admin-logout">خروج</button>`;
     $("#admin-logout").addEventListener("click", async () => {
       await window.CoffeeAPI.Auth.signOut();
