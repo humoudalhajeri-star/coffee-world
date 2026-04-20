@@ -1,4 +1,4 @@
-# ربط Coffee World بـ Firebase
+# ربط CoffeZ بـ Firebase
 
 ## ١. الإعداد (مرة واحدة فقط)
 

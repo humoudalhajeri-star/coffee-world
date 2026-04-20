@@ -1,5 +1,5 @@
 /**
- * Coffee World — Admin Panel logic
+ * CoffeZ — Admin Panel logic
  *
  * Access control: a client-side allowlist of emails (below). Pair with
  * the Firestore rules in FIREBASE.md which grant bypass-ownership and

@@ -29,7 +29,7 @@
 
   async function render(b, currentUser) {
     const root = $("#bd-root");
-    document.title = `${b.name || "بريستا"} — Coffee World`;
+    document.title = `${b.name || "بريستا"} — CoffeZ`;
 
     const phoneClean = normalizePhone(b.phone);
     const phoneLink  = b.phone ? `tel:+${phoneClean}` : null;

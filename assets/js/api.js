@@ -1,5 +1,5 @@
 /**
- * Coffee World — API Client
+ * CoffeZ — API Client
  *
  * Single source of truth for all backend communication.
  * Configure `API_BASE_URL` (and optionally `API_TOKEN`) to point at your backend.

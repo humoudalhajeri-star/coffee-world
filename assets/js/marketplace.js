@@ -166,7 +166,7 @@
         email: fd.get("email").toString(),
         password: fd.get("password").toString(),
       });
-      toast("مرحباً بك في Coffee World ✓", "success");
+      toast("مرحباً بك في CoffeZ ✓", "success");
       const shouldOpen = pendingListingAfterAuth;
       closeAuth();
       renderAuthArea();
