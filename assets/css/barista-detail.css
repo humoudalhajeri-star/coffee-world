@@ -162,6 +162,91 @@
 .bd-cv-card .meta .name { font-weight: 800; color: var(--coffee-900); }
 .bd-cv-card .meta .hint { color: var(--muted); font-size: 13px; }
 
+/* Timeline for experiences */
+.bd-timeline {
+  position: relative;
+  padding-inline-start: 20px;
+}
+.bd-timeline::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  inset-inline-start: 6px;
+  width: 2px;
+  background: var(--coffee-300);
+}
+.bd-timeline-item {
+  position: relative;
+  padding-bottom: 18px;
+}
+.bd-timeline-item:last-child { padding-bottom: 0; }
+.bd-timeline-dot {
+  position: absolute;
+  top: 6px;
+  inset-inline-start: -20px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--gold);
+  border: 3px solid var(--cream-50);
+  box-shadow: 0 0 0 1px var(--coffee-400);
+}
+.bd-timeline-body { padding-inline-start: 4px; }
+.bd-timeline-title {
+  font-weight: 800;
+  color: var(--coffee-900);
+  font-size: 15px;
+}
+.bd-timeline-sub {
+  color: var(--coffee-700);
+  font-weight: 700;
+  font-size: 14px;
+  margin-top: 2px;
+}
+.bd-timeline-when {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+/* Certification cards */
+.bd-cert-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+}
+.bd-cert-item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 14px;
+  background: var(--cream-100);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.bd-cert-icon {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  color: #2E1B10;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.bd-cert-name {
+  font-weight: 800;
+  color: var(--coffee-900);
+  font-size: 14px;
+}
+.bd-cert-meta {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
 .bd-owner-actions {
   padding: 16px 26px 22px;
   display: flex;

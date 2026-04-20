@@ -24,6 +24,134 @@
   let uploadingPhoto = false;
   let uploadingCv    = false;
 
+  const LANG_LEVELS = ["مبتدئ", "متوسط", "متقدم", "طلاقة", "لغة أم"];
+
+  /* ============ Dynamic sections (experiences / certifications / languages) ============
+   * We render DOM nodes directly (not innerHTML strings) so the user's in-progress
+   * typing survives add/remove of sibling entries.
+   */
+  function buildExperienceEntry(data = {}) {
+    const el = document.createElement("div");
+    el.className = "dyn-entry exp-entry";
+    el.innerHTML = `
+      <button type="button" class="remove-btn" aria-label="حذف">×</button>
+      <div class="dyn-grid">
+        <div class="field">
+          <label>المقهى / الشركة</label>
+          <input class="input f-place" value="${escapeHTML(data.place || "")}" placeholder="مثال: Dose Coffee" />
+        </div>
+        <div class="field">
+          <label>المسمى الوظيفي</label>
+          <input class="input f-role" value="${escapeHTML(data.role || "")}" placeholder="مثال: بريستا رئيسي" />
+        </div>
+        <div class="field">
+          <label>من (شهر/سنة)</label>
+          <input class="input f-from" type="month" value="${escapeHTML(data.from || "")}" />
+        </div>
+        <div class="field">
+          <label>إلى (شهر/سنة)</label>
+          <input class="input f-to" type="month" value="${escapeHTML(data.to || "")}" ${data.current ? "disabled" : ""} />
+        </div>
+      </div>
+      <label class="current-chip">
+        <input type="checkbox" class="f-current" ${data.current ? "checked" : ""} />
+        أعمل حالياً هنا
+      </label>
+    `;
+    el.querySelector(".remove-btn").addEventListener("click", () => el.remove());
+    const currentChk = el.querySelector(".f-current");
+    const toInput = el.querySelector(".f-to");
+    currentChk.addEventListener("change", () => {
+      toInput.disabled = currentChk.checked;
+      if (currentChk.checked) toInput.value = "";
+    });
+    return el;
+  }
+
+  function buildCertificationEntry(data = {}) {
+    const el = document.createElement("div");
+    el.className = "dyn-entry cert-entry";
+    el.innerHTML = `
+      <button type="button" class="remove-btn" aria-label="حذف">×</button>
+      <div class="dyn-grid">
+        <div class="field">
+          <label>اسم الشهادة</label>
+          <input class="input f-name" list="cert-suggestions" value="${escapeHTML(data.name || "")}" placeholder="مثال: SCA Barista Foundation" />
+        </div>
+        <div class="field">
+          <label>الجهة المانحة</label>
+          <input class="input f-issuer" value="${escapeHTML(data.issuer || "")}" placeholder="مثال: SCA" />
+        </div>
+      </div>
+      <div class="dyn-grid" style="margin-top:10px;">
+        <div class="field">
+          <label>سنة الحصول</label>
+          <input class="input f-year" inputmode="numeric" value="${escapeHTML(data.year || "")}" placeholder="2024" />
+        </div>
+      </div>
+    `;
+    el.querySelector(".remove-btn").addEventListener("click", () => el.remove());
+    return el;
+  }
+
+  function buildLanguageEntry(data = {}) {
+    const el = document.createElement("div");
+    el.className = "dyn-entry lang-entry";
+    el.innerHTML = `
+      <button type="button" class="remove-btn" aria-label="حذف">×</button>
+      <div class="dyn-grid">
+        <div class="field">
+          <label>اللغة</label>
+          <input class="input f-name" list="lang-suggestions" value="${escapeHTML(data.name || "")}" placeholder="مثال: العربية" />
+        </div>
+        <div class="field">
+          <label>المستوى</label>
+          <select class="select f-level">
+            ${LANG_LEVELS.map(l =>
+              `<option value="${l}" ${data.level === l ? "selected" : ""}>${l}</option>`
+            ).join("")}
+          </select>
+        </div>
+      </div>
+    `;
+    el.querySelector(".remove-btn").addEventListener("click", () => el.remove());
+    return el;
+  }
+
+  function clearDynList(id) {
+    const list = document.getElementById(id);
+    if (list) list.innerHTML = "";
+  }
+  function fillDynList(id, items, builder) {
+    const list = document.getElementById(id);
+    if (!list) return;
+    list.innerHTML = "";
+    (items || []).forEach(item => list.appendChild(builder(item)));
+  }
+
+  function collectExperiences() {
+    return $$("#experiences-list .exp-entry").map(el => ({
+      place:   el.querySelector(".f-place").value.trim(),
+      role:    el.querySelector(".f-role").value.trim(),
+      from:    el.querySelector(".f-from").value,
+      to:      el.querySelector(".f-to").value,
+      current: el.querySelector(".f-current").checked,
+    })).filter(e => e.place || e.role);
+  }
+  function collectCertifications() {
+    return $$("#certifications-list .cert-entry").map(el => ({
+      name:   el.querySelector(".f-name").value.trim(),
+      issuer: el.querySelector(".f-issuer").value.trim(),
+      year:   el.querySelector(".f-year").value.trim(),
+    })).filter(c => c.name);
+  }
+  function collectLanguages() {
+    return $$("#languages-list .lang-entry").map(el => ({
+      name:  el.querySelector(".f-name").value.trim(),
+      level: el.querySelector(".f-level").value,
+    })).filter(l => l.name);
+  }
+
   /* ============ Auth UI ============ */
   function renderAuthArea() {
     const area = $("#auth-area");
@@ -274,6 +402,10 @@
     $("#profile-form").reset();
     $("#profile-photo").value = "";
     $("#profile-cv").value = "";
+    // Clear dynamic sections
+    clearDynList("experiences-list");
+    clearDynList("certifications-list");
+    clearDynList("languages-list");
 
     // Does the user already have a barista profile? If yes, open in edit mode.
     const mine = await findMyProfile(user.user?.id);
@@ -317,6 +449,10 @@
     $$("#skills-chips .chip").forEach(c => {
       c.classList.toggle("active", (p.skills || []).includes(c.dataset.skill));
     });
+    // Dynamic sections
+    fillDynList("experiences-list",    p.experiences || [],    buildExperienceEntry);
+    fillDynList("certifications-list", p.certifications || [], buildCertificationEntry);
+    fillDynList("languages-list",      p.languages || [],      buildLanguageEntry);
     // Photo + CV previews
     photoUrl = p.photo || null;
     cvUrl    = p.cv || null;
@@ -431,6 +567,9 @@
       email:      (fd.get("email") || "").toString().trim(),
       bio:        (fd.get("bio") || "").toString().trim(),
       skills,
+      experiences:    collectExperiences(),
+      certifications: collectCertifications(),
+      languages:      collectLanguages(),
       photo:      photoUrl,
       cv:         cvUrl,
       cvName,
@@ -514,6 +653,17 @@
     $("#skills-chips").addEventListener("click", (e) => {
       const chip = e.target.closest(".chip");
       if (chip) chip.classList.toggle("active");
+    });
+
+    // Dynamic section add buttons
+    $("#add-experience")?.addEventListener("click", () => {
+      $("#experiences-list").appendChild(buildExperienceEntry());
+    });
+    $("#add-certification")?.addEventListener("click", () => {
+      $("#certifications-list").appendChild(buildCertificationEntry());
+    });
+    $("#add-language")?.addEventListener("click", () => {
+      $("#languages-list").appendChild(buildLanguageEntry());
     });
 
     let searchTimer;

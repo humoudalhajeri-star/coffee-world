@@ -64,6 +64,73 @@
     if (b.phone)   infoItems.push({ label: "الهاتف", value: `<a class="value" href="${phoneLink}">${escapeHTML(b.phone)}</a>` });
     if (b.email)   infoItems.push({ label: "البريد", value: `<a class="value" href="${emailLink}">${escapeHTML(b.email)}</a>` });
 
+    /* --- Experiences --- */
+    const formatMonth = (ym) => {
+      if (!ym) return "";
+      const [y, m] = ym.split("-");
+      const months = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+      return m ? `${months[parseInt(m, 10) - 1] || m} ${y}` : y;
+    };
+    const experiences = (b.experiences || []).filter(e => e.place || e.role);
+    const experiencesHTML = experiences.length ? `
+      <section class="bd-section">
+        <h2><span class="icon">💼</span> الخبرات السابقة</h2>
+        <div class="bd-timeline">
+          ${experiences.map(e => {
+            const when = [
+              formatMonth(e.from),
+              e.current ? "حتى الآن" : formatMonth(e.to),
+            ].filter(Boolean).join(" — ");
+            return `
+              <div class="bd-timeline-item">
+                <div class="bd-timeline-dot"></div>
+                <div class="bd-timeline-body">
+                  <div class="bd-timeline-title">${escapeHTML(e.role || "—")}</div>
+                  <div class="bd-timeline-sub">${escapeHTML(e.place || "")}</div>
+                  ${when ? `<div class="bd-timeline-when">${escapeHTML(when)}</div>` : ""}
+                </div>
+              </div>`;
+          }).join("")}
+        </div>
+      </section>` : "";
+
+    /* --- Certifications --- */
+    const certs = (b.certifications || []).filter(c => c.name);
+    const certsHTML = certs.length ? `
+      <section class="bd-section">
+        <h2><span class="icon">🏆</span> الشهادات</h2>
+        <div class="bd-cert-list">
+          ${certs.map(c => `
+            <div class="bd-cert-item">
+              <div class="bd-cert-icon">🏅</div>
+              <div>
+                <div class="bd-cert-name">${escapeHTML(c.name)}</div>
+                <div class="bd-cert-meta">
+                  ${c.issuer ? escapeHTML(c.issuer) : ""}
+                  ${c.issuer && c.year ? " · " : ""}
+                  ${c.year ? escapeHTML(c.year) : ""}
+                </div>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      </section>` : "";
+
+    /* --- Languages --- */
+    const langs = (b.languages || []).filter(l => l.name);
+    const languagesHTML = langs.length ? `
+      <section class="bd-section">
+        <h2><span class="icon">🌍</span> اللغات</h2>
+        <div class="bd-skills">
+          ${langs.map(l => `
+            <span class="bd-skill" style="background:var(--cream-100);">
+              ${escapeHTML(l.name)}
+              ${l.level ? `<span style="color:var(--coffee-600); margin-inline-start:6px;">· ${escapeHTML(l.level)}</span>` : ""}
+            </span>
+          `).join("")}
+        </div>
+      </section>` : "";
+
     const cvSection = b.cv ? `
       <section class="bd-section">
         <h2><span class="icon">📄</span> السيرة الذاتية</h2>
@@ -120,6 +187,12 @@
             `).join("")}
           </div>
         </section>` : ""}
+
+        ${experiencesHTML}
+
+        ${certsHTML}
+
+        ${languagesHTML}
 
         ${cvSection}
 
