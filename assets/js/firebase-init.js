@@ -107,7 +107,7 @@ async function compressImageToBlob(file, { maxDim = 1200, quality = 0.82 } = {})
 async function uploadFile(file, folder, onProgress) {
   const userId = currentUser?.uid || "anonymous";
   // Compress images first so the actual upload is tiny
-  const blob = await compressImageToBlob(file, { maxDim: 1200, quality: 0.82 });
+  const blob = await compressImageToBlob(file, { maxDim: 1000, quality: 0.78 });
   const isJpeg = blob !== file && blob.type === "image/jpeg";
   const baseName = (file.name || "file").replace(/\.[^.]+$/, "");
   const safeName = encodeURIComponent(isJpeg ? `${baseName}.jpg` : (file.name || "file"));
@@ -117,15 +117,38 @@ async function uploadFile(file, folder, onProgress) {
 
   return new Promise((resolve, reject) => {
     const task = uploadBytesResumable(ref, blob, { contentType });
+
+    // Watchdog: if Firebase Storage never reports progress, assume it's
+    // broken/unreachable and fail fast so the caller can fall back to
+    // embedding the file in Firestore.
+    let lastActivity = Date.now();
+    const NO_PROGRESS_MS = 12_000;   // abort if stuck for 12s
+    const TOTAL_MS      = 45_000;    // hard cap 45s
+    const watchdog = setInterval(() => {
+      if (Date.now() - lastActivity > NO_PROGRESS_MS) {
+        cleanup();
+        try { task.cancel(); } catch {}
+        reject(new Error("STORAGE_STUCK: Firebase Storage لم يستجب — تم التحويل للتخزين البديل"));
+      }
+    }, 2_000);
+    const total = setTimeout(() => {
+      cleanup();
+      try { task.cancel(); } catch {}
+      reject(new Error("STORAGE_TIMEOUT: تجاوز الرفع الحد الزمني"));
+    }, TOTAL_MS);
+    function cleanup() { clearInterval(watchdog); clearTimeout(total); }
+
     task.on(
       "state_changed",
       (snap) => {
+        lastActivity = Date.now();
         if (typeof onProgress === "function" && snap.totalBytes > 0) {
           onProgress(Math.round((snap.bytesTransferred / snap.totalBytes) * 100));
         }
       },
-      (err) => reject(err),
+      (err) => { cleanup(); reject(err); },
       async () => {
+        cleanup();
         try {
           const url = await getDownloadURL(task.snapshot.ref);
           resolve({ url, path });

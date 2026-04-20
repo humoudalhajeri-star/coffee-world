@@ -304,10 +304,16 @@
     uploadingPhoto = true;
     updateSubmitLock();
     try {
+      let stuckAnnounced = false;
       const res = await window.CoffeeAPI.Baristas.uploadPhoto(file, (pct) => {
+        stuckAnnounced = true; // progress arrived, no need for fallback notice
         const el = document.getElementById("photo-progress");
         if (el) el.textContent = `⏳ ${pct}%`;
       });
+      if (!stuckAnnounced) {
+        // Upload went through the Firestore-embed fallback; let the user know.
+        toast("Storage بطيء — تم حفظ الصورة محلياً", "info");
+      }
       photoUrl = res.url;
       // Swap to the final URL (server/firestore) once upload completes.
       $("#profile-preview").innerHTML = `<img src="${escapeHTML(photoUrl)}" alt="">`;

@@ -219,11 +219,10 @@
         try {
           return await f.uploadImage(file, onProgress);
         } catch (err) {
-          // Firebase Storage not ready yet (common while Blaze billing
-          // propagates, can take up to 24h) — fall back to embedding a
-          // compressed copy directly inside the Firestore document.
+          // Firebase Storage stuck or unavailable — fall back to embedding
+          // a compressed copy directly inside the Firestore document.
           console.warn("Firebase Storage unavailable, embedding compressed image instead:", err?.message);
-          const url = await compressImageFile(file, { maxDim: 900, quality: 0.75 });
+          const url = await compressImageFile(file, { maxDim: 800, quality: 0.72 });
           return { url, size: bytesOfDataURL(url) };
         }
       }
@@ -322,14 +321,20 @@
         try {
           return await f.uploadPhoto(file, onProgress);
         } catch (err) {
-          console.warn("Firebase Storage unavailable, embedding compressed image instead:", err?.message);
+          console.warn("Firebase Storage unavailable, embedding file instead:", err?.message);
           const isImage = file.type && file.type.startsWith("image/");
           if (isImage) {
-            const url = await compressImageFile(file, { maxDim: 700, quality: 0.75 });
+            // Fall back to a tiny compressed copy inside Firestore
+            const url = await compressImageFile(file, { maxDim: 700, quality: 0.72 });
             return { url, size: bytesOfDataURL(url) };
           }
-          // PDFs can't be embedded (~1MB Firestore doc limit). Tell the user.
-          throw new Error("تعذّر رفع الملف. فعّل Firebase Storage أو استخدم صورة بدلاً من PDF.");
+          // PDF fallback: embed if small enough to fit a Firestore doc (~1MB)
+          if (file.size && file.size < 700_000) {
+            const url = await fileToDataURL(file);
+            return { url, size: bytesOfDataURL(url) };
+          }
+          const sizeKB = file.size ? Math.round(file.size / 1024) : 0;
+          throw new Error(`حجم الملف كبير (${sizeKB}KB). Storage لم يستجب — جرّب ملف أصغر أو أعد المحاولة لاحقاً.`);
         }
       }
       return withFallback(
