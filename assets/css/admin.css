@@ -113,6 +113,9 @@
   place-items: center;
   padding: 40px 20px;
 }
+.admin-gate[hidden],
+.admin-panel[hidden],
+#admin-content[hidden] { display: none !important; }
 .admin-gate-inner {
   text-align: center;
   background: #fff;
