@@ -10,7 +10,7 @@
 الخطة المجانية تبدأ بـ "Test Mode" الذي يسمح بكل شيء لمدة 30 يوماً.
 انسخ القواعد التالية والصقها في Firebase Console قبل انتهاء المدة.
 
-### Firestore Rules
+### Firestore Rules (مع دعم لوحة الأدمن)
 افتح Firebase Console → **Firestore Database** → **Rules** → الصق:
 
 ```
@@ -18,31 +18,49 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // الوصفات: كل مستخدم يرى ويعدّل وصفاته فقط
-    match /recipes/{doc} {
-      allow read:   if request.auth != null && resource.data.ownerId == request.auth.uid;
-      allow create: if request.auth != null && request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if request.auth != null && resource.data.ownerId == request.auth.uid;
+    // ✏️ عدّل هذه القائمة بإيميلات المشرفين.
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email in [
+        "humoud.alhajeri@gmail.com",
+        "humoudlahajeri3@gmail.com"
+      ];
     }
 
-    // الإعلانات: الجميع يقرأ، المالك فقط يعدّل/يحذف
+    // المستخدمون: كل شخص يكتب وثيقته فقط. المشرفون يقرؤون الكل.
+    match /users/{uid} {
+      allow read:   if isAdmin() || request.auth.uid == uid;
+      allow write:  if request.auth.uid == uid;
+      allow delete: if isAdmin();
+    }
+
+    // الوصفات: كل مستخدم يرى وصفاته فقط، المشرفون يرون الكل.
+    match /recipes/{doc} {
+      allow read:   if isAdmin() || (request.auth != null && resource.data.ownerId == request.auth.uid);
+      allow create: if request.auth != null && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isAdmin() || (request.auth != null && resource.data.ownerId == request.auth.uid);
+    }
+
+    // الإعلانات: الجميع يقرأ، المالك أو المشرف يعدّل/يحذف.
     match /listings/{doc} {
       allow read:   if true;
       allow create: if request.auth != null && request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if request.auth != null && resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isAdmin() || (request.auth != null && resource.data.ownerId == request.auth.uid);
     }
 
-    // سِيَر البريستا: الجميع يقرأ، المالك فقط يعدّل/يحذف
+    // سِيَر البريستا: الجميع يقرأ، المالك أو المشرف يعدّل/يحذف.
     match /baristas/{doc} {
       allow read:   if true;
       allow create: if request.auth != null && request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if request.auth != null && resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isAdmin() || (request.auth != null && resource.data.ownerId == request.auth.uid);
     }
   }
 }
 ```
 
 اضغط **Publish**.
+
+> 💡 **لإضافة/إزالة مشرف:** غيّر قائمة الإيميلات في قاعدة `isAdmin()` أعلاه،
+> وأيضاً في `assets/js/admin.js` (ثابت `ADMIN_EMAILS`) و `assets/js/app.js`.
 
 ### Storage Rules
 افتح Firebase Console → **Storage** → **Rules** → الصق:

@@ -117,9 +117,38 @@
     openCV(href, name);
   }, true);
 
+  const ADMIN_EMAILS = [
+    "humoud.alhajeri@gmail.com",
+    "humoudlahajeri3@gmail.com",
+  ].map(e => e.toLowerCase());
+
+  /** Inject "لوحة التحكم" link in the main nav once we know the user is admin. */
+  function wireAdminLink() {
+    const maybeAddLink = () => {
+      const user = window.CoffeeAPI?.Auth?.current?.();
+      const email = (user?.user?.email || "").toLowerCase();
+      if (!ADMIN_EMAILS.includes(email)) return;
+      const navList = document.querySelector(".site-header .nav-links");
+      if (!navList) return;
+      if (navList.querySelector('a[data-page="admin"]')) return; // already added
+      // Determine relative path based on current location
+      const inPages = /\/pages\//.test(location.pathname);
+      const href = inPages ? "admin.html" : "pages/admin.html";
+      const li = document.createElement("li");
+      li.innerHTML = `<a href="${href}" data-page="admin">🛡️ الإدارة</a>`;
+      navList.appendChild(li);
+    };
+    maybeAddLink();
+    window.addEventListener("cw-auth-changed", maybeAddLink);
+    // Firebase auth can resolve slightly after DOMContentLoaded — retry briefly.
+    setTimeout(maybeAddLink, 600);
+    setTimeout(maybeAddLink, 1800);
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     setActiveNav();
     wireMenuToggle();
+    wireAdminLink();
   });
 
   global.CW = { $, $$, toast, formatDate, escapeHTML, qs, openCV };
