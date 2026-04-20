@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>لوحة التحكم — Coffee World Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css" />
+<link rel="stylesheet" href="../assets/css/admin.css" />
+</head>
+<body data-page="admin" class="admin-page">
+  <header class="admin-header">
+    <div class="admin-header-inner">
+      <a href="../index.html" class="admin-brand">
+        <span class="admin-logo">CW</span>
+        <div>
+          <div class="admin-title">لوحة التحكم</div>
+          <div class="admin-subtitle">Coffee World Admin</div>
+        </div>
+      </a>
+      <div class="admin-user" id="admin-user-chip">—</div>
+    </div>
+    <nav class="admin-tabs" id="admin-tabs" role="tablist">
+      <button class="admin-tab active" data-tab="dashboard">🏠 لوحة</button>
+      <button class="admin-tab" data-tab="users">👥 المستخدمون</button>
+      <button class="admin-tab" data-tab="listings">🛍 الإعلانات</button>
+      <button class="admin-tab" data-tab="baristas">☕ البريستا</button>
+      <button class="admin-tab" data-tab="recipes">📝 الوصفات</button>
+    </nav>
+  </header>
+
+  <main class="admin-main">
+    <!-- Access denied / loading overlay -->
+    <div id="admin-gate" class="admin-gate">
+      <div class="admin-gate-inner">
+        <div class="admin-gate-icon">🔒</div>
+        <h2>جارٍ التحقق من الصلاحيات...</h2>
+        <p>تحتاج تسجيل دخول بحساب له صلاحيات المشرف.</p>
+        <div class="admin-gate-actions">
+          <a class="btn btn-primary" href="baristas.html">تسجيل الدخول</a>
+          <a class="btn btn-outline" href="../index.html">الرئيسية</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin content (hidden until authorized) -->
+    <div id="admin-content" hidden>
+
+      <!-- Dashboard -->
+      <section class="admin-panel active" data-panel="dashboard">
+        <div class="admin-stats" id="admin-stats">
+          <div class="stat-card"><span class="stat-icon">👥</span><div class="stat-body"><div class="stat-value" id="st-users">—</div><div class="stat-label">المستخدمون</div></div></div>
+          <div class="stat-card"><span class="stat-icon">🛍</span><div class="stat-body"><div class="stat-value" id="st-listings">—</div><div class="stat-label">الإعلانات</div></div></div>
+          <div class="stat-card"><span class="stat-icon">☕</span><div class="stat-body"><div class="stat-value" id="st-baristas">—</div><div class="stat-label">ملفات البريستا</div></div></div>
+          <div class="stat-card"><span class="stat-icon">📝</span><div class="stat-body"><div class="stat-value" id="st-recipes">—</div><div class="stat-label">الوصفات</div></div></div>
+        </div>
+
+        <section class="admin-section">
+          <div class="section-head">
+            <h3>🕒 أحدث النشاط</h3>
+            <button class="btn btn-outline btn-sm" id="refresh-activity">↻ تحديث</button>
+          </div>
+          <div class="activity-list" id="activity-list">
+            <div class="empty">جارٍ التحميل...</div>
+          </div>
+        </section>
+      </section>
+
+      <!-- Users -->
+      <section class="admin-panel" data-panel="users" hidden>
+        <div class="section-head">
+          <h3>👥 المستخدمون</h3>
+          <input type="search" class="input search" id="users-search" placeholder="🔍 ابحث بالاسم أو البريد..." />
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table" id="users-table">
+            <thead>
+              <tr>
+                <th>الاسم</th>
+                <th>البريد</th>
+                <th>تاريخ التسجيل</th>
+                <th>إعلانات</th>
+                <th>ملف بريستا</th>
+                <th>إجراءات</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Listings -->
+      <section class="admin-panel" data-panel="listings" hidden>
+        <div class="section-head">
+          <h3>🛍 الإعلانات</h3>
+          <input type="search" class="input search" id="listings-search" placeholder="🔍 ابحث..." />
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table" id="listings-table">
+            <thead>
+              <tr>
+                <th>صورة</th>
+                <th>العنوان</th>
+                <th>السعر</th>
+                <th>الفئة</th>
+                <th>المدينة</th>
+                <th>المالك</th>
+                <th>تاريخ</th>
+                <th>إجراءات</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Baristas -->
+      <section class="admin-panel" data-panel="baristas" hidden>
+        <div class="section-head">
+          <h3>☕ ملفات البريستا</h3>
+          <input type="search" class="input search" id="baristas-search" placeholder="🔍 ابحث..." />
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table" id="baristas-table">
+            <thead>
+              <tr>
+                <th>صورة</th>
+                <th>الاسم</th>
+                <th>المدينة</th>
+                <th>الخبرة</th>
+                <th>سنوات</th>
+                <th>الهاتف</th>
+                <th>المالك</th>
+                <th>إجراءات</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Recipes -->
+      <section class="admin-panel" data-panel="recipes" hidden>
+        <div class="section-head">
+          <h3>📝 الوصفات</h3>
+          <input type="search" class="input search" id="recipes-search" placeholder="🔍 ابحث..." />
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table" id="recipes-table">
+            <thead>
+              <tr>
+                <th>الاسم</th>
+                <th>النوع</th>
+                <th>الحجم</th>
+                <th>شوتات</th>
+                <th>المالك</th>
+                <th>تاريخ</th>
+                <th>إجراءات</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script type="module" src="../assets/js/firebase-init.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/admin.js"></script>
+</body>
+</html>

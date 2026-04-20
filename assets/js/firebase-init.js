@@ -11,7 +11,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getFirestore, collection, addDoc, getDocs, doc, getDoc, deleteDoc,
-  updateDoc, query, orderBy, serverTimestamp,
+  updateDoc, setDoc, query, orderBy, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
   getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
@@ -200,6 +200,18 @@ window.CW_FB = {
         try { await updateProfile(cred.user, { displayName: name }); } catch {}
       }
       currentUser = cred.user;
+      // Mirror the user into /users/{uid} so the admin panel can list them.
+      // (Firebase Auth list is only accessible server-side.)
+      try {
+        await setDoc(doc(db, "users", cred.user.uid), {
+          uid: cred.user.uid,
+          name: (name || "").trim(),
+          email: (email || "").trim().toLowerCase(),
+          createdAt: serverTimestamp(),
+        }, { merge: true });
+      } catch (err) {
+        console.warn("users doc write failed:", err?.message);
+      }
       return this.current();
     },
     async signIn({ email, password }) {
