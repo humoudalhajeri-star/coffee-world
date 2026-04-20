@@ -67,6 +67,23 @@
     $("#auth-title").textContent = tab === "signin" ? "تسجيل الدخول" : "إنشاء حساب";
   }
 
+  /**
+   * If another page stashed a "return here after sign-in" URL in
+   * sessionStorage (e.g. admin.html), navigate back to it.
+   * Returns true if a redirect was triggered.
+   */
+  function honourReturnTo() {
+    try {
+      const url = sessionStorage.getItem("cw.returnTo");
+      if (url) {
+        sessionStorage.removeItem("cw.returnTo");
+        setTimeout(() => { window.location.href = url; }, 400);
+        return true;
+      }
+    } catch {}
+    return false;
+  }
+
   async function handleSignIn(e) {
     e.preventDefault();
     const fd = new FormData(e.target);
@@ -81,6 +98,8 @@
       closeAuth();
       renderAuthArea();
       loadAndRender();
+      // Priority: an external page requested a return (e.g. admin panel)
+      if (honourReturnTo()) return;
       if (continueToProfile) setTimeout(openModal, 200);
     } catch (err) {
       toast(err.message || "تعذّر تسجيل الدخول", "error");
@@ -100,6 +119,7 @@
       closeAuth();
       renderAuthArea();
       loadAndRender();
+      if (honourReturnTo()) return;
       // Auto-open the profile modal so the user can continue where they
       // left off without tapping "new profile" again.
       if (continueToProfile) setTimeout(openModal, 200);
