@@ -57,6 +57,8 @@
   function closeAuth() {
     $("#auth-modal").classList.remove("open");
     $$("#auth-modal form").forEach(f => f.reset());
+    // If the user cancelled before finishing, don't auto-pop the profile
+    pendingProfileAfterAuth = false;
   }
   function switchTab(tab) {
     $$("#auth-modal .tab").forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
@@ -74,8 +76,12 @@
         password: fd.get("password").toString(),
       });
       toast("تم تسجيل الدخول ✓", "success");
+      // Capture the intent *before* closeAuth resets pendingProfileAfterAuth
+      const continueToProfile = pendingProfileAfterAuth;
       closeAuth();
       renderAuthArea();
+      loadAndRender();
+      if (continueToProfile) setTimeout(openModal, 200);
     } catch (err) {
       toast(err.message || "تعذّر تسجيل الدخول", "error");
     }
@@ -90,8 +96,13 @@
         password: fd.get("password").toString(),
       });
       toast("مرحباً بك في Coffee World ✓", "success");
+      const continueToProfile = pendingProfileAfterAuth;
       closeAuth();
       renderAuthArea();
+      loadAndRender();
+      // Auto-open the profile modal so the user can continue where they
+      // left off without tapping "new profile" again.
+      if (continueToProfile) setTimeout(openModal, 200);
     } catch (err) {
       toast(err.message || "تعذّر إنشاء الحساب", "error");
     }
@@ -216,12 +227,20 @@
     });
   }
 
+  // Set when the user clicked "new profile" while signed out, so that
+  // once they complete sign-up/sign-in we can continue straight into
+  // opening the profile modal without needing another click.
+  let pendingProfileAfterAuth = false;
+
   /* ============ Profile modal ============ */
   async function openModal() {
     const user = window.CoffeeAPI.Auth.current();
     if (!user) {
-      toast("سجّل دخولك أولاً لإنشاء ملف", "info");
-      openAuth("signin");
+      // Force the user to create an account first. Open the Sign-up tab
+      // since the common case is a new visitor who has no account yet.
+      pendingProfileAfterAuth = true;
+      toast("يجب إنشاء حساب أولاً لإضافة ملف بريستا", "info", 3500);
+      openAuth("signup");
       return;
     }
 
@@ -365,37 +384,57 @@
   }
 
   async function submitForm(e) {
-    e.preventDefault();
+    if (e) e.preventDefault();
+
+    // Uploads still in flight?
     if (uploadingPhoto || uploadingCv) {
-      toast("انتظر اكتمال رفع الملفات...", "info");
+      toast("انتظر قليلاً — لم يكتمل رفع الملفات بعد", "info", 4000);
       return;
     }
+
     const currentUser = window.CoffeeAPI.Auth.current();
     if (!currentUser) {
-      toast("سجّل دخولك أولاً", "error");
-      openAuth("signin");
+      toast("يجب تسجيل حساب أولاً", "info", 3500);
+      openAuth("signup");
       return;
     }
-    const fd = new FormData(e.target);
+
+    const form = document.getElementById("profile-form");
+    const fd = new FormData(form);
     const skills = $$("#skills-chips .chip.active").map(c => c.dataset.skill);
     const data = {
-      name:       fd.get("name").toString().trim(),
-      city:       fd.get("city").toString().trim(),
+      name:       (fd.get("name") || "").toString().trim(),
+      city:       (fd.get("city") || "").toString().trim(),
       years:      Number(fd.get("years")) || 0,
-      experience: fd.get("experience"),
-      phone:      fd.get("phone").toString().trim(),
-      email:      fd.get("email").toString().trim(),
-      bio:        fd.get("bio").toString().trim(),
+      experience: (fd.get("experience") || "").toString(),
+      phone:      (fd.get("phone") || "").toString().trim(),
+      email:      (fd.get("email") || "").toString().trim(),
+      bio:        (fd.get("bio") || "").toString().trim(),
       skills,
       photo:      photoUrl,
       cv:         cvUrl,
       cvName,
       ownerId:    currentUser.user?.id,
     };
-    if (!data.name || !data.experience || !data.phone) {
-      toast("فضلاً أكمل الحقول الأساسية", "error");
+
+    // Explicit, specific validation so the user knows exactly what's missing
+    const missing = [];
+    if (!data.name)       missing.push("الاسم");
+    if (!data.experience) missing.push("المستوى");
+    if (!data.phone)      missing.push("رقم التواصل");
+    if (missing.length) {
+      toast("املأ الحقول المطلوبة: " + missing.join("، "), "error", 5000);
       return;
     }
+
+    // Lock the submit button while we save so double-taps don't fire twice
+    const submitBtn = document.querySelector("#profile-form button[type=submit]");
+    const savedText = submitBtn ? submitBtn.textContent : "";
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "⏳ جارٍ الحفظ...";
+    }
+
     try {
       if (editingId) {
         await window.CoffeeAPI.Baristas.update(editingId, data);
@@ -407,7 +446,13 @@
       closeModal();
       loadAndRender();
     } catch (err) {
-      toast("تعذّر الحفظ: " + err.message, "error");
+      console.error("Save profile error:", err);
+      toast("تعذّر الحفظ: " + (err.message || "خطأ غير معروف"), "error", 5000);
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = savedText || "نشر الملف";
+      }
     }
   }
 
