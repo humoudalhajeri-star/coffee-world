@@ -358,10 +358,15 @@
         <h2>يجب تسجيل الدخول</h2>
         <p>سجّل دخولك بحساب المشرف للوصول للوحة التحكم.</p>
         <div class="admin-gate-actions">
-          <a class="btn btn-primary" href="baristas.html">تسجيل الدخول</a>
+          <a class="btn btn-primary" id="admin-signin-link" href="baristas.html">تسجيل الدخول</a>
           <a class="btn btn-outline" href="../index.html">الرئيسية</a>
         </div>
       </div>`;
+    // Stash the return URL so the baristas page can send us back here
+    // after sign-in. Use sessionStorage so it survives the full-page nav.
+    $("#admin-signin-link").addEventListener("click", () => {
+      try { sessionStorage.setItem("cw.returnTo", window.location.href); } catch {}
+    });
   }
 
   function showAdminUI(user) {
