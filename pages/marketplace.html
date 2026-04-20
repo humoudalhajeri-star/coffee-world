@@ -33,6 +33,7 @@
         <h2>سوق القهوة ☕</h2>
         <p>تصفّح الإعلانات أو أضف إعلانك الجديد بصور احترافية.</p>
       </div>
+      <div id="auth-area" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;"></div>
     </div>
 
     <div class="market-toolbar">
@@ -126,6 +127,60 @@
   </footer>
 
   <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+  <!-- Modal: Auth (signin / signup) — same flow as the baristas page -->
+  <div class="modal-backdrop" id="auth-modal">
+    <div class="modal" style="max-width: 440px;">
+      <header>
+        <h3 id="auth-title">إنشاء حساب</h3>
+        <button class="close" id="close-auth">×</button>
+      </header>
+
+      <p id="auth-reason" style="color: var(--muted); margin: 0 0 6px;">
+        لإضافة إعلان جديد، يجب إنشاء حساب أولاً (مجاني، ثانية واحدة).
+      </p>
+
+      <div class="tabs">
+        <div class="tab" data-tab="signin">تسجيل الدخول</div>
+        <div class="tab active" data-tab="signup">إنشاء حساب</div>
+      </div>
+
+      <form id="signin-form" class="auth-form" style="display:none;">
+        <div class="field">
+          <label>البريد الإلكتروني</label>
+          <input name="email" type="email" class="input" required autocomplete="email" />
+        </div>
+        <div class="field" style="margin-top:10px;">
+          <label>كلمة المرور</label>
+          <input name="password" type="password" class="input" required autocomplete="current-password" />
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+          <button type="button" class="btn btn-outline" data-cancel>إلغاء</button>
+          <button type="submit" class="btn btn-primary">دخول</button>
+        </div>
+      </form>
+
+      <form id="signup-form" class="auth-form">
+        <div class="field">
+          <label>الاسم الكامل</label>
+          <input name="name" class="input" required maxlength="60" />
+        </div>
+        <div class="field" style="margin-top:10px;">
+          <label>البريد الإلكتروني</label>
+          <input name="email" type="email" class="input" required autocomplete="email" />
+        </div>
+        <div class="field" style="margin-top:10px;">
+          <label>كلمة المرور</label>
+          <input name="password" type="password" class="input" required minlength="6" autocomplete="new-password" />
+          <span class="hint">6 أحرف على الأقل</span>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+          <button type="button" class="btn btn-outline" data-cancel>إلغاء</button>
+          <button type="submit" class="btn btn-gold">إنشاء الحساب</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script type="module" src="../assets/js/firebase-init.js"></script>
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/app.js"></script>

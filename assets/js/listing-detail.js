@@ -45,7 +45,29 @@
     return d;
   }
 
-  function render(listing, currentUser) {
+  /** Look up seller info from /baristas (has photo) or /users (fallback). */
+  async function fetchSeller(ownerId) {
+    if (!ownerId) return null;
+    const out = { name: "", photo: null, baristaId: null };
+    try {
+      const baristas = await window.CoffeeAPI.Baristas.list();
+      const mine = (baristas || []).find(b => b.ownerId === ownerId);
+      if (mine) {
+        out.name  = mine.name  || "";
+        out.photo = mine.photo || null;
+        out.baristaId = mine.id;
+      }
+    } catch {}
+    if (!out.name && window.CW_FB) {
+      try {
+        const u = await window.CW_FB.getDocById("users", ownerId);
+        if (u) out.name = u.name || u.email || "";
+      } catch {}
+    }
+    return out;
+  }
+
+  function render(listing, currentUser, seller) {
     const photos = Array.isArray(listing.images) ? listing.images.filter(Boolean) : [];
     document.title = `${listing.title || "إعلان"} — Coffee World`;
 
@@ -98,6 +120,21 @@
           <p class="listing-description">${escapeHTML(description)}</p>
         ` : ""}
       </section>
+
+      ${seller && (seller.name || seller.photo) ? `
+      <section class="listing-info" style="padding:14px 18px;">
+        <p class="listing-section-title">👤 البائع</p>
+        <a ${seller.baristaId ? `href="barista.html?id=${escapeHTML(seller.baristaId)}"` : ""}
+           style="display:flex; align-items:center; gap:12px; text-decoration:none; color:inherit;">
+          <span class="seller-avatar">${seller.photo
+            ? `<img src="${escapeHTML(seller.photo)}" alt="">`
+            : `<span>👤</span>`}</span>
+          <div>
+            <div style="font-weight:800; color:var(--coffee-900); font-size:15px;">${escapeHTML(seller.name || "—")}</div>
+            ${seller.baristaId ? `<div style="color:var(--coffee-700); font-size:12px;">اعرض ملفه ←</div>` : ""}
+          </div>
+        </a>
+      </section>` : ""}
 
       ${listing.phone ? `
       <section class="listing-info" style="padding:14px 18px;">
@@ -159,7 +196,8 @@
         return;
       }
       const currentUser = window.CoffeeAPI.Auth.current();
-      render(listing, currentUser);
+      const seller = await fetchSeller(listing.ownerId);
+      render(listing, currentUser, seller);
     } catch (err) {
       $("#listing-root").innerHTML = `<div class="empty"><h3>تعذّر التحميل</h3><p>${escapeHTML(err.message)}</p></div>`;
     }

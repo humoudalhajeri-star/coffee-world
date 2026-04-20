@@ -47,6 +47,93 @@
     return `قبل ${Math.floor(months / 12)} سنة`;
   }
 
+  /* ============ Auth UI (Haraj-style: gated posting) ============ */
+  // When set, we auto-open the listing form right after sign-in/up finishes.
+  let pendingListingAfterAuth = false;
+
+  function renderAuthArea() {
+    const area = $("#auth-area");
+    if (!area) return;
+    const session = window.CoffeeAPI.Auth.current();
+    if (session) {
+      const name = session.user?.name || session.user?.email || "مستخدم";
+      const initial = (name || "?").trim().charAt(0);
+      area.innerHTML = `
+        <span class="auth-chip">
+          <span class="av">${escapeHTML(initial)}</span>
+          ${escapeHTML(name)}
+        </span>
+        <button class="btn btn-outline" id="signout-btn">تسجيل خروج</button>`;
+      $("#signout-btn").addEventListener("click", async () => {
+        await window.CoffeeAPI.Auth.signOut();
+        toast("تم تسجيل الخروج", "info");
+        renderAuthArea();
+      });
+    } else {
+      area.innerHTML = `
+        <button class="btn btn-outline" id="open-signin">تسجيل الدخول</button>
+        <button class="btn btn-gold"    id="open-signup">إنشاء حساب</button>`;
+      $("#open-signin").addEventListener("click", () => openAuth("signin"));
+      $("#open-signup").addEventListener("click", () => openAuth("signup"));
+    }
+  }
+
+  function openAuth(tab = "signup", reason) {
+    $("#auth-modal").classList.add("open");
+    const reasonEl = $("#auth-reason");
+    if (reasonEl && reason) reasonEl.textContent = reason;
+    switchAuthTab(tab);
+  }
+  function closeAuth() {
+    $("#auth-modal").classList.remove("open");
+    $$("#auth-modal form").forEach(f => f.reset());
+    pendingListingAfterAuth = false;
+  }
+  function switchAuthTab(tab) {
+    $$("#auth-modal .tab").forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
+    $("#signin-form").style.display = tab === "signin" ? "" : "none";
+    $("#signup-form").style.display = tab === "signup" ? "" : "none";
+    $("#auth-title").textContent = tab === "signin" ? "تسجيل الدخول" : "إنشاء حساب";
+  }
+
+  async function handleSignIn(e) {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    try {
+      await window.CoffeeAPI.Auth.signIn({
+        email: fd.get("email").toString(),
+        password: fd.get("password").toString(),
+      });
+      toast("تم تسجيل الدخول ✓", "success");
+      const shouldOpen = pendingListingAfterAuth;
+      closeAuth();
+      renderAuthArea();
+      loadAndRender();
+      if (shouldOpen) setTimeout(openModal, 200);
+    } catch (err) {
+      toast(err.message || "تعذّر تسجيل الدخول", "error");
+    }
+  }
+  async function handleSignUp(e) {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    try {
+      await window.CoffeeAPI.Auth.signUp({
+        name: fd.get("name").toString(),
+        email: fd.get("email").toString(),
+        password: fd.get("password").toString(),
+      });
+      toast("مرحباً بك في Coffee World ✓", "success");
+      const shouldOpen = pendingListingAfterAuth;
+      closeAuth();
+      renderAuthArea();
+      loadAndRender();
+      if (shouldOpen) setTimeout(openModal, 200);
+    } catch (err) {
+      toast(err.message || "تعذّر إنشاء الحساب", "error");
+    }
+  }
+
   /* ============ Grid ============ */
   let imageQueue = []; // current form's photo state
 
@@ -181,14 +268,44 @@
   }
 
   /* ============ Modal ============ */
-  function openModal() {
+  async function openModal() {
+    const session = window.CoffeeAPI.Auth.current();
+    if (!session) {
+      // Haraj-style: force sign-up/sign-in before the user can post.
+      pendingListingAfterAuth = true;
+      toast("يجب إنشاء حساب أولاً لنشر إعلان", "info", 3500);
+      openAuth("signup", "لإضافة إعلان جديد، يجب إنشاء حساب أولاً (مجاني، ثانية واحدة).");
+      return;
+    }
+
     imageQueue = [];
     $("#listing-form").reset();
     $("#listing-files").value = "";
     renderPreviews();
+
+    // Pre-fill phone and city from the user's barista profile if one exists.
+    // This saves them retyping details they already provided elsewhere.
+    try {
+      const mine = await findMyBaristaProfile(session.user?.id);
+      if (mine) {
+        const phoneInput = $("#listing-form [name=phone]");
+        const cityInput  = $("#listing-form [name=city]");
+        if (phoneInput && !phoneInput.value) phoneInput.value = mine.phone || "";
+        if (cityInput  && !cityInput.value)  cityInput.value  = mine.city  || "";
+      }
+    } catch {}
+
     $("#listing-modal").classList.add("open");
   }
   function closeModal() { $("#listing-modal").classList.remove("open"); }
+
+  async function findMyBaristaProfile(userId) {
+    if (!userId) return null;
+    try {
+      const list = await window.CoffeeAPI.Baristas.list();
+      return list.find(b => b.ownerId === userId) || null;
+    } catch { return null; }
+  }
 
   async function submitForm(e) {
     if (e) e.preventDefault();
@@ -236,7 +353,28 @@
     }
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
+    // Wait for Firebase auth to settle before first render so we don't
+    // flash "sign in" before realising the user is already logged in.
+    if (window.CW_FB) { try { await window.CW_FB.ready; } catch {} }
+    renderAuthArea();
+    window.addEventListener("cw-auth-changed", () => {
+      renderAuthArea();
+    });
+
+    // Auth modal wiring
+    $("#close-auth").addEventListener("click", closeAuth);
+    $("#auth-modal").addEventListener("click", (e) => {
+      if (e.target.id === "auth-modal") closeAuth();
+      if (e.target.matches("[data-cancel]")) closeAuth();
+    });
+    $$("#auth-modal .tab").forEach(t =>
+      t.addEventListener("click", () => switchAuthTab(t.dataset.tab))
+    );
+    $("#signin-form").addEventListener("submit", handleSignIn);
+    $("#signup-form").addEventListener("submit", handleSignUp);
+
+    // Listing modal wiring
     $("#new-listing-btn").addEventListener("click", openModal);
     $("#close-listing").addEventListener("click", closeModal);
     $("#cancel-listing").addEventListener("click", closeModal);
