@@ -167,6 +167,7 @@
         password: fd.get("password").toString(),
       });
       toast("مرحباً بك في CoffeZ ✓", "success");
+      window.CW_TRACK?.("CompleteRegistration", { description: "marketplace_signup" });
       const shouldOpen = pendingListingAfterAuth;
       closeAuth();
       renderAuthArea();
@@ -405,6 +406,7 @@
     try {
       await window.CoffeeAPI.Listings.create(data);
       toast("تم نشر الإعلان ✓", "success");
+      window.CW_TRACK?.("SubmitForm", { description: "new_listing" });
       closeModal();
       loadAndRender();
     } catch (err) {
@@ -490,9 +492,13 @@
     });
 
     let searchTimer;
-    $("#search").addEventListener("input", () => {
+    $("#search").addEventListener("input", (e) => {
       clearTimeout(searchTimer);
-      searchTimer = setTimeout(loadAndRender, 220);
+      searchTimer = setTimeout(() => {
+        loadAndRender();
+        const q = e.target.value.trim();
+        if (q.length >= 2) window.CW_TRACK?.("Search", { query: q });
+      }, 220);
     });
     $("#filter-category").addEventListener("change", loadAndRender);
 
