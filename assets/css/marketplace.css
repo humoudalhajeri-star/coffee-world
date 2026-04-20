@@ -397,3 +397,31 @@
   object-fit: cover;
   display: block;
 }
+
+/* Price input with currency suffix (auto-updated by country dropdown) */
+.price-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.price-wrap .price-input {
+  padding-inline-end: 58px;
+  width: 100%;
+  direction: ltr;
+  text-align: right;
+  font-family: "Tajawal", monospace;
+  font-variant-numeric: tabular-nums;
+}
+.price-wrap .price-currency {
+  position: absolute;
+  inset-inline-end: 12px;
+  background: var(--coffee-200);
+  color: var(--coffee-900);
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  pointer-events: none;
+  min-width: 42px;
+  text-align: center;
+}

@@ -83,8 +83,19 @@
 
         <div class="form-grid" style="margin-top:10px;">
           <div class="field">
-            <label>السعر (ر.س)</label>
-            <input name="price" type="number" min="0" class="input" placeholder="0" />
+            <label>الدولة *</label>
+            <select name="country" id="listing-country" class="select" required>
+              <option value="KW">🇰🇼 الكويت</option>
+              <option value="SA">🇸🇦 السعودية</option>
+              <option value="AE">🇦🇪 الإمارات</option>
+              <option value="QA">🇶🇦 قطر</option>
+              <option value="BH">🇧🇭 البحرين</option>
+              <option value="OM">🇴🇲 عُمان</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>المدينة</label>
+            <input name="city" class="input" placeholder="مثال: السالمية، الرياض، دبي..." />
           </div>
           <div class="field">
             <label>الفئة *</label>
@@ -100,12 +111,18 @@
             </select>
           </div>
           <div class="field">
-            <label>المدينة</label>
-            <input name="city" class="input" placeholder="الرياض، جدة، ..." />
+            <label>السعر <small class="hint" id="price-currency-hint">(د.ك)</small></label>
+            <div class="price-wrap">
+              <input name="price" id="listing-price" type="text" inputmode="decimal"
+                     pattern="[0-9٠-٩.]*" class="input price-input"
+                     placeholder="مثال: 250 أو ٢٥٠" />
+              <span class="price-currency" id="price-currency-suffix">د.ك</span>
+            </div>
+            <small class="hint">يُقبل الرقم بالعربي أو الإنجليزي</small>
           </div>
           <div class="field">
             <label>رقم التواصل *</label>
-            <input name="phone" class="input" required placeholder="05xxxxxxxx" />
+            <input name="phone" class="input" required placeholder="مثال: 05xxxxxxxx" />
           </div>
         </div>
 
@@ -122,8 +139,12 @@
     </div>
   </div>
 
-  <footer class="site-footer">
-    <div class="container">© <span id="year"></span> Coffee World</div>
+  <footer class="site-footer" style="margin-bottom:80px;">
+    <div class="container">
+      © <span id="year"></span> Coffee World ·
+      <a href="terms.html">الشروط</a> ·
+      <a href="privacy.html">الخصوصية</a>
+    </div>
   </footer>
 
   <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
@@ -173,6 +194,15 @@
           <input name="password" type="password" class="input" required minlength="6" autocomplete="new-password" />
           <span class="hint">6 أحرف على الأقل</span>
         </div>
+        <label class="terms-check">
+          <input type="checkbox" name="agree" required />
+          <span>
+            أوافق على
+            <a href="terms.html" target="_blank" rel="noopener">شروط الاستخدام</a>
+            و
+            <a href="privacy.html" target="_blank" rel="noopener">سياسة الخصوصية</a>.
+          </span>
+        </label>
         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
           <button type="button" class="btn btn-outline" data-cancel>إلغاء</button>
           <button type="submit" class="btn btn-gold">إنشاء الحساب</button>

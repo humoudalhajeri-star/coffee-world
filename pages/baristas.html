@@ -93,6 +93,15 @@
           <input name="password" type="password" class="input" required minlength="6" autocomplete="new-password" />
           <span class="hint">6 أحرف على الأقل</span>
         </div>
+        <label class="terms-check">
+          <input type="checkbox" name="agree" required />
+          <span>
+            أوافق على
+            <a href="terms.html" target="_blank" rel="noopener">شروط الاستخدام</a>
+            و
+            <a href="privacy.html" target="_blank" rel="noopener">سياسة الخصوصية</a>.
+          </span>
+        </label>
         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
           <button type="button" class="btn btn-outline" data-cancel>إلغاء</button>
           <button type="submit" class="btn btn-gold">إنشاء الحساب</button>
@@ -194,7 +203,11 @@
   </div>
 
   <footer class="site-footer">
-    <div class="container">© <span id="year"></span> Coffee World</div>
+    <div class="container">
+      © <span id="year"></span> Coffee World ·
+      <a href="terms.html">الشروط</a> ·
+      <a href="privacy.html">الخصوصية</a>
+    </div>
   </footer>
 
   <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
