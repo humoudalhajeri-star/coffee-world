@@ -339,16 +339,27 @@
   /* =================================================================
    * Access gate
    * ================================================================= */
-  function renderAccessDenied() {
+  function renderAccessDenied(user) {
+    const email = user?.user?.email || "(غير محدّد)";
     $("#admin-gate").innerHTML = `
       <div class="admin-gate-inner">
         <div class="admin-gate-icon">🚫</div>
         <h2>الوصول مرفوض</h2>
-        <p>هذه الصفحة متاحة للمشرفين فقط. البريد المسجّل غير مدرج في قائمة المشرفين.</p>
-        <div class="admin-gate-actions">
-          <a class="btn btn-primary" href="../index.html">الرئيسية</a>
+        <p>بريدك الحالي <b style="color:var(--coffee-800);">${escapeHTML(email)}</b> غير مدرج في قائمة المشرفين.</p>
+        <p style="font-size:13px; color:var(--muted); margin-top:10px;">
+          إيميلات المشرفين المقبولة حالياً:<br>
+          ${ADMIN_EMAILS.map(e => `<code style="background:#f3f0e8; padding:2px 6px; border-radius:4px; display:inline-block; margin:2px;">${escapeHTML(e)}</code>`).join("<br>")}
+        </p>
+        <div class="admin-gate-actions" style="margin-top:18px;">
+          <a class="btn btn-outline" href="../index.html">الرئيسية</a>
+          <button class="btn btn-primary" id="admin-logout-try">تسجيل خروج + دخول بحساب آخر</button>
         </div>
       </div>`;
+    document.getElementById("admin-logout-try")?.addEventListener("click", async () => {
+      await window.CoffeeAPI.Auth.signOut();
+      try { sessionStorage.setItem("cw.returnTo", window.location.href); } catch {}
+      window.location.href = "baristas.html";
+    });
   }
 
   function renderSignInNeeded() {
@@ -385,13 +396,25 @@
   /* =================================================================
    * Init
    * ================================================================= */
+  async function waitForUser(maxWaitMs = 6000) {
+    // Give Firebase Auth extra time to restore the session after a
+    // fresh page navigation (IndexedDB is async on some browsers).
+    const start = Date.now();
+    let user = window.CoffeeAPI.Auth.current();
+    while (!user && Date.now() - start < maxWaitMs) {
+      await new Promise(r => setTimeout(r, 200));
+      user = window.CoffeeAPI.Auth.current();
+    }
+    return user;
+  }
+
   document.addEventListener("DOMContentLoaded", async () => {
-    // Wait for Firebase auth state
+    // Wait for Firebase auth state, then give it a bit of extra patience
     if (window.CW_FB) { try { await window.CW_FB.ready; } catch {} }
-    const user = window.CoffeeAPI.Auth.current();
+    const user = await waitForUser();
 
     if (!user) { renderSignInNeeded(); return; }
-    if (!isAdmin(user)) { renderAccessDenied(); return; }
+    if (!isAdmin(user)) { renderAccessDenied(user); return; }
 
     showAdminUI(user);
 
