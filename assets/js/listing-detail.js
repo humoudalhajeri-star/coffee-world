@@ -57,13 +57,21 @@
     return d;
   }
 
-  /** Look up seller info from /baristas (has photo) or /users (fallback). */
-  async function fetchSeller(ownerId) {
+  /**
+   * Look up seller info from /baristas (has photo) or /users (fallback).
+   * Demo-flag-aware: a real listing should never match a seeded demo
+   * barista (the admin who seeded the demo data shares their ownerId
+   * with every demo barista, so a plain `.find(ownerId === uid)` was
+   * surfacing demo names like 'سارة' on the admin's own real listings).
+   */
+  async function fetchSeller(ownerId, isListingDemo = false) {
     if (!ownerId) return null;
     const out = { name: "", photo: null, baristaId: null };
     try {
       const baristas = await window.CoffeeAPI.Baristas.list();
-      const mine = (baristas || []).find(b => b.ownerId === ownerId);
+      const mine = (baristas || []).find(b =>
+        b.ownerId === ownerId && (!!b.isDemo === !!isListingDemo)
+      );
       if (mine) {
         out.name  = mine.name  || "";
         out.photo = mine.photo || null;
@@ -273,7 +281,7 @@
         return;
       }
       const currentUser = window.CoffeeAPI.Auth.current();
-      const seller = await fetchSeller(listing.ownerId);
+      const seller = await fetchSeller(listing.ownerId, !!listing.isDemo);
       render(listing, currentUser, seller);
     } catch (err) {
       $("#listing-root").innerHTML = `<div class="empty"><h3>تعذّر التحميل</h3><p>${escapeHTML(err.message)}</p></div>`;
