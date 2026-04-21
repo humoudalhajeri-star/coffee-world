@@ -123,7 +123,15 @@
       <section class="admin-panel" data-panel="listings" hidden>
         <div class="section-head">
           <h3>🛍 الإعلانات</h3>
-          <input type="search" class="input search" id="listings-search" placeholder="🔍 ابحث..." />
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+            <button type="button" class="btn btn-outline btn-sm" id="seed-demo-btn" title="تضيف 15 إعلان تجريبي لتعبئة السوق عند الإطلاق">
+              🌱 إضافة إعلانات تجريبية
+            </button>
+            <button type="button" class="btn btn-danger btn-sm" id="delete-demo-btn" title="حذف كل الإعلانات التجريبية دفعة واحدة">
+              🗑 حذف التجريبية
+            </button>
+            <input type="search" class="input search" id="listings-search" placeholder="🔍 ابحث..." />
+          </div>
         </div>
         <div class="data-table-wrap">
           <table class="data-table" id="listings-table">
@@ -199,6 +207,7 @@
   <script type="module" src="../assets/js/firebase-init.js"></script>
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/seed-data.js"></script>
   <script src="../assets/js/admin.js"></script>
 </body>
 </html>

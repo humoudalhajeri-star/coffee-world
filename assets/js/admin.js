@@ -356,6 +356,69 @@
   }
 
   /* =================================================================
+   * Demo seed — bulk insert realistic coffee listings on first launch
+   * ================================================================= */
+  function wireDemoSeed() {
+    const seedBtn   = $("#seed-demo-btn");
+    const deleteBtn = $("#delete-demo-btn");
+
+    seedBtn?.addEventListener("click", async () => {
+      const items = window.CW_SEED_LISTINGS;
+      if (!Array.isArray(items) || !items.length) {
+        toast("لم تُحمَّل بيانات البذر", "error");
+        return;
+      }
+      const already = allListings.filter(l => l.isDemo).length;
+      if (already >= items.length) {
+        toast(`الإعلانات التجريبية موجودة بالفعل (${already})`, "success");
+        return;
+      }
+      if (!confirm(`إضافة ${items.length} إعلان تجريبي للسوق؟`)) return;
+
+      seedBtn.disabled = true;
+      seedBtn.textContent = "⏳ جارٍ الإضافة...";
+      let ok = 0, fail = 0;
+      for (const it of items) {
+        try {
+          await window.CoffeeAPI.Listings.create({ ...it, isDemo: true });
+          ok++;
+          seedBtn.textContent = `⏳ ${ok}/${items.length}...`;
+        } catch (err) {
+          console.error("Seed failed:", err);
+          fail++;
+        }
+      }
+      seedBtn.disabled = false;
+      seedBtn.textContent = "🌱 إضافة إعلانات تجريبية";
+      toast(`تمت الإضافة: ${ok} ✓${fail ? ` — فشل: ${fail}` : ""}`, ok ? "success" : "error");
+      loadAllData();
+    });
+
+    deleteBtn?.addEventListener("click", async () => {
+      const demos = allListings.filter(l => l.isDemo);
+      if (!demos.length) {
+        toast("لا توجد إعلانات تجريبية للحذف", "success");
+        return;
+      }
+      if (!confirm(`حذف ${demos.length} إعلان تجريبي نهائياً؟`)) return;
+
+      deleteBtn.disabled = true;
+      let ok = 0;
+      for (const d of demos) {
+        try {
+          await window.CoffeeAPI.Listings.remove(d.id);
+          ok++;
+          deleteBtn.textContent = `⏳ ${ok}/${demos.length}...`;
+        } catch (err) { console.error("Delete failed:", err); }
+      }
+      deleteBtn.disabled = false;
+      deleteBtn.textContent = "🗑 حذف التجريبية";
+      toast(`تم حذف ${ok} إعلان تجريبي`, "success");
+      loadAllData();
+    });
+  }
+
+  /* =================================================================
    * Search wiring (debounced)
    * ================================================================= */
   function debounceInput(input, fn) {
@@ -472,6 +535,7 @@
     // Wire refresh + deletes
     $("#refresh-activity")?.addEventListener("click", loadAllData);
     wireAllDeletes();
+    wireDemoSeed();
 
     // Also re-render when auth state changes (e.g. sign out from another tab)
     window.addEventListener("cw-auth-changed", () => window.location.reload());
