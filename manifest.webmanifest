@@ -1,0 +1,21 @@
+{
+  "name": "CoffeZ — كوفيز",
+  "short_name": "CoffeZ",
+  "description": "منصة CoffeZ للقهوة المختصة: ابتكر وصفتك، تسوّق، وتواصل مع أفضل البريستا.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F5F0E8",
+  "theme_color": "#2E1B10",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/assets/img/coffez-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
