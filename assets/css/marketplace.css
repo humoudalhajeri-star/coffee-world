@@ -77,6 +77,33 @@
   white-space: nowrap;
 }
 
+.market-demo-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .5px;
+  box-shadow: 0 2px 6px rgba(22,163,74,.4);
+  text-transform: uppercase;
+}
+
+.listing-demo-banner {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #78350f;
+  border: 1px solid #f59e0b;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.listing-demo-banner strong { display: block; margin-bottom: 2px; font-size: 15px; }
+
 .market-count-badge {
   position: absolute;
   bottom: 8px;

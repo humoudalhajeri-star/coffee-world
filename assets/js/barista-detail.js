@@ -42,7 +42,8 @@
     const emailLink  = b.email ? `mailto:${b.email}` : null;
 
     const avatar = b.photo
-      ? `<img src="${escapeHTML(b.photo)}" alt="${escapeHTML(b.name || "")}">`
+      ? `<img src="${escapeHTML(b.photo)}" alt="${escapeHTML(b.name || "")}"
+          onerror='this.onerror=null;this.replaceWith(Object.assign(document.createElement("span"),{textContent:"👤"}));'>`
       : `<span>👤</span>`;
 
     const experience = EXPERIENCE_LABELS[b.experience] || b.experience || "";
@@ -158,7 +159,13 @@
         <button class="btn btn-danger" id="bd-delete">🗑️ حذف الملف</button>
       </div>` : "";
 
+    const demoBanner = b.isDemo ? `
+      <div class="listing-demo-banner">
+        <strong>🌱 ملف تجريبي للعرض</strong> — هذا ملف بريستا تقديمي لعرض شكل المنصة. الشخص ورقم التواصل ليسا حقيقيين.
+      </div>` : "";
+
     root.innerHTML = `
+      ${demoBanner}
       <article class="bd-card">
         <div class="bd-banner"></div>
         <div class="bd-header">
@@ -206,7 +213,12 @@
     `;
 
     root.querySelectorAll(".bd-contact a").forEach(a => {
-      a.addEventListener("click", () => {
+      a.addEventListener("click", (e) => {
+        if (b.isDemo) {
+          e.preventDefault();
+          toast("هذا ملف تجريبي للعرض فقط — البيانات غير حقيقية", "error", 3500);
+          return;
+        }
         const href = a.getAttribute("href") || "";
         let kind = "other";
         if (href.startsWith("https://wa.me")) kind = "whatsapp";

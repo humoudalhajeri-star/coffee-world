@@ -21,12 +21,15 @@
     accessories: "أدوات وإكسسوارات",
     cups: "أكواب وعبوات",
     syrups: "نكهات وبومب",
+    traditional: "تراثي (دلال وفناجيل)",
+    dates: "تمور",
     other: "أخرى",
   };
 
   const CATEGORY_ICONS = {
     beans: "🫘", machines: "⚙️", grinders: "🌀",
-    accessories: "🧰", cups: "☕", syrups: "🍯", other: "📦",
+    accessories: "🧰", cups: "☕", syrups: "🍯",
+    traditional: "🫖", dates: "🌴", other: "📦",
   };
 
   /** Gulf countries + their currencies (symbol used in Arabic UIs). */
@@ -202,11 +205,15 @@
   function cardHTML(it) {
     const photos = Array.isArray(it.images) ? it.images.filter(Boolean) : [];
     const img = photos[0];
+    const fallbackIcon = CATEGORY_ICONS[it.category] || "☕";
     const mediaBody = img
-      ? `<img src="${escapeHTML(img)}" alt="${escapeHTML(it.title)}" loading="lazy">`
-      : `<span class="fallback">${CATEGORY_ICONS[it.category] || "☕"}</span>`;
+      ? `<img src="${escapeHTML(img)}" alt="${escapeHTML(it.title)}" loading="lazy"
+             onerror='this.onerror=null;this.replaceWith(Object.assign(document.createElement("span"),{className:"fallback",textContent:"${fallbackIcon}"}));'>`
+      : `<span class="fallback">${fallbackIcon}</span>`;
     const countBadge = photos.length > 1
       ? `<span class="market-count-badge">📷 ${photos.length}</span>` : "";
+    const demoBadge = it.isDemo
+      ? `<span class="market-demo-badge" title="إعلان تجريبي للعرض — ليس للبيع الفعلي">تجريبي</span>` : "";
     const curr = currencyOf(it.country);
     const priceBadge = it.price
       ? `<span class="market-price-badge">${Number(it.price).toLocaleString("ar-SA")} ${curr}</span>`
@@ -227,6 +234,7 @@
           ${mediaBody}
           ${priceBadge}
           ${countBadge}
+          ${demoBadge}
         </div>
         <div class="market-body">
           <h3 class="market-title">${escapeHTML(it.title || "بدون عنوان")}</h3>

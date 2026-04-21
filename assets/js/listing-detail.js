@@ -11,11 +11,14 @@
     accessories: "أدوات وإكسسوارات",
     cups: "أكواب وعبوات",
     syrups: "نكهات وبومب",
+    traditional: "تراثي (دلال وفناجيل)",
+    dates: "تمور",
     other: "أخرى",
   };
   const CATEGORY_ICONS = {
     beans: "🫘", machines: "⚙️", grinders: "🌀",
-    accessories: "🧰", cups: "☕", syrups: "🍯", other: "📦",
+    accessories: "🧰", cups: "☕", syrups: "🍯",
+    traditional: "🫖", dates: "🌴", other: "📦",
   };
   const COUNTRIES = {
     KW: { flag: "🇰🇼", name: "الكويت",   currency: "د.ك" },
@@ -88,9 +91,11 @@
       currency: listing.currency || "SAR",
     });
 
+    const fallbackIcon = CATEGORY_ICONS[listing.category] || "☕";
     const slidesHTML = photos.length
-      ? photos.map(src => `<div class="slide"><img src="${escapeHTML(src)}" alt="${escapeHTML(listing.title || "")}"></div>`).join("")
-      : `<div class="slide"><span>${CATEGORY_ICONS[listing.category] || "☕"}</span></div>`;
+      ? photos.map(src => `<div class="slide"><img src="${escapeHTML(src)}" alt="${escapeHTML(listing.title || "")}"
+          onerror='this.onerror=null;this.replaceWith(Object.assign(document.createElement("span"),{textContent:"${fallbackIcon}"}));'></div>`).join("")
+      : `<div class="slide"><span>${fallbackIcon}</span></div>`;
 
     const dotsHTML = photos.length > 1
       ? photos.map((_, i) => `<span class="dot${i === 0 ? " active" : ""}" data-i="${i}"></span>`).join("")
@@ -127,7 +132,13 @@
 
     const description = (listing.description || "").trim();
 
+    const demoBanner = listing.isDemo ? `
+      <div class="listing-demo-banner">
+        <strong>🌱 إعلان تجريبي للعرض</strong> — هذا إعلان عرض تقديمي لمنصة CoffeZ. الرقم والبائع ليسا حقيقيين.
+      </div>` : "";
+
     $("#listing-root").innerHTML = `
+      ${demoBanner}
       <div class="listing-gallery">
         <div class="listing-slides" id="ld-slides">${slidesHTML}</div>
         ${counterHTML}
@@ -174,10 +185,20 @@
       </div>
     `;
 
-    $("#listing-root .btn-call")?.addEventListener("click", () => {
+    $("#listing-root .btn-call")?.addEventListener("click", (e) => {
+      if (listing.isDemo) {
+        e.preventDefault();
+        toast("هذا إعلان تجريبي للعرض فقط — الرقم غير حقيقي", "error", 3500);
+        return;
+      }
       window.CW_TRACK?.("Contact", { description: "listing_call", content_id: listing.id });
     });
-    $("#listing-root .btn-whatsapp")?.addEventListener("click", () => {
+    $("#listing-root .btn-whatsapp")?.addEventListener("click", (e) => {
+      if (listing.isDemo) {
+        e.preventDefault();
+        toast("هذا إعلان تجريبي للعرض فقط — الرقم غير حقيقي", "error", 3500);
+        return;
+      }
       window.CW_TRACK?.("Contact", { description: "listing_whatsapp", content_id: listing.id });
     });
 
