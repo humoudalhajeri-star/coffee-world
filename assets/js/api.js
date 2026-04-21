@@ -108,49 +108,29 @@
     return window.CW_FB;
   }
 
-  /* ============= Recipes (Stage 1) ============= */
+  /* ============= Recipes (Stage 1) =============
+   * Recipes are private per-device. Stored in localStorage only —
+   * no Firebase, no server — because the recipe builder has no sign-in
+   * and we don't want anyone's recipes to leak to other users.
+   */
   const Recipes = {
     async list() {
-      const f = await fb();
-      if (f) return f.listDocs("recipes", { ownerOnly: true });
-      return withFallback(
-        () => http("GET", "/recipes"),
-        () => LS.read(LS_KEYS.recipes)
-      );
+      return LS.read(LS_KEYS.recipes);
     },
     async get(id) {
-      const f = await fb();
-      if (f) return f.getDocById("recipes", id);
-      return withFallback(
-        () => http("GET", `/recipes/${encodeURIComponent(id)}`),
-        () => LS.read(LS_KEYS.recipes).find(r => r.id === id) || null
-      );
+      return LS.read(LS_KEYS.recipes).find(r => r.id === id) || null;
     },
     async create(recipe) {
-      const f = await fb();
-      if (f) return f.createDoc("recipes", recipe);
-      return withFallback(
-        () => http("POST", "/recipes", recipe),
-        () => {
-          const items = LS.read(LS_KEYS.recipes);
-          const saved = { ...recipe, id: LS.uid(), createdAt: new Date().toISOString() };
-          items.unshift(saved);
-          LS.write(LS_KEYS.recipes, items);
-          return saved;
-        }
-      );
+      const items = LS.read(LS_KEYS.recipes);
+      const saved = { ...recipe, id: LS.uid(), createdAt: new Date().toISOString() };
+      items.unshift(saved);
+      LS.write(LS_KEYS.recipes, items);
+      return saved;
     },
     async remove(id) {
-      const f = await fb();
-      if (f) return f.deleteDoc("recipes", id);
-      return withFallback(
-        () => http("DELETE", `/recipes/${encodeURIComponent(id)}`),
-        () => {
-          const items = LS.read(LS_KEYS.recipes).filter(r => r.id !== id);
-          LS.write(LS_KEYS.recipes, items);
-          return { ok: true };
-        }
-      );
+      const items = LS.read(LS_KEYS.recipes).filter(r => r.id !== id);
+      LS.write(LS_KEYS.recipes, items);
+      return { ok: true };
     },
   };
 
