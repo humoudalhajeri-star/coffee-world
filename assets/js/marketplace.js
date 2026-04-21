@@ -96,6 +96,11 @@
   /* ============ Auth UI (Haraj-style: gated posting) ============ */
   // When set, we auto-open the listing form right after sign-in/up finishes.
   let pendingListingAfterAuth = false;
+  // "إعلاناتي" filter: when true, the grid is restricted to the signed-in user.
+  let showMineOnly = false;
+  // When editing an existing listing, holds its id so submit knows to
+  // update instead of create.
+  let editingListingId = null;
 
   function renderAuthArea() {
     const area = $("#auth-area");
@@ -104,16 +109,27 @@
     if (session) {
       const name = session.user?.name || session.user?.email || "مستخدم";
       const initial = (name || "?").trim().charAt(0);
+      const mineBtn = showMineOnly
+        ? `<button class="btn btn-gold" id="toggle-mine-btn">🛍 كل السوق</button>`
+        : `<button class="btn btn-outline" id="toggle-mine-btn">📦 إعلاناتي</button>`;
       area.innerHTML = `
         <span class="auth-chip">
           <span class="av">${escapeHTML(initial)}</span>
           ${escapeHTML(name)}
         </span>
+        ${mineBtn}
         <button class="btn btn-outline" id="signout-btn">تسجيل خروج</button>`;
+      $("#toggle-mine-btn").addEventListener("click", () => {
+        showMineOnly = !showMineOnly;
+        renderAuthArea();
+        loadAndRender();
+      });
       $("#signout-btn").addEventListener("click", async () => {
         await window.CoffeeAPI.Auth.signOut();
+        showMineOnly = false;
         toast("تم تسجيل الخروج", "info");
         renderAuthArea();
+        loadAndRender();
       });
     } else {
       area.innerHTML = `
@@ -192,17 +208,26 @@
     try {
       let items = await window.CoffeeAPI.Listings.list(search);
       if (cat) items = items.filter(i => i.category === cat);
-      if (!items.length) {
+
+      const session = window.CoffeeAPI.Auth.current();
+      const myId = session?.user?.id;
+      if (showMineOnly && myId) {
+        items = items.filter(i => i.ownerId === myId);
+        if (!items.length) {
+          grid.innerHTML = `<div class="empty" style="grid-column:1/-1;"><h3>لم ترفع أي إعلان بعد</h3><p>اضغط "أضف إعلانك" لنشر أول إعلان.</p></div>`;
+          return;
+        }
+      } else if (!items.length) {
         grid.innerHTML = `<div class="empty" style="grid-column:1/-1;"><h3>لا توجد إعلانات بعد</h3><p>كن أول من يضيف إعلاناً — اضغط "أضف إعلانك".</p></div>`;
         return;
       }
-      grid.innerHTML = items.map(cardHTML).join("");
+      grid.innerHTML = items.map(it => cardHTML(it, myId)).join("");
     } catch (err) {
       grid.innerHTML = `<div class="empty"><h3>تعذّر التحميل</h3><p>${escapeHTML(err.message)}</p></div>`;
     }
   }
 
-  function cardHTML(it) {
+  function cardHTML(it, myId) {
     const photos = Array.isArray(it.images) ? it.images.filter(Boolean) : [];
     const img = photos[0];
     const fallbackIcon = CATEGORY_ICONS[it.category] || "☕";
@@ -226,6 +251,13 @@
       (i === 0 ? p : `<span class="dot">·</span>${p}`)
     ).join(" ");
 
+    const isMine = myId && it.ownerId === myId;
+    const ownerActions = isMine ? `
+      <div class="market-owner-actions">
+        <button class="btn btn-outline btn-sm" data-edit="${escapeHTML(it.id)}" onclick="event.stopPropagation()">✎ تعديل</button>
+        <button class="btn btn-danger btn-sm"  data-delete="${escapeHTML(it.id)}" onclick="event.stopPropagation()">🗑 حذف</button>
+      </div>` : "";
+
     return `
       <article class="market-card" data-open="${escapeHTML(it.id)}" role="button" tabindex="0">
         <div class="market-media">
@@ -236,12 +268,35 @@
         <div class="market-body">
           <h3 class="market-title">${escapeHTML(it.title || "بدون عنوان")}</h3>
           <div class="market-meta">${metaRow}</div>
+          ${ownerActions}
         </div>
       </article>`;
   }
 
   function wireGridOnce() {
-    $("#listings").addEventListener("click", (e) => {
+    $("#listings").addEventListener("click", async (e) => {
+      const editBtn = e.target.closest("[data-edit]");
+      if (editBtn) {
+        e.stopPropagation();
+        const id = editBtn.getAttribute("data-edit");
+        try {
+          const listing = await window.CoffeeAPI.Listings.get(id);
+          if (listing) openEditModal(listing);
+        } catch (err) { toast("تعذّر تحميل الإعلان: " + err.message, "error"); }
+        return;
+      }
+      const delBtn = e.target.closest("[data-delete]");
+      if (delBtn) {
+        e.stopPropagation();
+        const id = delBtn.getAttribute("data-delete");
+        if (!confirm("حذف هذا الإعلان نهائياً؟")) return;
+        try {
+          await window.CoffeeAPI.Listings.remove(id);
+          toast("تم الحذف", "success");
+          loadAndRender();
+        } catch (err) { toast("تعذّر الحذف: " + err.message, "error"); }
+        return;
+      }
       const card = e.target.closest(".market-card[data-open]");
       if (!card) return;
       window.location.href = `listing.html?id=${encodeURIComponent(card.dataset.open)}`;
@@ -331,6 +386,12 @@
       return;
     }
 
+    editingListingId = null;
+    const header = $("#listing-modal header h3");
+    if (header) header.textContent = "إعلان جديد";
+    const submitBtn = $("#listing-form button[type=submit]");
+    if (submitBtn) submitBtn.textContent = "نشر الإعلان";
+
     imageQueue = [];
     $("#listing-form").reset();
     $("#listing-files").value = "";
@@ -361,7 +422,41 @@
 
     $("#listing-modal").classList.add("open");
   }
-  function closeModal() { $("#listing-modal").classList.remove("open"); }
+  function closeModal() {
+    $("#listing-modal").classList.remove("open");
+    editingListingId = null;
+    const submitBtn = $("#listing-form button[type=submit]");
+    if (submitBtn) submitBtn.textContent = "نشر الإعلان";
+    const header = $("#listing-modal header h3");
+    if (header) header.textContent = "إعلان جديد";
+  }
+
+  function openEditModal(listing) {
+    imageQueue = Array.isArray(listing.images) ? [...listing.images] : [];
+    $("#listing-form").reset();
+    $("#listing-files").value = "";
+
+    const form = $("#listing-form");
+    form.elements["title"].value       = listing.title       || "";
+    form.elements["price"].value       = listing.price       || "";
+    form.elements["category"].value    = listing.category    || "";
+    form.elements["phone"].value       = listing.phone       || "";
+    form.elements["description"].value = listing.description || "";
+    const countrySel = $("#listing-country");
+    if (countrySel && listing.country) {
+      countrySel.value = listing.country;
+      countrySel.dispatchEvent(new Event("change"));
+    }
+    if (listing.city) form.elements["city"].value = listing.city;
+
+    renderPreviews();
+    editingListingId = listing.id;
+    const header = $("#listing-modal header h3");
+    if (header) header.textContent = "تعديل الإعلان";
+    const submitBtn = $("#listing-form button[type=submit]");
+    if (submitBtn) submitBtn.textContent = "حفظ التعديلات";
+    $("#listing-modal").classList.add("open");
+  }
 
   async function findMyBaristaProfile(userId) {
     if (!userId) return null;
@@ -407,15 +502,20 @@
 
     const submitBtn = form.querySelector("button[type=submit]");
     const saved = submitBtn?.textContent;
-    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "⏳ جارٍ النشر..."; }
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = editingListingId ? "⏳ جارٍ الحفظ..." : "⏳ جارٍ النشر..."; }
     try {
-      await window.CoffeeAPI.Listings.create(data);
-      toast("تم نشر الإعلان ✓", "success");
-      window.CW_TRACK?.("SubmitForm", { description: "new_listing" });
+      if (editingListingId) {
+        await window.CoffeeAPI.Listings.update(editingListingId, data);
+        toast("تم حفظ التعديلات ✓", "success");
+      } else {
+        await window.CoffeeAPI.Listings.create(data);
+        toast("تم نشر الإعلان ✓", "success");
+        window.CW_TRACK?.("SubmitForm", { description: "new_listing" });
+      }
       closeModal();
       loadAndRender();
     } catch (err) {
-      toast("تعذّر النشر: " + err.message, "error");
+      toast("تعذّر الحفظ: " + err.message, "error");
     } finally {
       if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = saved || "نشر الإعلان"; }
     }

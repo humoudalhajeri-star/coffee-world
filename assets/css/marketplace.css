@@ -155,6 +155,19 @@
 }
 .market-meta .dot { opacity: 0.5; }
 
+.market-owner-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+}
+.market-owner-actions .btn-sm {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
 /* ===== FAB: "Add listing" button ===== */
 .market-fab {
   position: fixed;

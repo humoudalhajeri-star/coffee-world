@@ -180,6 +180,23 @@
         }
       );
     },
+    async update(id, listing) {
+      const f = await fb();
+      if (f) return f.updateDoc("listings", id, listing);
+      return withFallback(
+        () => http("PATCH", `/listings/${encodeURIComponent(id)}`, listing),
+        () => {
+          const items = LS.read(LS_KEYS.listings);
+          const i = items.findIndex(l => l.id === id);
+          if (i >= 0) {
+            items[i] = { ...items[i], ...listing, updatedAt: new Date().toISOString() };
+            LS.write(LS_KEYS.listings, items);
+            return items[i];
+          }
+          throw new Error("الإعلان غير موجود");
+        }
+      );
+    },
     async remove(id) {
       const f = await fb();
       if (f) return f.deleteDoc("listings", id);
