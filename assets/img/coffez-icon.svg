@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="coffee-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5B3A23"/>
+      <stop offset="55%" stop-color="#2E1B10"/>
+      <stop offset="100%" stop-color="#1A0E08"/>
+    </linearGradient>
+    <radialGradient id="shine" cx="30%" cy="25%" r="55%">
+      <stop offset="0%" stop-color="#D4AF37" stop-opacity="0.45"/>
+      <stop offset="70%" stop-color="#D4AF37" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gold-dot" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5D76E"/>
+      <stop offset="100%" stop-color="#C9A227"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Base rounded square -->
+  <rect width="512" height="512" rx="112" ry="112" fill="url(#coffee-bg)"/>
+
+  <!-- Radial gold shine from top-left -->
+  <rect width="512" height="512" rx="112" ry="112" fill="url(#shine)"/>
+
+  <!-- Subtle inner border -->
+  <rect x="4" y="4" width="504" height="504" rx="108" ry="108"
+        fill="none" stroke="#D4AF37" stroke-width="3" stroke-opacity="0.25"/>
+
+  <!-- Gold accent dot (top-right) -->
+  <circle cx="412" cy="100" r="30" fill="url(#gold-dot)"/>
+  <circle cx="412" cy="100" r="30" fill="none" stroke="#F5D76E" stroke-width="2" stroke-opacity="0.6"/>
+
+  <!-- "cZ" monogram, slightly tilted for character -->
+  <g transform="rotate(-4 256 260)">
+    <text x="256" y="360"
+          font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+          font-size="300" font-weight="900"
+          fill="#D4AF37"
+          text-anchor="middle"
+          letter-spacing="-20">cZ</text>
+  </g>
+</svg>
