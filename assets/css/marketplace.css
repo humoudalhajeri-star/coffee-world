@@ -59,8 +59,13 @@
 .market-media .fallback {
   position: absolute; inset: 0;
   display: grid; place-items: center;
-  font-size: 42px;
+  font-size: 92px;
   color: var(--coffee-900);
+  background:
+    radial-gradient(circle at 30% 30%, rgba(212,175,55,.35), transparent 60%),
+    linear-gradient(135deg, var(--cream-100), var(--coffee-300));
+  text-shadow: 0 3px 12px rgba(62,39,22,.15);
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,.1));
 }
 
 .market-price-badge {
@@ -283,11 +288,13 @@
   flex: 0 0 100%;
   scroll-snap-align: start;
   aspect-ratio: 4 / 3;
-  background: linear-gradient(135deg, var(--coffee-300), var(--coffee-400));
+  background:
+    radial-gradient(circle at 30% 30%, rgba(212,175,55,.35), transparent 60%),
+    linear-gradient(135deg, var(--cream-100), var(--coffee-300));
   display: grid;
   place-items: center;
   color: var(--coffee-900);
-  font-size: 48px;
+  font-size: 140px;
 }
 .listing-slides .slide img {
   width: 100%; height: 100%;
