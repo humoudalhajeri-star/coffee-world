@@ -161,7 +161,7 @@
 
     const demoBanner = b.isDemo ? `
       <div class="listing-demo-banner">
-        <strong>🌱 ملف تجريبي للعرض</strong> — هذا ملف بريستا تقديمي لعرض شكل المنصة. الشخص ورقم التواصل ليسا حقيقيين.
+        عرض افتتاحي من CoffeZ — للتواصل العام مع المنصة، تابع الحسابات الرسمية.
       </div>` : "";
 
     root.innerHTML = `
@@ -216,7 +216,7 @@
       a.addEventListener("click", (e) => {
         if (b.isDemo) {
           e.preventDefault();
-          toast("هذا ملف تجريبي للعرض فقط — البيانات غير حقيقية", "error", 3500);
+          toast("عرض افتتاحي — تابع حسابات CoffeZ الرسمية للتواصل", "success", 3500);
           return;
         }
         const href = a.getAttribute("href") || "";

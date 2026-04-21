@@ -134,7 +134,7 @@
 
     const demoBanner = listing.isDemo ? `
       <div class="listing-demo-banner">
-        <strong>🌱 إعلان تجريبي للعرض</strong> — هذا إعلان عرض تقديمي لمنصة CoffeZ. الرقم والبائع ليسا حقيقيين.
+        عرض افتتاحي من CoffeZ — للتواصل العام مع المنصة، تابع الحسابات الرسمية.
       </div>` : "";
 
     $("#listing-root").innerHTML = `
@@ -188,7 +188,7 @@
     $("#listing-root .btn-call")?.addEventListener("click", (e) => {
       if (listing.isDemo) {
         e.preventDefault();
-        toast("هذا إعلان تجريبي للعرض فقط — الرقم غير حقيقي", "error", 3500);
+        toast("عرض افتتاحي — تابع حسابات CoffeZ الرسمية للتواصل", "success", 3500);
         return;
       }
       window.CW_TRACK?.("Contact", { description: "listing_call", content_id: listing.id });
@@ -196,7 +196,7 @@
     $("#listing-root .btn-whatsapp")?.addEventListener("click", (e) => {
       if (listing.isDemo) {
         e.preventDefault();
-        toast("هذا إعلان تجريبي للعرض فقط — الرقم غير حقيقي", "error", 3500);
+        toast("عرض افتتاحي — تابع حسابات CoffeZ الرسمية للتواصل", "success", 3500);
         return;
       }
       window.CW_TRACK?.("Contact", { description: "listing_whatsapp", content_id: listing.id });
