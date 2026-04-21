@@ -212,8 +212,6 @@
       : `<span class="fallback">${fallbackIcon}</span>`;
     const countBadge = photos.length > 1
       ? `<span class="market-count-badge">📷 ${photos.length}</span>` : "";
-    const demoBadge = it.isDemo
-      ? `<span class="market-demo-badge" title="إعلان تجريبي للعرض — ليس للبيع الفعلي">تجريبي</span>` : "";
     const curr = currencyOf(it.country);
     const priceBadge = it.price
       ? `<span class="market-price-badge">${Number(it.price).toLocaleString("ar-SA")} ${curr}</span>`
@@ -234,7 +232,6 @@
           ${mediaBody}
           ${priceBadge}
           ${countBadge}
-          ${demoBadge}
         </div>
         <div class="market-body">
           <h3 class="market-title">${escapeHTML(it.title || "بدون عنوان")}</h3>
