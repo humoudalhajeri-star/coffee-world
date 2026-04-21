@@ -290,8 +290,11 @@
 
   function cardHTML(b, currentUser) {
     const avatar = b.photo
-      ? `<img src="${escapeHTML(b.photo)}" alt="${escapeHTML(b.name)}">`
+      ? `<img src="${escapeHTML(b.photo)}" alt="${escapeHTML(b.name)}"
+          onerror='this.onerror=null;this.replaceWith(Object.assign(document.createElement("span"),{textContent:"👤"}));'>`
       : `<span>👤</span>`;
+    const demoBadge = b.isDemo
+      ? `<span class="market-demo-badge" style="position:absolute;top:8px;right:8px;z-index:2;">تجريبي</span>` : "";
     const skills = (b.skills || []).slice(0, 4)
       .map(s => `<span class="tag">${escapeHTML(SKILL_LABELS[s] || s)}</span>`).join(" ");
     const more = (b.skills || []).length > 4 ? `<span class="tag">+${(b.skills || []).length - 4}</span>` : "";
@@ -305,8 +308,12 @@
     const deleteBtn = canDelete
       ? `<button class="btn btn-danger" data-delete="${b.id}" title="حذف" onclick="event.stopPropagation()">🗑️</button>`
       : "";
+    const demoCallGuard = b.isDemo
+      ? `onclick="event.stopPropagation();event.preventDefault();window.CW?.toast('ملف تجريبي للعرض فقط — البيانات غير حقيقية','error',3500);"`
+      : `onclick="event.stopPropagation()"`;
     return `
-      <article class="barista-card" data-open="${b.id}" role="button" tabindex="0">
+      <article class="barista-card" data-open="${b.id}" role="button" tabindex="0" style="position:relative;">
+        ${demoBadge}
         <div class="barista-banner"></div>
         <div class="barista-avatar">${avatar}</div>
         <div class="barista-body">
@@ -321,8 +328,8 @@
           <small style="color:var(--muted);">🗓️ ${formatDate(b.createdAt)}</small>
         </div>
         <div class="barista-actions">
-          <a class="btn btn-gold"    href="${waHref}" target="_blank" rel="noopener" onclick="event.stopPropagation()">💬 واتساب</a>
-          <a class="btn btn-outline" href="${phoneHref}" onclick="event.stopPropagation()">☎️</a>
+          <a class="btn btn-gold"    href="${waHref}" target="_blank" rel="noopener" ${demoCallGuard}>💬 واتساب</a>
+          <a class="btn btn-outline" href="${phoneHref}" ${demoCallGuard}>☎️</a>
           ${cvBtn}
           ${deleteBtn}
         </div>

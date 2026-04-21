@@ -156,7 +156,15 @@
       <section class="admin-panel" data-panel="baristas" hidden>
         <div class="section-head">
           <h3>☕ ملفات البريستا</h3>
-          <input type="search" class="input search" id="baristas-search" placeholder="🔍 ابحث..." />
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+            <button type="button" class="btn btn-outline btn-sm" id="seed-baristas-btn" title="إضافة 6 ملفات بريستا تجريبية لتعبئة القسم">
+              🌱 إضافة بريستا تجريبيين
+            </button>
+            <button type="button" class="btn btn-danger btn-sm" id="delete-baristas-btn" title="حذف كل ملفات البريستا التجريبية">
+              🗑 حذف التجريبيين
+            </button>
+            <input type="search" class="input search" id="baristas-search" placeholder="🔍 ابحث..." />
+          </div>
         </div>
         <div class="data-table-wrap">
           <table class="data-table" id="baristas-table">
@@ -208,6 +216,7 @@
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/app.js"></script>
   <script src="../assets/js/seed-data.js"></script>
+  <script src="../assets/js/seed-baristas.js"></script>
   <script src="../assets/js/admin.js"></script>
 </body>
 </html>
