@@ -9,6 +9,8 @@
   display: grid;
   place-items: center;
   overflow: hidden;
+  width: 100%;
+  max-width: 100vw;
   background:
     radial-gradient(circle at 70% 30%, rgba(212,175,55,.18), transparent 45%),
     linear-gradient(135deg, #2E1B10 0%, #1A0E08 100%);
@@ -38,9 +40,11 @@
   position: relative;
   z-index: 2;
   text-align: center;
+  width: 100%;
   max-width: 760px;
   padding: 80px 22px 60px;
   color: #fff;
+  box-sizing: border-box;
 }
 
 .home-hero-eyebrow {
@@ -82,10 +86,12 @@
 
 .home-hero-ctas {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 14px;
   max-width: 640px;
+  width: 100%;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .home-cta {
@@ -318,14 +324,57 @@
   font-size: 14px;
 }
 
+/* ===== Global guard: prevent any horizontal scroll on mobile ===== */
+html, body { overflow-x: hidden; }
+body[data-page="home"] { overflow-x: hidden; max-width: 100vw; }
+
 /* ===== Mobile tuning ===== */
 @media (max-width: 600px) {
-  .home-hero { min-height: 72vh; }
-  .home-hero-content { padding: 60px 18px 40px; }
-  .home-cta { padding: 16px 18px; }
-  .home-cta-icon { font-size: 28px; }
-  .home-cta-title { font-size: 14px; }
+  .home-hero { min-height: auto; padding: 0; }
+  .home-hero-content {
+    padding: 50px 16px 50px;
+    max-width: 100%;
+  }
+  .home-hero-eyebrow {
+    font-size: 11px;
+    padding: 6px 14px;
+    margin-bottom: 18px;
+  }
+  .home-hero-title {
+    font-size: clamp(24px, 8vw, 36px);
+    margin-bottom: 14px;
+  }
+  .home-hero-sub {
+    font-size: 14px;
+    margin-bottom: 26px;
+    padding: 0 6px;
+  }
+
+  /* Critical: stack the two CTA buttons vertically on mobile */
+  .home-hero-ctas {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    max-width: 360px;
+  }
+  .home-cta {
+    padding: 16px 18px;
+    gap: 14px;
+  }
+  .home-cta-icon { font-size: 30px; }
+  .home-cta-title { font-size: 15px; }
   .home-cta-sub { font-size: 11px; }
+
   .home-stats { padding: 24px 16px; }
-  .home-why, .home-services { padding: 48px 16px; }
+  .home-stats-grid { gap: 12px; }
+  .home-stat-num { font-size: 26px; }
+
+  .home-why, .home-services { padding: 42px 16px; }
+  .home-why-grid, .home-services-grid { gap: 14px; }
+  .home-why-card, .home-service-card { padding: 22px 18px; }
+}
+
+/* Ultra-narrow devices (≤360px) */
+@media (max-width: 360px) {
+  .home-hero-title { font-size: 22px; }
+  .home-hero-content { padding: 40px 14px 40px; }
 }
