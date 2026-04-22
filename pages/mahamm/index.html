@@ -3,66 +3,87 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>نَفَس — Wireframe</title>
-<meta name="description" content="نَفَس: حوّل ساعات دوامك إلى لحظات سلام صغيرة — بدون تغيير وظيفتك." />
+<title>أَثَر — Wireframe</title>
+<meta name="description" content="أَثَر: مرآة تريك الأثر الذي تتركه كل يوم — حتى لو ما تشوفه." />
 <link rel="icon" type="image/svg+xml" href="/assets/img/coffez-icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="mahamm.css" />
 </head>
-<body class="nafas-page">
+<body class="athar-page">
 
-  <nav class="nafas-nav">
-    <a href="#" class="nafas-brand">
-      <span class="nafas-brand-mark">ن</span>
-      <span class="nafas-brand-name">نَفَس</span>
+  <nav class="athar-nav">
+    <a href="#" class="athar-brand">
+      <span class="athar-brand-mark">أ</span>
+      <span class="athar-brand-name">أَثَر</span>
     </a>
-    <a href="/" class="nafas-nav-back">← رجوع لـ CoffeZ</a>
+    <a href="/" class="athar-nav-back">← رجوع لـ CoffeZ</a>
   </nav>
 
   <!-- ===== Hero ===== -->
-  <section class="nafas-hero">
-    <div class="nafas-hero-badge">🌿 WIREFRAME — مفهوم جديد</div>
+  <section class="athar-hero">
+    <div class="athar-hero-badge">✨ WIREFRAME — مفهوم مبتكر</div>
 
-    <div class="nafas-breath-circle">🕊️</div>
+    <div class="athar-fingerprint">
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- Concentric fingerprint circles -->
+        <g>
+          <circle class="athar-fp-bg" cx="100" cy="100" r="22"/>
+          <circle class="athar-fp-bg" cx="100" cy="100" r="36"/>
+          <circle class="athar-fp-bg" cx="100" cy="100" r="50"/>
+          <circle class="athar-fp-bg" cx="100" cy="100" r="64"/>
+          <circle class="athar-fp-bg" cx="100" cy="100" r="78"/>
+          <circle class="athar-fp-bg" cx="100" cy="100" r="92"/>
+        </g>
+        <!-- Gold trace arcs that reveal themselves -->
+        <path class="athar-fp-gold" d="M 100 78 A 22 22 0 0 1 122 100" />
+        <path class="athar-fp-gold" d="M 64 100 A 36 36 0 0 1 100 64" />
+        <path class="athar-fp-gold" d="M 100 150 A 50 50 0 0 1 50 100" />
+        <path class="athar-fp-gold" d="M 100 36 A 64 64 0 0 1 164 100" />
+        <path class="athar-fp-gold" d="M 36 100 A 64 64 0 0 1 70 45" />
+      </svg>
+    </div>
 
     <h1>
-      خُذ <span class="accent">نَفَساً</span><br>
-      وأنت في مكانك
+      أنت ترى عملك <span style="color:var(--a-muted);">بسيطاً</span><br>
+      نحن نراه <span class="accent">أَثَراً</span>
     </h1>
 
-    <p class="nafas-hero-tag">
-      تطبيق يحوّل ساعات دوامك الفارغة إلى <strong>لحظات سلام صغيرة</strong> —
-      بدون ما تغيّر وظيفتك، بدون مخاطرة، فقط راحة نفسية.
+    <p class="athar-hero-tag">
+      <strong>أَثَر</strong> = مرآة ذكية تكشف لك القيمة الخفيّة
+      في عملك اليومي. كل إيميل تردّ عليه، كل ملف تدقّقه، كل زميل تساعده
+      — كل هذا <strong>أَثَر تتركه</strong> لكنك لا تراه.
     </p>
 
-    <div class="nafas-hero-quote">
-      <strong>الفلسفة</strong>
-      <em>نَفَس</em> كلمة بثلاث معاني: الشهيق، الذات، والاستراحة.
-      ما نبي نغيّر وظيفتك — نبي نغيّر <strong>علاقتك فيها</strong>.
-      كل ساعة بدوامك = فرصة لنفَسٍ جديد، لحظة وعي، كلمة شكر،
-      أو مجرد ٦٠ ثانية مع ذاتك.
+    <div class="athar-hero-quote">
+      <strong>الفلسفة المختلفة</strong>
+      المشكلة ما تكمن في أنك لا قيمة لك — المشكلة أنك <strong>لا ترى قيمتك</strong>.
+      مَهَم يبنيلك هوية جديدة، نَفَس يهدّئك،
+      <strong>أَثَر يكشف لك أن القيمة موجودة أصلاً</strong> — فقط نحتاج نَجعلها مرئية.
     </div>
   </section>
 
-  <!-- Three pillars of wellbeing -->
+  <!-- Three pillars -->
   <section class="pillars">
     <div class="pillars-grid">
       <div class="pillar">
-        <div class="pillar-icon">🌅</div>
-        <h3>بداية بنيّة</h3>
-        <p>كل صباح، دقيقة واحدة للمزاج والامتنان — ابدأ يومك بوعي.</p>
+        <div class="pillar-num">1</div>
+        <div class="pillar-icon">🔍</div>
+        <h3>اكشف</h3>
+        <p>أسئلة يومية ذكية تستخرج الأثر الخفي في عملك.</p>
       </div>
       <div class="pillar">
-        <div class="pillar-icon">🕊️</div>
-        <h3>نَفَس كل ساعة</h3>
-        <p>تنبيه لطيف كل ساعة: تنفّس، كتب كلمة، راقب مزاجك.</p>
+        <div class="pillar-num">2</div>
+        <div class="pillar-icon">💎</div>
+        <h3>اعرض</h3>
+        <p>ملف أثر يوثّق مساهماتك — لك وحدك أو للآخرين.</p>
       </div>
       <div class="pillar">
-        <div class="pillar-icon">🌙</div>
-        <h3>ختام بامتنان</h3>
-        <p>آخر النهار، اكتب ٣ انتصارات صغيرة — حتى لو كانت تافهة.</p>
+        <div class="pillar-num">3</div>
+        <div class="pillar-icon">🤝</div>
+        <h3>تواصل</h3>
+        <p>ناس يحتاجون مهاراتك بالضبط — اربطك فيهم.</p>
       </div>
     </div>
   </section>
@@ -70,8 +91,8 @@
   <!-- ===== Screens ===== -->
   <section class="wireframe-section">
     <div class="wireframe-section-head">
-      <h2>رحلة يوم كامل في التطبيق</h2>
-      <p>٧ شاشات تغطّي الدوام من ٧ ص إلى ٣ ع</p>
+      <h2>٧ شاشات تكشف أَثَرَك</h2>
+      <p>من الشعور بالتهميش إلى رؤية قيمتك الحقيقية</p>
     </div>
 
     <div class="screens-grid">
@@ -82,207 +103,257 @@
           <div class="phone-screen">
             <div class="p-statusbar"></div>
             <div class="s-welcome">
-              <div class="s-welcome-orb">🕊️</div>
-              <h2>نَفَس</h2>
-              <p style="color:var(--n-peach); font-weight:800; font-size:15px;">
-                ليس كل يوم يحتاج<br>أن يكون منتجاً.<br>
-                بعض الأيام تحتاج<br>فقط أن تكون <span class="highlight">هادئة</span>.
-              </p>
+              <div class="s-welcome-fp">
+                <svg viewBox="0 0 100 100">
+                  <circle class="s-welcome-fp-bg" cx="50" cy="50" r="12"/>
+                  <circle class="s-welcome-fp-bg" cx="50" cy="50" r="20"/>
+                  <circle class="s-welcome-fp-bg" cx="50" cy="50" r="28"/>
+                  <circle class="s-welcome-fp-bg" cx="50" cy="50" r="36"/>
+                  <path class="s-welcome-fp-gold" d="M 50 38 A 12 12 0 0 1 62 50" fill="none"/>
+                  <path class="s-welcome-fp-gold" d="M 50 70 A 20 20 0 0 1 30 50" fill="none"/>
+                  <path class="s-welcome-fp-gold" d="M 22 50 A 28 28 0 0 1 50 22" fill="none"/>
+                </svg>
+              </div>
+              <h2>أَثَر<span style="display:block; font-size:14px; margin-top:4px; opacity:0.9;">ما تراه فينا — نراه بَصْمةً</span></h2>
               <p>
-                ٨ ساعات دوام يومياً.<br>
-                ٤٨٠ دقيقة.<br>
-                إحنا راح نخليها لك<br>أجمل مع ذاتك.
+                كل إنسان يترك أَثَراً —<br>
+                المشكلة أنك لا تلاحظه.<br>
+                هذا التطبيق يريك نفسك<br>
+                كما يراك العالم.
               </p>
-              <div class="cta">ابدأ رحلة الهدوء ←</div>
+              <div class="cta">اكشف أَثَرَك ←</div>
             </div>
           </div>
         </div>
         <div class="phone-label">
           <div class="phone-label-num">1</div>
           <h3>الترحيب</h3>
-          <p>يكسر عقدة الإنتاجية: "مو كل يوم لازم يكون منتج — بعضها للهدوء فقط".</p>
+          <p>شاشة بصمة متحرّكة — تعطي إحساس "هناك شي مخفي في داخلك نكشفه".</p>
         </div>
       </div>
 
-      <!-- Screen 2: Morning ritual -->
+      <!-- Screen 2: Daily Impact Detective -->
       <div class="phone-wrap">
         <div class="phone">
           <div class="phone-screen">
             <div class="p-statusbar"></div>
-            <div class="s-morning-sunrise">🌅</div>
-            <div class="s-morning-body">
-              <div class="s-morning-title">صباح الخير</div>
-              <div class="s-morning-sub">الساعة 7:00 ص · طقس الصباح</div>
+            <div class="s-detect-head">
+              <h2>تحقيق اليوم</h2>
+              <p>٣ أسئلة سريعة · ٢ دقيقة</p>
+            </div>
+            <div class="s-detect-body">
+              <div class="s-q-label">السؤال 1/3</div>
+              <div class="s-q-text">شنو أصغر شي سويته اليوم؟</div>
 
-              <div class="s-mood-q">كيف حالك هاليوم؟</div>
-              <div class="s-mood-faces">
-                <div class="s-mood-face">😔</div>
-                <div class="s-mood-face">😐</div>
-                <div class="s-mood-face selected">🙂</div>
-                <div class="s-mood-face">😊</div>
-                <div class="s-mood-face">🤩</div>
+              <div class="s-q-chip">ردّيت على إيميل</div>
+              <div class="s-q-chip selected">✓ ساعدت زميل في Excel</div>
+              <div class="s-q-chip">دقّقت ملف قبل يطلع</div>
+              <div class="s-q-chip">حضرت اجتماع</div>
+
+              <div class="s-q-input">
+                "علي كان عالق في pivot table<br>وشرحته له بـ 5 دقايق..."
               </div>
 
-              <div class="s-gratitude">
-                <label>✨ شي واحد تشكر الله عليه؟</label>
-                <div class="s-gratitude-input">"صحتي وعائلتي..."</div>
-              </div>
-
-              <div class="s-intention">
-                <div class="s-intention-label">🎯 نيّة اليوم</div>
-                اليوم راح أركّز على ما هو في يدي، وأترك الباقي.
+              <div class="s-ai-hint">
+                <span class="s-ai-hint-icon">✨</span>
+                <span><strong>اكتشفنا:</strong> وفّرت على علي ساعة كاملة. هذا أَثَر حقيقي.</span>
               </div>
             </div>
           </div>
         </div>
         <div class="phone-label">
           <div class="phone-label-num">2</div>
-          <h3>طقس الصباح (7:00 ص)</h3>
-          <p>٩٠ ثانية: مزاج + امتنان + نيّة. يبدأ دوامك بروح مختلفة.</p>
+          <h3>كشف الأثر اليومي</h3>
+          <p>٣ أسئلة ذكية. الـ AI يستخرج "الأثر" من أبسط الأعمال.</p>
         </div>
       </div>
 
-      <!-- Screen 3: Hourly breath -->
+      <!-- Screen 3: Impact Extracted -->
       <div class="phone-wrap">
         <div class="phone">
           <div class="phone-screen">
             <div class="p-statusbar"></div>
-            <div class="s-breath-popup">
-              <div class="s-breath-card">
-                <div class="s-breath-orb">
-                  <div>
-                    <div class="s-breath-label">شهيق</div>
-                    <div class="s-breath-orb-text">٤</div>
-                  </div>
+            <div class="p-header">
+              <span>← رجوع</span>
+              <span class="p-header-title">أثرك هالأسبوع</span>
+              <span>📤</span>
+            </div>
+            <div class="p-body">
+              <div class="s-impact-intro">
+                <div class="s-impact-intro-icon">✨</div>
+                <h3>٨ آثار اكتشفناها</h3>
+                <p>في ٥ أيام فقط</p>
+              </div>
+
+              <div class="s-impact-card">
+                <div class="s-impact-card-head">
+                  <div class="s-impact-icon">💡</div>
+                  <div class="s-impact-title">وفّرت ساعة لزميلك</div>
                 </div>
-                <div class="s-breath-title">لحظة نَفَس 🕊️</div>
-                <div class="s-breath-sub">خذ 60 ثانية لنفسك</div>
-                <div class="s-breath-timer">0:42</div>
-                <div class="s-breath-skip">تخطّي — أكمل لاحقاً</div>
+                <p class="s-impact-text">علمت علي Excel pivot tables — تقدير: وفّرت له ساعة عمل.</p>
+                <span class="s-impact-tag">#مهارة_تدريب</span>
+                <span class="s-impact-tag">#Excel</span>
+              </div>
+
+              <div class="s-impact-card">
+                <div class="s-impact-icon"></div>
+                <div class="s-impact-card-head">
+                  <div class="s-impact-icon">🛡</div>
+                  <div class="s-impact-title">منعت خطأ مكلف</div>
+                </div>
+                <p class="s-impact-text">دقّقت ملف العقد ولاحظت خطأ في المبلغ — وفّرت ١٢ ألف ريال محتملة.</p>
+                <span class="s-impact-tag">#تدقيق</span>
+                <span class="s-impact-tag">#دقة</span>
+              </div>
+
+              <div class="s-impact-card">
+                <div class="s-impact-card-head">
+                  <div class="s-impact-icon">💬</div>
+                  <div class="s-impact-title">هدّأت جوّاً متوتراً</div>
+                </div>
+                <p class="s-impact-text">في اجتماع اليوم، غيّرت المسار من جدل حاد إلى حل عملي.</p>
+                <span class="s-impact-tag">#ذكاء_عاطفي</span>
               </div>
             </div>
           </div>
         </div>
         <div class="phone-label">
           <div class="phone-label-num">3</div>
-          <h3>نَفَس كل ساعة</h3>
-          <p>تنبيه لطيف كل ساعة. دائرة تكبر وتصغر مع التنفس. ٦٠ ثانية فقط — وترجع لشغلك.</p>
+          <h3>سجلّ الأثر</h3>
+          <p>يحوّل كل فعل بسيط إلى بطاقة أثر ملموسة. مع تقدير كمّي للقيمة.</p>
         </div>
       </div>
 
-      <!-- Screen 4: Journal -->
+      <!-- Screen 4: Skills Mirror -->
       <div class="phone-wrap">
         <div class="phone">
           <div class="phone-screen">
             <div class="p-statusbar"></div>
             <div class="p-header">
               <span>← رجوع</span>
-              <span class="p-header-title">يومياتي</span>
-              <span>+</span>
+              <span class="p-header-title">مرآتك</span>
+              <span>⚙</span>
             </div>
             <div class="p-body">
-              <div class="s-journal-date">
-                <div class="s-date-chip"><div class="day">سبت</div><div class="num">١٩</div></div>
-                <div class="s-date-chip"><div class="day">أحد</div><div class="num">٢٠</div></div>
-                <div class="s-date-chip"><div class="day">إث</div><div class="num">٢١</div></div>
-                <div class="s-date-chip active"><div class="day">اليوم</div><div class="num">٢٢</div></div>
+              <div class="s-mirror-head">
+                <h3>المهارات المكتشفة</h3>
+                <p>من أعمالك في الشهر الماضي</p>
               </div>
 
-              <div class="s-j-entry">
-                <div class="s-j-head">
-                  <div class="s-j-time">9:15 ص</div>
-                  <div class="s-j-mood">🙂</div>
+              <div class="s-skill-item">
+                <div class="s-skill-head">
+                  <div class="s-skill-name">🧑‍🏫 التدريب العملي</div>
+                  <div class="s-skill-pct">خبير</div>
                 </div>
-                <p class="s-j-text">شربت قهوتي بهدوء اليوم. أول مرة من شهر.</p>
+                <div class="s-skill-bar"><div class="s-skill-fill" style="width:88%;"></div></div>
+                <div class="s-skill-proof">١٢ مرة علّمت زملاءك مهارات</div>
               </div>
 
-              <div class="s-j-entry">
-                <div class="s-j-head">
-                  <div class="s-j-time">11:30 ص</div>
-                  <div class="s-j-mood">😐</div>
+              <div class="s-skill-item">
+                <div class="s-skill-head">
+                  <div class="s-skill-name">🛡 التدقيق والدقة</div>
+                  <div class="s-skill-pct">متقدم</div>
                 </div>
-                <p class="s-j-text">الاجتماع كان طويل، لكن لاحظت إن سهى ما تاخذ موضوعها جد.</p>
-                <div class="s-j-audio">
-                  <span>🎤</span>
-                  <div class="s-j-audio-bar"></div>
-                  <span style="font-size:10px; color:var(--n-muted);">0:32</span>
-                </div>
+                <div class="s-skill-bar"><div class="s-skill-fill" style="width:75%;"></div></div>
+                <div class="s-skill-proof">٧ أخطاء اكتشفتها قبل أن تسبب ضرراً</div>
               </div>
 
-              <div class="s-j-entry">
-                <div class="s-j-head">
-                  <div class="s-j-time">1:45 م</div>
-                  <div class="s-j-mood">😊</div>
+              <div class="s-skill-item">
+                <div class="s-skill-head">
+                  <div class="s-skill-name">💬 الوساطة والحوار</div>
+                  <div class="s-skill-pct">متوسط</div>
                 </div>
-                <p class="s-j-text">ساعدت زميلي في Excel وشكرني. أحسست إني مفيد.</p>
+                <div class="s-skill-bar"><div class="s-skill-fill" style="width:62%;"></div></div>
+                <div class="s-skill-proof">٥ مواقف هدّأت فيها جوّاً متوتراً</div>
               </div>
 
-              <div class="s-j-add">
-                ＋ أضف ملاحظة الآن
+              <div class="s-skill-item">
+                <div class="s-skill-head">
+                  <div class="s-skill-name">📊 تحليل البيانات</div>
+                  <div class="s-skill-pct">مبتدئ</div>
+                </div>
+                <div class="s-skill-bar"><div class="s-skill-fill" style="width:38%;"></div></div>
+                <div class="s-skill-proof">٣ تقارير فيها رؤى مفيدة</div>
+              </div>
+
+              <div style="background:rgba(212,160,23,.1); border:1px solid rgba(212,160,23,.3); padding:10px; border-radius:12px; margin-top:12px; font-size:11px; text-align:center; color:var(--a-indigo-dark); font-weight:700;">
+                💡 ملاحظة: كل مهارة مدعومة بأدلة من عملك
               </div>
             </div>
             <div class="p-tabbar">
-              <div class="p-tab"><span class="p-tab-icon">🌅</span>البداية</div>
-              <div class="p-tab"><span class="p-tab-icon">🕊️</span>نَفَس</div>
-              <div class="p-tab active"><span class="p-tab-icon">📔</span>يومياتي</div>
-              <div class="p-tab"><span class="p-tab-icon">💬</span>مجتمع</div>
-              <div class="p-tab"><span class="p-tab-icon">📊</span>رؤى</div>
+              <div class="p-tab"><span class="p-tab-icon">✨</span>اليوم</div>
+              <div class="p-tab"><span class="p-tab-icon">💎</span>أثري</div>
+              <div class="p-tab active"><span class="p-tab-icon">🪞</span>مرآتي</div>
+              <div class="p-tab"><span class="p-tab-icon">🤝</span>ساعد</div>
+              <div class="p-tab"><span class="p-tab-icon">💌</span>شكر</div>
             </div>
           </div>
         </div>
         <div class="phone-label">
           <div class="phone-label-num">4</div>
-          <h3>يوميات لحظية</h3>
-          <p>كلمة، صوت، أو جملة. خاص جداً. ما أحد يشوفه غيرك.</p>
+          <h3>مرآة المهارات</h3>
+          <p>مهاراتك الحقيقية — مستخرجة من أعمالك، مدعومة بأدلة.</p>
         </div>
       </div>
 
-      <!-- Screen 5: Insights -->
+      <!-- Screen 5: Help Feed -->
       <div class="phone-wrap">
         <div class="phone">
           <div class="phone-screen">
             <div class="p-statusbar"></div>
             <div class="p-header">
               <span>← رجوع</span>
-              <span class="p-header-title">رؤى أسبوعك</span>
+              <span class="p-header-title">ناس يحتاجونك</span>
               <span>🔍</span>
             </div>
             <div class="p-body">
-              <div class="s-insights-hero">
-                <h3>📈 مزاجك خلال الأسبوع</h3>
-                <p>أسبوعك كان أفضل ١٨٪ من الأسبوع الماضي</p>
-                <div class="s-chart">
-                  <div class="s-bar" data-day="س" style="height:40%;"></div>
-                  <div class="s-bar" data-day="ح" style="height:55%;"></div>
-                  <div class="s-bar" data-day="ن" style="height:70%;"></div>
-                  <div class="s-bar" data-day="ث" style="height:60%;"></div>
-                  <div class="s-bar" data-day="ر" style="height:80%;"></div>
-                  <div class="s-bar" data-day="خ" style="height:90%;"></div>
-                  <div class="s-bar" data-day="ج" style="height:95%;"></div>
+              <div style="background:linear-gradient(135deg, var(--a-indigo), var(--a-indigo-dark)); color:#fff; padding:14px; border-radius:14px; margin-bottom:14px; text-align:center;">
+                <div style="font-size:12px; margin-bottom:4px;">🎯 بناءً على مهاراتك</div>
+                <div style="font-size:18px; font-weight:900; color:var(--a-gold-glow);">٣ أشخاص يحتاجون خبرتك الآن</div>
+              </div>
+
+              <div class="s-help-item match">
+                <div class="s-help-from">
+                  <div class="s-help-avatar">🧑</div>
+                  <div>
+                    <div class="s-help-name">مستخدم مجهول</div>
+                    <div class="s-help-when">قبل 20 دقيقة</div>
+                  </div>
+                </div>
+                <p class="s-help-q">محتار في pivot tables. أي مرجع سريع؟</p>
+                <div class="s-help-meta">
+                  <span class="s-help-skill">🧑‍🏫 التدريب</span>
+                  <span class="s-help-btn">ساعده ←</span>
                 </div>
               </div>
 
-              <div class="s-insight-card">
-                <div class="s-insight-icon">🎯</div>
-                <div class="s-insight-body">
-                  <div class="s-insight-title">أفضل وقت في يومك</div>
-                  <div class="s-insight-text">بين ٢ و ٣ ع. ٨٠٪ من مشاعرك الإيجابية تحدث هناك.</div>
+              <div class="s-help-item match">
+                <div class="s-help-from">
+                  <div class="s-help-avatar">🧕</div>
+                  <div>
+                    <div class="s-help-name">سارة ك.</div>
+                    <div class="s-help-when">قبل ساعة</div>
+                  </div>
+                </div>
+                <p class="s-help-q">ملف عقد عندي، أحتاج عين ثانية تدقّقه قبل لا أسلّمه.</p>
+                <div class="s-help-meta">
+                  <span class="s-help-skill">🛡 التدقيق</span>
+                  <span class="s-help-btn">ساعدها ←</span>
                 </div>
               </div>
 
-              <div class="s-insight-card">
-                <div class="s-insight-icon">🔁</div>
-                <div class="s-insight-body">
-                  <div class="s-insight-title">نمط اكتشفناه</div>
-                  <div class="s-insight-text">مزاجك يرتفع كل ما كتبت يوميات. جرّب اكتب اليوم؟</div>
+              <div class="s-help-item">
+                <div class="s-help-from">
+                  <div class="s-help-avatar">🧔</div>
+                  <div>
+                    <div class="s-help-name">مستخدم مجهول</div>
+                    <div class="s-help-when">قبل ساعتين</div>
+                  </div>
                 </div>
-              </div>
-
-              <div class="s-insight-card">
-                <div class="s-insight-icon">💡</div>
-                <div class="s-insight-body">
-                  <div class="s-insight-title">كلمة تتكرر</div>
-                  <div class="s-insight-text">قلت "ملل" ١٢ مرة هالأسبوع. الخميس ما قلتها. شنو اختلف؟</div>
+                <p class="s-help-q">كيف أحضّر عرض تقديمي مقنع في ٢٠ دقيقة؟</p>
+                <div class="s-help-meta">
+                  <span class="s-help-skill">📊 التحليل</span>
+                  <span class="s-help-btn">ساعده ←</span>
                 </div>
               </div>
             </div>
@@ -290,132 +361,125 @@
         </div>
         <div class="phone-label">
           <div class="phone-label-num">5</div>
-          <h3>رؤى ذكية</h3>
-          <p>التطبيق يكتشف أنماطك الخفيّة — ويطلعلك مرآة نفسية.</p>
+          <h3>ناس يحتاجونك</h3>
+          <p>يطابق مهاراتك المكتشفة مع احتياجات الآخرين — مجاناً، مجهول الهوية.</p>
         </div>
       </div>
 
-      <!-- Screen 6: Anonymous community -->
+      <!-- Screen 6: Appreciation Inbox -->
       <div class="phone-wrap">
         <div class="phone">
           <div class="phone-screen">
             <div class="p-statusbar"></div>
             <div class="p-header">
               <span>← رجوع</span>
-              <span class="p-header-title">غرفة المزاج</span>
-              <span>+</span>
+              <span class="p-header-title">رسائل الشكر</span>
+              <span>💌</span>
             </div>
             <div class="p-body">
-              <div class="s-com-header">
-                <h3>🔒 مساحة آمنة — مجهولة</h3>
-                <p>اكتب ما تشعر به — بدون اسم، بدون حكم</p>
+              <div class="s-app-hero">
+                <div class="s-app-count">٢٣</div>
+                <div class="s-app-label">شخص شكرك هذا الشهر</div>
               </div>
 
-              <div class="s-com-post">
-                <div class="s-com-post-head">
-                  <div class="s-com-anon">
-                    <div class="s-com-avatar">🌿</div>
-                    <div>
-                      <div class="s-com-handle">يقظ_هادئ</div>
-                      <div class="s-com-when">قبل 12 دقيقة</div>
-                    </div>
-                  </div>
+              <div class="s-thanks-item">
+                <div class="s-thanks-head">
+                  <div class="s-thanks-avatar">🌿</div>
+                  <div class="s-thanks-who">مستخدم مجهول · قبل ساعة</div>
                 </div>
-                <p class="s-com-text">اليوم ما عندي شي أسويه في الدوام. أحس إني شبح.</p>
-                <div class="s-com-reactions">
-                  <span class="s-com-react">🤗 ٢٣ قلب</span>
-                  <span class="s-com-react">💬 ٥ ردود</span>
-                  <span class="s-com-react">🫂 عناق</span>
-                </div>
+                <p class="s-thanks-text">"يعطيك العافية — حلّيت لي مشكلة كنت شهر أحاول فيها ٥ دقايق!"</p>
               </div>
 
-              <div class="s-com-post">
-                <div class="s-com-post-head">
-                  <div class="s-com-anon">
-                    <div class="s-com-avatar">🌊</div>
-                    <div>
-                      <div class="s-com-handle">موج_الشتا</div>
-                      <div class="s-com-when">قبل ساعة</div>
-                    </div>
-                  </div>
+              <div class="s-thanks-item">
+                <div class="s-thanks-head">
+                  <div class="s-thanks-avatar">🌊</div>
+                  <div class="s-thanks-who">زميل في شركة ثانية · أمس</div>
                 </div>
-                <p class="s-com-text">لاحظت إني أشرب ٤ أكواب قهوة من الملل مو من الحاجة 🫠</p>
-                <div class="s-com-reactions">
-                  <span class="s-com-react">😂 ٤٧</span>
-                  <span class="s-com-react">✋ أنا بعد</span>
-                </div>
+                <p class="s-thanks-text">"شرحك للملف كان أوضح من اللي عندنا من قسم التدريب ❤️"</p>
               </div>
 
-              <div class="s-com-post">
-                <div class="s-com-post-head">
-                  <div class="s-com-anon">
-                    <div class="s-com-avatar">🌸</div>
-                    <div>
-                      <div class="s-com-handle">نبتة_الصبار</div>
-                      <div class="s-com-when">قبل ساعتين</div>
-                    </div>
-                  </div>
+              <div class="s-thanks-item">
+                <div class="s-thanks-head">
+                  <div class="s-thanks-avatar">🌸</div>
+                  <div class="s-thanks-who">مستخدم مجهول · قبل يومين</div>
                 </div>
-                <p class="s-com-text">شكراً للتطبيق — أول مرة من سنين أحس إن أحد فاهمني.</p>
-                <div class="s-com-reactions">
-                  <span class="s-com-react">❤️ ١٢٠</span>
-                  <span class="s-com-react">🙏 بركة</span>
+                <p class="s-thanks-text">"بسببك لاحظت خطأ في حساباتي — ما تتصوّر كم وفّرت علي"</p>
+              </div>
+
+              <div class="s-thanks-item">
+                <div class="s-thanks-head">
+                  <div class="s-thanks-avatar">🕊️</div>
+                  <div class="s-thanks-who">مستخدم مجهول · هذا الأسبوع</div>
                 </div>
+                <p class="s-thanks-text">"نصيحتك بس ٣ جمل — بس غيّرت طريقة تفكيري كلها"</p>
               </div>
             </div>
           </div>
         </div>
         <div class="phone-label">
           <div class="phone-label-num">6</div>
-          <h3>غرفة المزاج (مجهولة)</h3>
-          <p>مساحة آمنة للتنفيس. ردود فعل دافئة فقط (قلب، عناق، ٪أنا بعد٪). بدون إساءة.</p>
+          <h3>رسائل الشكر</h3>
+          <p>كلمات شكر مجهولة من الناس اللي ساعدتهم — دواء للقلب المهمّش.</p>
         </div>
       </div>
 
-      <!-- Screen 7: Evening -->
+      <!-- Screen 7: Monthly Report -->
       <div class="phone-wrap">
         <div class="phone">
           <div class="phone-screen">
             <div class="p-statusbar"></div>
-            <div class="s-evening-sunset">🌙</div>
-            <div class="s-evening-greet">
-              مساء النور ✨<br>
-              <span style="font-size:11px; color:var(--n-muted); font-weight:700;">الساعة 3:15 م · انتهى الدوام</span>
+            <div class="p-header">
+              <span>← رجوع</span>
+              <span class="p-header-title">تقرير الشهر</span>
+              <span>📤</span>
             </div>
-            <div class="s-evening-body">
-              <div style="font-size:12px; font-weight:900; color:var(--n-sage-dark); margin-bottom:8px;">
-                ٣ انتصارات صغيرة اليوم:
+            <div class="p-body">
+              <div class="s-report-title">
+                <h3>أَثَرُك في أبريل</h3>
+                <p>مرآة كاملة لمساهماتك</p>
               </div>
 
-              <div class="s-win-item">
-                <div class="s-win-check">✓</div>
-                <div class="s-win-text">رددت سلام على زميل ما كنت أكلّمه</div>
-              </div>
-
-              <div class="s-win-item">
-                <div class="s-win-check">✓</div>
-                <div class="s-win-text">شربت ماي بدل قهوة ٣ مرات</div>
-              </div>
-
-              <div class="s-win-item">
-                <div class="s-win-check">✓</div>
-                <div class="s-win-text">خذت ٥ أنفاس لما حسّيت بالضيق</div>
-              </div>
-
-              <div class="s-streak">
-                <div class="s-streak-num">٧</div>
-                <div class="s-streak-label">🔥 أيام متتالية</div>
-                <div style="font-size:10px; margin-top:4px; font-weight:700;">
-                  كمّل — أسبوع كامل من الوعي الذاتي
+              <div class="s-stat-row">
+                <div class="s-stat-box">
+                  <div class="s-stat-val">٣٤</div>
+                  <div class="s-stat-lbl">أثر مسجّل</div>
+                </div>
+                <div class="s-stat-box">
+                  <div class="s-stat-val">٢٣</div>
+                  <div class="s-stat-lbl">شخص شكرك</div>
+                </div>
+                <div class="s-stat-box">
+                  <div class="s-stat-val">١٢س</div>
+                  <div class="s-stat-lbl">وفّرتها للناس</div>
                 </div>
               </div>
+
+              <div style="font-size:11px; font-weight:900; color:var(--a-indigo); margin-bottom:8px;">آثارك عبر الأسابيع</div>
+              <div class="s-chart">
+                <div class="s-bar" data-label="١" style="height:45%;"></div>
+                <div class="s-bar" data-label="٢" style="height:60%;"></div>
+                <div class="s-bar" data-label="٣" style="height:55%;"></div>
+                <div class="s-bar" data-label="٤" style="height:85%;"></div>
+              </div>
+              <div style="height: 24px;"></div>
+
+              <div class="s-report-insight">
+                💎 <strong>نتيجة الشهر:</strong> في وظيفتك اللي تحسّ أنها ممّلة،
+                أنت ساعدت ٢٣ شخصاً، ووفّرت ١٢ ساعة عمل للآخرين،
+                ومنعت خطأً يساوي ١٢,٠٠٠ ريال.
+                <strong>هذا أثر حقيقي — لكن لم يكن أحد يراه.</strong>
+              </div>
+
+              <button style="background:linear-gradient(135deg, var(--a-gold), var(--a-gold-glow)); color:var(--a-indigo-dark); padding:12px; border-radius:12px; font-weight:900; font-size:13px; border:none; margin-top:12px; width:100%; box-shadow:0 8px 20px rgba(212,160,23,.4);">
+                📤 شارك تقريرك (خاص/عام)
+              </button>
             </div>
           </div>
         </div>
         <div class="phone-label">
           <div class="phone-label-num">7</div>
-          <h3>ختام بامتنان (3 ع)</h3>
-          <p>٣ انتصارات صغيرة — حتى لو كانت تافهة. المخ يحتاج "إنجاز" مرئي.</p>
+          <h3>تقرير شهري</h3>
+          <p>مرآة كاملة: ٣٤ أثراً، ٢٣ شكر، ١٢ ساعة وفّرتها. دليل مادي لقيمتك.</p>
         </div>
       </div>
 
@@ -423,40 +487,41 @@
   </section>
 
   <!-- ===== CTA Decision ===== -->
-  <section class="nafas-cta">
-    <h2>هل نبني <span>نَفَس</span> فعلاً؟</h2>
+  <section class="athar-cta">
+    <h2>هل نبني <span>أَثَر</span>؟</h2>
     <p>
-      مو كل تطبيق لازم يغيّر الحياة — بعضها يكفي إنه يخليك <strong>تتنفس</strong>.<br>
-      نَفَس ما يحتاج منك تغيير وظيفة ولا مغامرة. فقط ٥ دقايق ذكية يومياً.
+      لا يُطلب منك أن تتعلم مهارات جديدة، ولا أن تغيّر وظيفتك،
+      ولا حتى أن تسوّي شي زائد. بس ٢ دقيقة يومياً —
+      والتطبيق يُظهر لك ما <strong>أنت فيه أصلاً</strong>.
     </p>
-    <div class="nafas-cta-row">
-      <a href="/" class="nafas-cta-btn">🌿 نبدأ بناء MVP</a>
-      <a href="/" class="nafas-cta-btn nafas-cta-btn-outline">💭 نعدّل الفكرة</a>
+    <div class="athar-cta-row">
+      <a href="/" class="athar-cta-btn">✨ نبدأ بناء MVP</a>
+      <a href="/" class="athar-cta-btn athar-cta-btn-outline">💭 نعدّل الفكرة</a>
     </div>
 
-    <div class="nafas-science">
-      <h4>🧪 الأساس العلمي</h4>
+    <div class="athar-science">
+      <h4>🧠 لماذا هذا يعمل نفسياً؟</h4>
       <p>
-        <strong>Positive Psychology</strong> (Seligman):
-        الامتنان اليومي يرفع السعادة ٢٥٪ خلال أسبوعين.
+        <strong>Reframing Theory</strong> (Dr. Aaron Beck):
+        إعادة تأطير الواقع يغيّر الشعور به — بدون تغيير الواقع نفسه.
       </p>
       <p>
-        <strong>Micro-mindfulness</strong> (UCLA 2023):
-        ٦٠ ثانية تنفس واعي كل ساعة تقلّل التوتر ٤٠٪.
+        <strong>Self-Affirmation</strong> (Dr. Claude Steele — Stanford):
+        رؤية الفرد لمساهماته يرفع ثقته بالذات ٤٠٪ في أسبوعين.
       </p>
       <p>
-        <strong>Anonymous sharing</strong> (Stanford):
-        التعبير المجهول عن المشاعر يقلّل الاكتئاب ٣٢٪.
+        <strong>Gratitude Received</strong> (Dr. Robert Emmons — UC Davis):
+        تلقّي الشكر من غرباء يزيد السعادة ضعفَي الشكر لمن تعرفهم.
       </p>
       <p>
-        <strong>Reflection journaling</strong> (Harvard Business Review):
-        ١٥ دقيقة تأمل يومياً ترفع الأداء ٢٣٪ — حتى لو شغلك روتيني.
+        <strong>Hidden Labor Research</strong> (HBR 2024):
+        ٧٢٪ من موظفي المكاتب يشعرون أن "ما يسوّونه لا يُلاحَظ" —
+        وهذا أبرز سبب للاحتراق الوظيفي.
       </p>
     </div>
   </section>
 
   <script>
-    // Scroll reveal
     const phones = document.querySelectorAll('.phone-wrap');
     const io = new IntersectionObserver((entries) => {
       entries.forEach(e => {
