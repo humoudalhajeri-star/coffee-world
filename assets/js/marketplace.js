@@ -237,6 +237,8 @@
       : `<span class="fallback">${fallbackIcon}</span>`;
     const countBadge = photos.length > 1
       ? `<span class="market-count-badge">📷 ${photos.length}</span>` : "";
+    const founderBadge = it.isFoundingPartner
+      ? `<span class="founder-badge" title="شريك مؤسس في CoffeZ">🏆 شريك مؤسس</span>` : "";
     const curr = currencyOf(it.country);
     const priceBadge = it.price
       ? `<span class="market-price-badge">${Number(it.price).toLocaleString("ar-SA")} ${curr}</span>`
@@ -264,6 +266,7 @@
           ${mediaBody}
           ${priceBadge}
           ${countBadge}
+          ${founderBadge}
         </div>
         <div class="market-body">
           <h3 class="market-title">${escapeHTML(it.title || "بدون عنوان")}</h3>

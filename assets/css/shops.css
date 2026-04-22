@@ -1,0 +1,270 @@
+/* =============================================
+ * CoffeZ — Merchant landing page (/pages/shops.html)
+ * ============================================= */
+
+.shops-hero {
+  background:
+    radial-gradient(circle at 20% 30%, rgba(212,175,55,.18), transparent 55%),
+    linear-gradient(135deg, var(--cream-100), var(--cream-50));
+  padding: 60px 0 50px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 3px solid var(--gold);
+}
+
+.shops-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--gold), #B8860B);
+  color: #2E1B10;
+  padding: 8px 20px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: .5px;
+  box-shadow: 0 4px 12px rgba(212,175,55,.4);
+  margin-bottom: 22px;
+  text-transform: uppercase;
+}
+
+.shops-hero h1 {
+  font-size: clamp(28px, 6vw, 44px);
+  color: var(--coffee-900);
+  margin: 0 auto 20px;
+  max-width: 780px;
+  line-height: 1.3;
+  font-weight: 900;
+}
+.shops-hero h1 span {
+  color: var(--gold);
+  background: linear-gradient(135deg, var(--gold), #B8860B);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.shops-hero-sub {
+  font-size: 17px;
+  color: var(--coffee-700);
+  max-width: 640px;
+  margin: 0 auto 32px;
+  line-height: 1.7;
+}
+
+.btn-lg {
+  padding: 16px 36px;
+  font-size: 17px;
+  font-weight: 900;
+  border-radius: 14px;
+  box-shadow: 0 8px 22px rgba(212,175,55,.35);
+}
+
+.shops-hero-note {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 14px;
+}
+.shops-hero-note span { color: var(--gold); }
+
+/* Offer cards */
+.shops-offer {
+  padding: 60px 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.shops-offer h2 {
+  text-align: center;
+  font-size: clamp(24px, 5vw, 34px);
+  color: var(--coffee-900);
+  margin: 0 0 40px;
+  font-weight: 900;
+}
+.offer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+.offer-card {
+  background: var(--cream-50);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 26px 22px;
+  text-align: center;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.offer-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px rgba(62,39,22,.1);
+}
+.offer-icon {
+  font-size: 44px;
+  margin-bottom: 14px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.1));
+}
+.offer-card h3 {
+  font-size: 17px;
+  color: var(--coffee-900);
+  margin: 0 0 8px;
+  font-weight: 900;
+}
+.offer-card p {
+  color: var(--coffee-700);
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* Target */
+.shops-target {
+  background: linear-gradient(135deg, var(--coffee-900) 0%, var(--coffee-700) 100%);
+  color: #fff;
+  padding: 60px 0;
+}
+.shops-target h2 {
+  text-align: center;
+  font-size: clamp(22px, 5vw, 30px);
+  margin: 0 0 34px;
+  font-weight: 900;
+  color: var(--gold);
+}
+.target-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+.target-card {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(212,175,55,.3);
+  padding: 18px 16px;
+  border-radius: 12px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 15px;
+  backdrop-filter: blur(4px);
+}
+
+/* How */
+.shops-how {
+  padding: 60px 20px;
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+.shops-how h2 {
+  font-size: clamp(24px, 5vw, 34px);
+  color: var(--coffee-900);
+  margin: 0 0 40px;
+  font-weight: 900;
+}
+.how-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+}
+.how-step {
+  position: relative;
+  padding: 26px 20px 20px;
+  background: var(--cream-50);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.how-num {
+  position: absolute;
+  top: -20px;
+  inset-inline-start: 50%;
+  transform: translateX(50%);
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), #B8860B);
+  color: #2E1B10;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  font-weight: 900;
+  box-shadow: 0 6px 14px rgba(212,175,55,.4);
+}
+.how-step h3 {
+  font-size: 17px;
+  color: var(--coffee-900);
+  margin: 16px 0 8px;
+  font-weight: 900;
+}
+.how-step p {
+  color: var(--coffee-700);
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* Form */
+.shops-form-section {
+  background: linear-gradient(135deg, var(--cream-100), var(--cream-50));
+  padding: 60px 20px 80px;
+  border-top: 3px solid var(--gold);
+}
+.shops-form-card {
+  max-width: 580px;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 36px 28px;
+  box-shadow: 0 20px 40px rgba(62,39,22,.12);
+}
+.shops-form-card h2 {
+  font-size: 26px;
+  color: var(--coffee-900);
+  margin: 0 0 6px;
+  font-weight: 900;
+  text-align: center;
+}
+.shops-form-card > p {
+  text-align: center;
+  color: var(--coffee-700);
+  margin: 0 0 26px;
+  font-size: 14px;
+}
+.shops-form-card .field { margin-bottom: 14px; }
+.shops-submit-btn {
+  width: 100%;
+  margin-top: 18px;
+}
+.shops-form-footer {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 14px;
+}
+
+/* Success */
+.shops-success {
+  text-align: center;
+  padding: 40px 20px;
+}
+.shops-success-icon { font-size: 72px; margin-bottom: 14px; }
+.shops-success h3 {
+  color: var(--coffee-900);
+  margin: 0 0 10px;
+  font-size: 22px;
+  font-weight: 900;
+}
+.shops-success p {
+  color: var(--coffee-700);
+  font-size: 15px;
+  line-height: 1.7;
+  margin: 0 0 6px;
+}
+.shops-success-meta {
+  color: var(--gold) !important;
+  font-weight: 700;
+  margin-top: 16px !important;
+}
+
+@media (max-width: 600px) {
+  .shops-hero { padding: 40px 20px 36px; }
+  .shops-offer, .shops-how { padding: 40px 16px; }
+  .shops-form-card { padding: 28px 20px; }
+}

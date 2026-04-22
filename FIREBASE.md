@@ -177,3 +177,30 @@ match /visits/{visitId} {
 - كل متصفح يُسجَّل **مرة واحدة في اليوم لكل قسم** (Home / Recipe / Marketplace / Baristas) — لتقليل كتابات Firestore.
 - صفحات **admin / terms / privacy** مُستبعَدة من العدّ.
 - إذا أردت حذف عدّاد معيّن (مثلاً لاختبار)، احذف الوثيقة من Firebase Console.
+
+## ٩. تفعيل صفحة شركاء المحلات (Shops Landing)
+
+صفحة `/pages/shops.html` تستقبل طلبات المحلات الراغبة في الانضمام كشركاء مؤسسين، وتحفظها في Firestore `shopRequests/`. لوحة التحكم تبويب **🏪 شركاء المحلات** يعرضها.
+
+أضف القاعدة التالية:
+
+```
+match /shopRequests/{requestId} {
+  // أي زائر يستطيع إرسال طلب شراكة
+  allow create: if
+    request.resource.data.keys().hasAll(['ownerName','shopName','phone','category','country']) &&
+    request.resource.data.shopName is string &&
+    request.resource.data.shopName.size() > 0 &&
+    request.resource.data.shopName.size() < 200;
+
+  // فقط المشرفون يقرأون/يعدّلون/يحذفون
+  allow read, update, delete: if isAdmin();
+}
+```
+
+اضغط **Publish**. بعد دقيقة، أي طلب يُقدَّم من صفحة `/shops` سيظهر في لوحة التحكم.
+
+### ملاحظات:
+- يمكنك اعتماد / رفض / حذف الطلبات من اللوحة
+- زر الواتساب يفتح محادثة جاهزة مع رسالة ترحيب
+- الرابط المباشر لدعوة المحلات: `https://coffez.net/pages/shops.html`

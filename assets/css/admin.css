@@ -433,6 +433,79 @@
 .device-legend .dot.mobile  { background: var(--gold); }
 .device-legend .dot.desktop { background: var(--coffee-800); }
 
+/* ===== Shop partner cards ===== */
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+.shop-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.shop-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+.shop-card-head h4 {
+  margin: 0 0 2px;
+  font-size: 16px;
+  color: var(--coffee-900);
+  font-weight: 900;
+}
+.shop-card-owner {
+  font-size: 13px;
+  color: var(--muted);
+}
+.shop-chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.shop-chip-pending  { background: #FEF3C7; color: #92400E; }
+.shop-chip-approved { background: #D1FAE5; color: #065F46; }
+.shop-chip-rejected { background: #FEE2E2; color: #991B1B; }
+
+.shop-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--coffee-800);
+}
+.shop-meta-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.shop-notes {
+  background: var(--cream-100);
+  border-radius: 10px;
+  padding: 8px 12px;
+  color: var(--coffee-700);
+  font-size: 13px;
+  font-style: italic;
+  line-height: 1.6;
+  border-inline-start: 3px solid var(--gold);
+}
+.shop-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+}
+.shop-card-actions .btn-sm { flex: 1; min-width: 80px; padding: 6px 10px; font-size: 12px; }
+
 /* ===== Mobile ===== */
 @media (max-width: 600px) {
   .admin-main { padding: 16px 12px; }
