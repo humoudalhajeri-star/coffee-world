@@ -1,0 +1,21 @@
+{
+  "name": "بَعدين — نظّف screenshots جوالك",
+  "short_name": "بَعدين",
+  "description": "منظّم screenshots مع فرز سريع وسجل مشاركة واضح.",
+  "start_url": "/pages/badeen-app/",
+  "scope": "/pages/badeen-app/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAF9F6",
+  "theme_color": "#14B8A6",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/assets/img/coffez-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
