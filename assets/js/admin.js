@@ -34,6 +34,7 @@
   let allListings = [];
   let allBaristas = [];
   let allRecipes = [];
+  let allVisits = [];
 
   function isAdmin(user) {
     const email = (user?.user?.email || "").toLowerCase();
@@ -59,11 +60,12 @@
   }
 
   async function loadAllData() {
-    [allUsers, allListings, allBaristas, allRecipes] = await Promise.all([
+    [allUsers, allListings, allBaristas, allRecipes, allVisits] = await Promise.all([
       safeList("users"),
       safeList("listings"),
       safeList("baristas"),
       safeList("recipes"),
+      safeList("visits"),
     ]);
     renderStats();
     renderActivity();
@@ -71,6 +73,7 @@
     renderListings();
     renderBaristas();
     renderRecipes();
+    renderAnalytics();
   }
 
   /* =================================================================
@@ -350,6 +353,144 @@
   }
 
   /* =================================================================
+   * Analytics — aggregates docs from /visits
+   * ================================================================= */
+  const SECTION_LABELS = {
+    home:        { icon: "🏠", label: "الرئيسية" },
+    recipe:      { icon: "☕", label: "ابتكر وصفتك" },
+    marketplace: { icon: "🛒", label: "السوق" },
+    baristas:    { icon: "👥", label: "البريستا" },
+    other:       { icon: "📄", label: "أخرى" },
+  };
+
+  function renderAnalytics() {
+    const el = $("#analytics-content");
+    if (!el) return;
+
+    if (!allVisits || !allVisits.length) {
+      el.innerHTML = `
+        <div class="empty" style="padding:40px 20px;">
+          <h3>ما وصلت زيارات بعد</h3>
+          <p>إذا كنت تنتظر من ساعات وما ظهرت زيارات، تأكد من إضافة قاعدة Firestore للـ <code>visits</code> (راجع <strong>FIREBASE.md</strong>).</p>
+          <p class="tbl-muted">كل زائر يُسجَّل مرة واحدة فقط لكل قسم في اليوم.</p>
+        </div>`;
+      return;
+    }
+
+    const now = Date.now();
+    const DAY = 24 * 60 * 60 * 1000;
+    const tsOf = (v) => v.createdAt ? new Date(v.createdAt).getTime() : 0;
+
+    const today    = allVisits.filter(v => (now - tsOf(v)) <= DAY).length;
+    const last7    = allVisits.filter(v => (now - tsOf(v)) <= 7 * DAY).length;
+    const last30   = allVisits.filter(v => (now - tsOf(v)) <= 30 * DAY).length;
+    const total    = allVisits.length;
+    const mobile   = allVisits.filter(v => v.device === "mobile").length;
+    const desktop  = allVisits.filter(v => v.device === "desktop").length;
+
+    // Section breakdown
+    const bySection = {};
+    allVisits.forEach(v => {
+      const key = v.section || "other";
+      bySection[key] = (bySection[key] || 0) + 1;
+    });
+    const sectionRows = Object.entries(bySection)
+      .sort((a, b) => b[1] - a[1])
+      .map(([key, count]) => {
+        const info = SECTION_LABELS[key] || { icon: "📄", label: key };
+        const pct = Math.round((count / total) * 100);
+        return `
+          <div class="section-row">
+            <span class="section-icon">${info.icon}</span>
+            <div class="section-body">
+              <div class="section-label">${escapeHTML(info.label)}</div>
+              <div class="section-bar">
+                <div class="section-bar-fill" style="width:${pct}%"></div>
+              </div>
+            </div>
+            <span class="section-count">${count.toLocaleString("ar-SA")}</span>
+          </div>`;
+      }).join("");
+
+    // Recent 20
+    const recent = [...allVisits]
+      .filter(v => v.createdAt)
+      .sort((a, b) => tsOf(b) - tsOf(a))
+      .slice(0, 20)
+      .map(v => {
+        const info = SECTION_LABELS[v.section || "other"] || { icon: "📄", label: v.section };
+        return `
+          <div class="activity-item">
+            <div class="activity-icon">${info.icon}</div>
+            <div class="activity-body">
+              <div class="activity-title">${escapeHTML(info.label)} · <span class="tbl-muted">${v.device === "mobile" ? "📱" : "💻"}</span></div>
+              <div class="activity-meta">${formatDate(v.createdAt)}</div>
+            </div>
+          </div>`;
+      }).join("");
+
+    const mobilePct  = Math.round((mobile  / total) * 100);
+    const desktopPct = Math.round((desktop / total) * 100);
+
+    el.innerHTML = `
+      <div class="admin-stats">
+        <div class="stat-card" style="cursor:default;">
+          <span class="stat-icon">📅</span>
+          <div class="stat-body">
+            <div class="stat-value">${today.toLocaleString("ar-SA")}</div>
+            <div class="stat-label">اليوم (آخر 24 ساعة)</div>
+          </div>
+        </div>
+        <div class="stat-card" style="cursor:default;">
+          <span class="stat-icon">📊</span>
+          <div class="stat-body">
+            <div class="stat-value">${last7.toLocaleString("ar-SA")}</div>
+            <div class="stat-label">آخر 7 أيام</div>
+          </div>
+        </div>
+        <div class="stat-card" style="cursor:default;">
+          <span class="stat-icon">📈</span>
+          <div class="stat-body">
+            <div class="stat-value">${last30.toLocaleString("ar-SA")}</div>
+            <div class="stat-label">آخر 30 يوم</div>
+          </div>
+        </div>
+        <div class="stat-card" style="cursor:default;">
+          <span class="stat-icon">🌍</span>
+          <div class="stat-body">
+            <div class="stat-value">${total.toLocaleString("ar-SA")}</div>
+            <div class="stat-label">الإجمالي</div>
+          </div>
+        </div>
+      </div>
+
+      <section class="admin-section">
+        <div class="section-head"><h3>📱 الجهاز</h3></div>
+        <div class="device-row">
+          <div class="device-bar">
+            <div class="device-fill mobile"  style="width:${mobilePct}%"></div>
+            <div class="device-fill desktop" style="width:${desktopPct}%"></div>
+          </div>
+          <div class="device-legend">
+            <span><span class="dot mobile"></span> جوال ${mobilePct}% (${mobile.toLocaleString("ar-SA")})</span>
+            <span><span class="dot desktop"></span> كمبيوتر ${desktopPct}% (${desktop.toLocaleString("ar-SA")})</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="admin-section">
+        <div class="section-head"><h3>🏆 الأقسام الأكثر زيارة</h3></div>
+        <div class="section-breakdown">${sectionRows}</div>
+      </section>
+
+      <section class="admin-section">
+        <div class="section-head"><h3>🕒 آخر الزيارات (20)</h3></div>
+        <div class="activity-list">${recent}</div>
+      </section>
+    `;
+  }
+
+  /* =================================================================
    * Tabs
    * ================================================================= */
   function switchTab(tab) {
@@ -534,6 +675,7 @@
 
     // Wire refresh + deletes
     $("#refresh-activity")?.addEventListener("click", loadAllData);
+    $("#refresh-analytics")?.addEventListener("click", loadAllData);
     wireAllDeletes();
     wireDemoSeed();
 
