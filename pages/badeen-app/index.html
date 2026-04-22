@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>بَعدين — نظّف screenshots جوالك</title>
+<meta name="description" content="تطبيق ينظّم screenshots جوالك، يسوي فرز سريع، ويشاركها بذكاء مع سجل من أرسلتها له." />
+
+<link rel="icon" type="image/svg+xml" href="/assets/img/coffez-icon.svg">
+<link rel="apple-touch-icon" href="/assets/img/coffez-icon.svg">
+<link rel="manifest" href="/pages/badeen-app/manifest.webmanifest">
+<meta name="theme-color" content="#14B8A6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="بَعدين">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ==== WELCOME VIEW ==== -->
+  <section id="view-welcome" class="view">
+    <div class="welcome">
+      <div class="welcome-logo">ب</div>
+      <h1>نظّف الـ <span>"بَعدين"</span><br>في جوالك</h1>
+      <p>
+        كل screenshot أخذتها وقلت "أشوفها بَعدين" — اجمعها هنا،
+        رتّبها بـ swipe سريع، وشاركها مع اللي يحتاجها.
+      </p>
+
+      <div class="welcome-stats">
+        <div class="welcome-stat">
+          <div class="welcome-stat-num">📱</div>
+          <div class="welcome-stat-lbl">اختر الصور يدوياً</div>
+        </div>
+        <div class="welcome-stat">
+          <div class="welcome-stat-num">🔀</div>
+          <div class="welcome-stat-lbl">فرز Tinder-style</div>
+        </div>
+        <div class="welcome-stat">
+          <div class="welcome-stat-num">💌</div>
+          <div class="welcome-stat-lbl">شارك + تتبّع</div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="welcome-start">
+        📸 ارفع أول مجموعة
+      </button>
+      <button class="btn btn-ghost" id="welcome-skip">
+        شوف المكتبة الفارغة
+      </button>
+
+      <div class="welcome-note">
+        💾 كل صورك محفوظة على جوالك فقط — لا يطلع منها شي للسحابة.
+      </div>
+    </div>
+  </section>
+
+  <!-- ==== LIBRARY VIEW ==== -->
+  <section id="view-library" class="view">
+    <header class="app-header">
+      <div style="width:36px;"></div>
+      <h1>📸 مكتبتي</h1>
+      <button class="app-header-btn" onclick="qs('#file-input').click()">＋</button>
+    </header>
+    <div class="library-body" id="library-content"></div>
+  </section>
+
+  <!-- ==== SWIPE VIEW ==== -->
+  <section id="view-swipe" class="view">
+    <header class="app-header">
+      <button class="app-header-btn" data-back="library">←</button>
+      <h1 id="swipe-counter">0/0</h1>
+      <div style="width:36px;"></div>
+    </header>
+    <div class="swipe-progress">
+      <div class="swipe-progress-fill" id="swipe-progress-fill" style="width:0%"></div>
+    </div>
+    <div class="swipe-body" id="swipe-content"></div>
+    <div class="swipe-actions">
+      <button class="swipe-btn swipe-btn-delete" onclick="handleSwipe('delete')">🗑</button>
+      <button class="swipe-btn swipe-btn-later" onclick="swipeIndex++; renderSwipeCard();">⏰</button>
+      <button class="swipe-btn swipe-btn-keep" onclick="handleSwipe('keep')">💾</button>
+    </div>
+  </section>
+
+  <!-- ==== DETAIL VIEW ==== -->
+  <section id="view-detail" class="view">
+    <header class="app-header">
+      <button class="app-header-btn" data-back="library">←</button>
+      <h1>التفاصيل</h1>
+      <div style="width:36px;"></div>
+    </header>
+    <div class="detail-body" id="detail-content"></div>
+  </section>
+
+  <!-- ==== SENT VIEW ==== -->
+  <section id="view-sent" class="view">
+    <header class="app-header">
+      <div style="width:36px;"></div>
+      <h1>📤 المُرسَلات</h1>
+      <div style="width:36px;"></div>
+    </header>
+    <div class="library-body" id="sent-content"></div>
+  </section>
+
+  <!-- ==== TABBAR (shown on main views only) ==== -->
+  <nav class="tabbar">
+    <div class="tab" data-tab="library">
+      <span class="tab-icon">📚</span>
+      مكتبتي
+    </div>
+    <div class="tab" data-tab="sent">
+      <span class="tab-icon">📤</span>
+      المُرسَلات
+    </div>
+    <div class="tab" data-tab="welcome">
+      <span class="tab-icon">ℹ️</span>
+      حول
+    </div>
+  </nav>
+
+  <!-- FAB upload -->
+  <button class="fab" id="fab" aria-label="إضافة صور">＋</button>
+
+</div>
+
+<!-- Hidden file input -->
+<input type="file" id="file-input" class="upload-input" accept="image/*" multiple>
+
+<!-- Upload progress -->
+<div id="upload-progress" class="upload-progress" style="display:none;">جاري الرفع...</div>
+
+<!-- Share Modal -->
+<div id="share-modal" class="modal-backdrop">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>💌 إرسال إلى...</h3>
+      <button class="modal-close" id="share-close">×</button>
+    </div>
+    <div class="modal-body">
+
+      <textarea id="share-note" class="share-note" rows="2" placeholder="ملاحظة اختيارية (مثل: جربيها 😍)"></textarea>
+
+      <div class="recipients-label">👤 اكتب اسم جديد</div>
+      <input type="text" id="manual-recipient" class="recipients-input" placeholder="مثلاً: أبو أحمد">
+
+      <div class="recipients-label">⭐ أو اختر من المعتاد</div>
+      <div class="recipient-suggestions" id="recipient-suggestions"></div>
+
+      <button class="share-send-btn" id="share-send">
+        📤 تأكيد + مشاركة
+      </button>
+
+      <p style="text-align:center; font-size:11px; color:var(--b-muted); margin-top:10px; line-height:1.7;">
+        الإرسال يفتح WhatsApp أو أي تطبيق مشاركة في جوالك.<br>
+        سجل المرسلات يبقى عندك في التطبيق.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
