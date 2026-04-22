@@ -28,6 +28,7 @@
       <button class="admin-tab" data-tab="listings">🛍 الإعلانات</button>
       <button class="admin-tab" data-tab="baristas">☕ البريستا</button>
       <button class="admin-tab" data-tab="recipes">📝 الوصفات</button>
+      <button class="admin-tab" data-tab="shops">🏪 شركاء المحلات</button>
       <button class="admin-tab" data-tab="analytics">📈 الإحصائيات</button>
     </nav>
   </header>
@@ -207,6 +208,17 @@
             </thead>
             <tbody></tbody>
           </table>
+        </div>
+      </section>
+
+      <!-- Shops -->
+      <section class="admin-panel" data-panel="shops" hidden>
+        <div class="section-head">
+          <h3>🏪 طلبات شراكة المحلات</h3>
+          <button type="button" class="btn btn-outline btn-sm" id="refresh-shops">↻ تحديث</button>
+        </div>
+        <div id="shops-content">
+          <div class="empty"><p>جارٍ التحميل...</p></div>
         </div>
       </section>
 

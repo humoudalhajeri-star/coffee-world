@@ -35,6 +35,7 @@
   let allBaristas = [];
   let allRecipes = [];
   let allVisits = [];
+  let allShopRequests = [];
 
   function isAdmin(user) {
     const email = (user?.user?.email || "").toLowerCase();
@@ -60,12 +61,13 @@
   }
 
   async function loadAllData() {
-    [allUsers, allListings, allBaristas, allRecipes, allVisits] = await Promise.all([
+    [allUsers, allListings, allBaristas, allRecipes, allVisits, allShopRequests] = await Promise.all([
       safeList("users"),
       safeList("listings"),
       safeList("baristas"),
       safeList("recipes"),
       safeList("visits"),
+      safeList("shopRequests"),
     ]);
     renderStats();
     renderActivity();
@@ -74,6 +76,7 @@
     renderBaristas();
     renderRecipes();
     renderAnalytics();
+    renderShopRequests();
   }
 
   /* =================================================================
@@ -362,6 +365,173 @@
     baristas:    { icon: "👥", label: "البريستا" },
     other:       { icon: "📄", label: "أخرى" },
   };
+
+  /* =================================================================
+   * Shop partner requests — from /pages/shops.html landing form
+   * ================================================================= */
+  const SHOP_CATEGORY_LABELS = {
+    roastery:    "☕ محمصة قهوة",
+    dates:       "🌴 متجر تمور",
+    traditional: "🫖 دلال وتراثيات",
+    gear:        "⚙️ مكائن ومطاحن",
+    gift:        "🎁 هدايا وبوكسات",
+    cafe:        "☕ كافيه مستقل",
+    other:       "📦 أخرى",
+  };
+  const SHOP_COUNTRY_LABELS = {
+    KW: "🇰🇼 الكويت", SA: "🇸🇦 السعودية", AE: "🇦🇪 الإمارات",
+    QA: "🇶🇦 قطر",     BH: "🇧🇭 البحرين",  OM: "🇴🇲 عُمان",
+  };
+
+  function normalizeWa(phone) {
+    let d = String(phone || "").replace(/[^\d]/g, "");
+    if (d.startsWith("00")) d = d.slice(2);
+    if (d.startsWith("0") && d.length === 10) return "966" + d.slice(1);
+    if (d.length === 8) return "965" + d; // default to KW if 8 digits
+    return d;
+  }
+
+  function renderShopRequests() {
+    const el = $("#shops-content");
+    if (!el) return;
+
+    if (!allShopRequests || !allShopRequests.length) {
+      el.innerHTML = `
+        <div class="empty" style="padding:40px 20px;">
+          <h3>لا توجد طلبات بعد</h3>
+          <p>لما يسجّل محل من صفحة <a href="shops.html" target="_blank">shops</a>، راح يظهر هنا.</p>
+          <p class="tbl-muted">تأكد من إضافة قاعدة Firestore للـ <code>shopRequests</code> — راجع <strong>FIREBASE.md</strong>.</p>
+        </div>`;
+      return;
+    }
+
+    // Sort newest first
+    const sorted = [...allShopRequests].sort((a, b) =>
+      new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+    );
+
+    const pending  = sorted.filter(r => (r.status || "pending") === "pending").length;
+    const approved = sorted.filter(r => r.status === "approved").length;
+    const rejected = sorted.filter(r => r.status === "rejected").length;
+
+    const cardsHTML = sorted.map(r => {
+      const cat = SHOP_CATEGORY_LABELS[r.category] || r.category || "—";
+      const ctry = SHOP_COUNTRY_LABELS[r.country] || r.country || "";
+      const wa = normalizeWa(r.phone);
+      const waText = encodeURIComponent(
+        `السلام عليكم ${r.ownerName || ""}،\nشكراً لاهتمامكم بالانضمام لـ CoffeZ كشريك مؤسس.\nأنا حمود من CoffeZ ☕`
+      );
+      const waLink = wa ? `https://wa.me/${wa}?text=${waText}` : "#";
+      const igLink = r.instagram ? `https://instagram.com/${encodeURIComponent(r.instagram)}` : null;
+
+      const status = r.status || "pending";
+      const statusChip = {
+        pending:  `<span class="shop-chip shop-chip-pending">قيد المراجعة</span>`,
+        approved: `<span class="shop-chip shop-chip-approved">✓ شريك مؤسس</span>`,
+        rejected: `<span class="shop-chip shop-chip-rejected">مرفوض</span>`,
+      }[status] || "";
+
+      return `
+        <article class="shop-card">
+          <header class="shop-card-head">
+            <div>
+              <h4>${escapeHTML(r.shopName || "—")}</h4>
+              <div class="shop-card-owner">${escapeHTML(r.ownerName || "")}</div>
+            </div>
+            ${statusChip}
+          </header>
+
+          <div class="shop-card-body">
+            <div class="shop-meta-row">
+              <span>${cat}</span>
+              <span>${ctry}${r.city ? " · " + escapeHTML(r.city) : ""}</span>
+            </div>
+            <div class="shop-meta-row">
+              <span>📱 ${escapeHTML(r.phone || "")}</span>
+              ${r.instagram ? `<span>📸 @${escapeHTML(r.instagram)}</span>` : ""}
+            </div>
+            ${r.productCount ? `<div class="shop-meta-row"><span>📦 ${escapeHTML(r.productCount)} منتج</span></div>` : ""}
+            ${r.notes ? `<div class="shop-notes">"${escapeHTML(r.notes)}"</div>` : ""}
+            <div class="shop-meta-row tbl-muted">
+              <span>🗓️ ${formatDate(r.createdAt)}</span>
+            </div>
+          </div>
+
+          <div class="shop-card-actions">
+            ${wa ? `<a class="btn btn-gold btn-sm" href="${waLink}" target="_blank" rel="noopener">💬 واتساب</a>` : ""}
+            ${igLink ? `<a class="btn btn-outline btn-sm" href="${igLink}" target="_blank" rel="noopener">📸 إنستقرام</a>` : ""}
+            ${status !== "approved" ? `<button class="btn btn-outline btn-sm" data-shop-approve="${escapeHTML(r.id)}">✓ وافقت</button>` : ""}
+            ${status !== "rejected" ? `<button class="btn btn-outline btn-sm" data-shop-reject="${escapeHTML(r.id)}">✗ رفض</button>` : ""}
+            <button class="btn btn-danger btn-sm" data-shop-delete="${escapeHTML(r.id)}">🗑</button>
+          </div>
+        </article>`;
+    }).join("");
+
+    el.innerHTML = `
+      <div class="admin-stats" style="margin-bottom:20px;">
+        <div class="stat-card" style="cursor:default;">
+          <span class="stat-icon">⏳</span>
+          <div class="stat-body">
+            <div class="stat-value">${pending.toLocaleString("ar-SA")}</div>
+            <div class="stat-label">قيد المراجعة</div>
+          </div>
+        </div>
+        <div class="stat-card" style="cursor:default;">
+          <span class="stat-icon">✅</span>
+          <div class="stat-body">
+            <div class="stat-value">${approved.toLocaleString("ar-SA")}</div>
+            <div class="stat-label">شركاء مؤسسين</div>
+          </div>
+        </div>
+        <div class="stat-card" style="cursor:default;">
+          <span class="stat-icon">❌</span>
+          <div class="stat-body">
+            <div class="stat-value">${rejected.toLocaleString("ar-SA")}</div>
+            <div class="stat-label">مرفوضة</div>
+          </div>
+        </div>
+        <div class="stat-card" style="cursor:default;">
+          <span class="stat-icon">🏪</span>
+          <div class="stat-body">
+            <div class="stat-value">${sorted.length.toLocaleString("ar-SA")}</div>
+            <div class="stat-label">الإجمالي</div>
+          </div>
+        </div>
+      </div>
+      <div class="shop-grid">${cardsHTML}</div>
+    `;
+
+    // Wire actions via event delegation
+    el.onclick = async (e) => {
+      const approveBtn = e.target.closest("[data-shop-approve]");
+      const rejectBtn  = e.target.closest("[data-shop-reject]");
+      const deleteBtn  = e.target.closest("[data-shop-delete]");
+
+      if (approveBtn) {
+        const id = approveBtn.getAttribute("data-shop-approve");
+        try {
+          await window.CW_FB.updateDoc("shopRequests", id, { status: "approved" });
+          toast("تم اعتماد الشريك ✓", "success");
+          loadAllData();
+        } catch (err) { toast("فشل: " + err.message, "error"); }
+      } else if (rejectBtn) {
+        const id = rejectBtn.getAttribute("data-shop-reject");
+        try {
+          await window.CW_FB.updateDoc("shopRequests", id, { status: "rejected" });
+          toast("تم الرفض", "info");
+          loadAllData();
+        } catch (err) { toast("فشل: " + err.message, "error"); }
+      } else if (deleteBtn) {
+        const id = deleteBtn.getAttribute("data-shop-delete");
+        if (!confirm("حذف هذا الطلب نهائياً؟")) return;
+        try {
+          await window.CW_FB.deleteDoc("shopRequests", id);
+          toast("تم الحذف", "success");
+          loadAllData();
+        } catch (err) { toast("فشل: " + err.message, "error"); }
+      }
+    };
+  }
 
   function renderAnalytics() {
     const el = $("#analytics-content");
@@ -676,6 +846,7 @@
     // Wire refresh + deletes
     $("#refresh-activity")?.addEventListener("click", loadAllData);
     $("#refresh-analytics")?.addEventListener("click", loadAllData);
+    $("#refresh-shops")?.addEventListener("click", loadAllData);
     wireAllDeletes();
     wireDemoSeed();
 
