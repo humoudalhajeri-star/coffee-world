@@ -101,6 +101,7 @@
   let state = {
     items: [],
     collections: [],
+    recent: [], // recently viewed item ids (newest first, capped at 10)
     filter: { type: 'all', q: '' },
     editing: null, // item being edited in modal
     creatingType: 'code',
@@ -115,6 +116,7 @@
         const d = JSON.parse(raw);
         state.items = Array.isArray(d.items) ? d.items : [];
         state.collections = Array.isArray(d.collections) ? d.collections : [];
+        state.recent = Array.isArray(d.recent) ? d.recent : [];
         // migrate legacy type 'info' → 'note'
         state.items.forEach((it) => { if (it.type === 'info') it.type = 'note'; });
       }
@@ -127,7 +129,14 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       items: state.items,
       collections: state.collections,
+      recent: state.recent,
     }));
+  }
+
+  function trackRecent(id) {
+    if (!id) return;
+    state.recent = [id, ...state.recent.filter((x) => x !== id)].slice(0, 10);
+    persist();
   }
 
   function seedCollections() {
@@ -268,10 +277,15 @@
   /* ============ TABS ============ */
   function renderTabs() {
     const wrap = $('#tabs');
+    const favCount = state.items.filter((x) => x.important).length;
     wrap.innerHTML = `
       <button class="tab ${state.filter.type === 'all' ? 'active' : ''}" data-tab="all">
         الكل · All
         <span class="tab-count">${state.items.length}</span>
+      </button>
+      <button class="tab ${state.filter.type === 'fav' ? 'active' : ''}" data-tab="fav" style="color: ${state.filter.type === 'fav' ? '#C89B3C' : ''}; border-bottom-color: ${state.filter.type === 'fav' ? '#C89B3C' : ''};">
+        ⭐ المفضلة · Favorites
+        <span class="tab-count" style="${state.filter.type === 'fav' ? 'background:#C89B3C; color:#fff;' : ''}">${favCount}</span>
       </button>
       ${TYPES.map((t) => `
         <button class="tab ${state.filter.type === t.id ? 'active' : ''}" data-tab="${t.id}" data-type="${t.id}">
@@ -297,12 +311,44 @@
 
   function filteredItems() {
     const q = (state.filter.q || '').trim().toLowerCase();
+    const f = state.filter.type;
     return state.items.filter((it) => {
-      if (state.filter.type !== 'all' && it.type !== state.filter.type) return false;
+      if (f === 'fav' && !it.important) return false;
+      if (f !== 'all' && f !== 'fav' && it.type !== f) return false;
       if (!q) return true;
       const hay = (it.title + ' ' + it.body + ' ' + (it.tags || []).join(' ')).toLowerCase();
       return hay.includes(q);
     }).sort((a, b) => b.createdAt - a.createdAt);
+  }
+
+  function renderRecentStrip() {
+    // only on the "All" tab with no active search
+    if (state.filter.type !== 'all' || state.filter.q) return '';
+    const recent = state.recent
+      .map((id) => state.items.find((x) => x.id === id))
+      .filter(Boolean)
+      .slice(0, 8);
+    if (recent.length === 0) return '';
+    return `
+      <div class="recent-strip">
+        <div class="recent-strip-head">
+          <h4>
+            ⏱ الأحدث تصفّحاً
+            <span class="en">RECENTLY VIEWED</span>
+          </h4>
+          <button id="recent-clear">مسح</button>
+        </div>
+        <div class="recent-chips">
+          ${recent.map((it) => {
+            const t = getType(it.type);
+            return `
+              <button class="recent-chip" data-item="${it.id}" title="${esc(it.title)}">
+                <span class="recent-chip-icon">${t.icon}</span>
+                ${esc(it.title)}
+              </button>`;
+          }).join('')}
+        </div>
+      </div>`;
   }
 
   function renderList() {
@@ -312,21 +358,35 @@
 
     countEl.textContent = items.length + (items.length === 1 ? ' عنصر · 1 item' : ' عناصر · ' + items.length + ' items');
 
+    const recentStripHTML = renderRecentStrip();
+
     if (items.length === 0) {
-      listWrap.innerHTML = `
+      listWrap.innerHTML = recentStripHTML + `
         <div class="empty">
-          <div class="empty-emoji">🧠</div>
-          <h3>${state.filter.q ? 'لا نتائج' : 'ذاكرتك فارغة'}</h3>
-          <p>${state.filter.q ? 'جرّب كلمة أخرى' : 'ابدأ بإضافة أول معلومة من الـAI'}</p>
-          ${!state.filter.q ? '<button class="btn btn-indigo" onclick="window.Z.openCreate()">＋ أضف أول شي</button>' : ''}
+          <div class="empty-emoji">${state.filter.type === 'fav' ? '⭐' : '🧠'}</div>
+          <h3>${
+            state.filter.q ? 'لا نتائج' :
+            state.filter.type === 'fav' ? 'لا توجد مفضلات بعد' :
+            'ذاكرتك فارغة'
+          }</h3>
+          <p>${
+            state.filter.q ? 'جرّب كلمة أخرى' :
+            state.filter.type === 'fav' ? 'علّم أي عنصر بنجمة ⭐ ليظهر هنا' :
+            'ابدأ بإضافة أول معلومة من الـAI'
+          }</p>
+          ${!state.filter.q && state.filter.type !== 'fav'
+            ? '<button class="btn btn-indigo" onclick="window.Z.openCreate()">＋ أضف أول شي</button>'
+            : ''}
         </div>`;
-      return;
+    } else {
+      listWrap.innerHTML = recentStripHTML + items.map(entryHTML).join('');
     }
 
-    listWrap.innerHTML = items.map(entryHTML).join('');
     $$('[data-item]').forEach((el) => {
       el.onclick = () => window.Z.openDetail(el.dataset.item);
     });
+    const clear = $('#recent-clear');
+    if (clear) clear.onclick = () => { state.recent = []; persist(); render(); };
   }
 
   function highlight(text, q) {
@@ -641,6 +701,7 @@
   function openDetail(id) {
     const it = state.items.find((x) => x.id === id);
     if (!it) return;
+    trackRecent(id);
     const t = getType(it.type);
     const modal = $('#detail-modal .modal');
     modal.setAttribute('data-type', it.type);
