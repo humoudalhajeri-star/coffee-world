@@ -578,8 +578,64 @@
     render();
   }
 
+  /* ============ PRO / PAYWALL ============ */
+  const PRO_KEY = 'zakerah.pro';
+  const FREE_TYPE_LIMIT = 3;
+  // Update this Gumroad product URL once you publish it. Until then, the
+  // button explains the next step instead of opening a 404.
+  const GUMROAD_PRO_URL = 'https://coffez.gumroad.com/l/zakerah-pro';
+  // Static unlock codes accepted by the app. Add/rotate as needed.
+  // For per-purchase keys, swap this for a Gumroad license-key API call.
+  const VALID_UNLOCK_CODES = new Set([
+    'ZAKERAH-PRO-2026',
+    'ZAKERAH-PRO-LIFETIME',
+    'COFFEZ-FOUNDER',
+  ]);
+
+  function isPro() { return !!localStorage.getItem(PRO_KEY); }
+  function setPro(reason) { localStorage.setItem(PRO_KEY, reason || '1'); }
+  function clearPro() { localStorage.removeItem(PRO_KEY); }
+
+  function openPaywall(reason = 'types') {
+    const sub = $('#paywall-sub');
+    if (sub) {
+      if (reason === 'types') {
+        sub.innerHTML = `النسخة المجانية تسمح بـ<strong>${FREE_TYPE_LIMIT} أنواع مخصصة</strong>. لإضافة أنواع غير محدودة، رقِّ إلى Pro لمرة واحدة.`;
+      } else {
+        sub.innerHTML = `لإلغاء الحد المجاني، رقِّ إلى Pro بدفعة واحدة.`;
+      }
+    }
+    $('#paywall-license').value = '';
+    const msg = $('#paywall-msg'); if (msg) msg.textContent = '';
+    $('#paywall-modal')?.classList.add('open');
+  }
+  function closePaywall() { $('#paywall-modal')?.classList.remove('open'); }
+
+  function activateLicense() {
+    const code = ($('#paywall-license')?.value || '').trim().toUpperCase();
+    const msg = $('#paywall-msg');
+    if (!code) {
+      if (msg) { msg.textContent = '⚠ ادخل رمز تفعيل'; msg.style.color = 'var(--danger)'; }
+      return;
+    }
+    if (VALID_UNLOCK_CODES.has(code)) {
+      setPro(code);
+      if (msg) { msg.textContent = '✓ تم التفعيل! استمتع بـPro'; msg.style.color = 'var(--success)'; }
+      toast('🎉 أُفعّل Pro — أنواع غير محدودة', 'success');
+      setTimeout(() => { closePaywall(); render(); }, 900);
+    } else {
+      if (msg) { msg.textContent = '⚠ رمز غير صالح. تأكد من النسخ.'; msg.style.color = 'var(--danger)'; }
+    }
+  }
+
   /* ============ CUSTOM TYPES ============ */
   function saveNewType() {
+    // freemium gate: limit free users to FREE_TYPE_LIMIT custom types
+    if (!isPro() && (state.customTypes || []).length >= FREE_TYPE_LIMIT) {
+      openPaywall('types');
+      return;
+    }
+
     const ar = ($('#new-type-ar')?.value || '').trim();
     const en = ($('#new-type-en')?.value || '').trim() || ar;
     const icon = ($('#new-type-icon')?.value || '').trim() || '🌟';
@@ -1336,7 +1392,21 @@
       </div>
 
       <div class="settings-section">
-        <h4>الأنواع المخصصة · Custom Types</h4>
+        <h4>
+          الأنواع المخصصة · Custom Types
+          ${isPro() ? '<span class="pro-badge">💎 PRO</span>' : ''}
+        </h4>
+        ${!isPro() ? `
+          <div class="usage-meter">
+            <span class="usage-meter-text">${state.customTypes.length} / ${FREE_TYPE_LIMIT} مجاني</span>
+            <div class="usage-meter-bar">
+              <div class="usage-meter-fill" style="width: ${Math.min(100, (state.customTypes.length / FREE_TYPE_LIMIT) * 100)}%"></div>
+            </div>
+            ${state.customTypes.length >= FREE_TYPE_LIMIT
+              ? '<button class="btn btn-primary btn-sm" id="set-upgrade">💎 ترقية</button>'
+              : ''}
+          </div>
+        ` : ''}
         ${state.customTypes.length === 0 ? `
           <p style="font-size:12px; color:var(--muted); margin:0; line-height:1.7;">
             لا توجد أنواع مخصصة بعد. عند إضافة عنصر جديد، استخدم زر "+ إضافة" في شريط اختيار النوع لإنشاء نوع خاص بك.
@@ -1387,6 +1457,10 @@
     $('#set-show-welcome')?.addEventListener('click', () => {
       closeSettings();
       setTimeout(openWelcome, 160);
+    });
+    $('#set-upgrade')?.addEventListener('click', () => {
+      closeSettings();
+      setTimeout(() => openPaywall('types'), 160);
     });
     $$('[data-del-type]').forEach((el) => {
       el.onclick = () => deleteCustomType(el.dataset.delType);
@@ -2071,6 +2145,7 @@
       if (e.key === 'Escape') {
         closeEditor(); closeDetail(); closeSearch();
         closeCollections(); closeSettings(); closeMonetize();
+        closePaywall();
       }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
@@ -2091,6 +2166,18 @@
     // wire welcome CTAs (exist in DOM from first load)
     $('#welcome-demo')?.addEventListener('click', startWithDemos);
     $('#welcome-blank')?.addEventListener('click', startBlank);
+    // wire paywall CTAs
+    $('#paywall-close')?.addEventListener('click', closePaywall);
+    $('#paywall-modal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'paywall-modal') closePaywall();
+    });
+    $('#paywall-buy')?.addEventListener('click', () => {
+      window.open(GUMROAD_PRO_URL, '_blank', 'noopener');
+    });
+    $('#paywall-activate')?.addEventListener('click', activateLicense);
+    $('#paywall-license')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); activateLicense(); }
+    });
     render();
     if (shouldShowWelcome()) openWelcome();
   });
