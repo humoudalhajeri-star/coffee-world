@@ -129,8 +129,17 @@
         state.items.forEach((it) => { if (it.type === 'info') it.type = 'note'; });
       }
     } catch {}
-    if (state.items.length === 0) seedDemo();
-    if (state.collections.length === 0) seedCollections();
+    // Intentionally no auto-seed here — welcome modal drives first-visit.
+  }
+
+  const WELCOMED_KEY = 'zakerah.welcomed';
+  function hasWelcomed()   { return !!localStorage.getItem(WELCOMED_KEY); }
+  function markWelcomed()  { localStorage.setItem(WELCOMED_KEY, '1'); }
+  function shouldShowWelcome() {
+    return !hasWelcomed() && state.items.length === 0 && state.collections.length === 0;
+  }
+  function countDemoItems() {
+    return state.items.filter((it) => it.isDemo).length;
   }
 
   function persist() {
@@ -185,7 +194,7 @@
         targetAi: 'ChatGPT',
         tags: ['email', 'writing'],
         usedCount: 0,
-        important: true,
+        important: true, isDemo: true,
         createdAt: now - 1000 * 60 * 60 * 2,
       },
       {
@@ -196,7 +205,7 @@
         source: 'Claude',
         lang: 'javascript',
         tags: ['react', 'performance'],
-        important: true,
+        important: true, isDemo: true,
         createdAt: now - 1000 * 60 * 60 * 6,
       },
       {
@@ -207,7 +216,7 @@
         source: 'ChatGPT',
         sourceUrl: '',
         tags: ['react', 'hooks'],
-        important: false,
+        important: false, isDemo: true,
         createdAt: now - 1000 * 60 * 60 * 24,
       },
       {
@@ -217,7 +226,7 @@
         body: '١) Linear — أفضل للفرق التقنية.\n٢) Notion — الأكثر مرونة لكن يحتاج إعداد.\n٣) Things 3 — للأفراد فقط.\n٤) Asana — مناسب لفرق التسويق.\n\nالتوصية: Linear + Notion معاً.',
         source: 'Claude',
         tags: ['productivity', 'tools'],
-        important: false,
+        important: false, isDemo: true,
         createdAt: now - 1000 * 60 * 60 * 24 * 2,
       },
       {
@@ -229,7 +238,7 @@
         status: 'exploring',
         priority: 'high',
         tags: ['coffee', 'app'],
-        important: false,
+        important: false, isDemo: true,
         createdAt: now - 1000 * 60 * 60 * 24 * 5,
       },
       {
@@ -239,7 +248,7 @@
         body: '1. ملخص بسطر واحد\n2. الجمهور المستهدف\n3. أهم 3 مزايا\n4. أهم 3 عيوب\n5. مقارنة مع منافس قريب\n6. التوصية النهائية + لمن يناسب',
         source: 'Manual',
         tags: ['content', 'review'],
-        important: false,
+        important: false, isDemo: true,
         createdAt: now - 1000 * 60 * 60 * 24 * 7,
       },
     ];
@@ -381,6 +390,21 @@
       </div>`;
   }
 
+  function renderDemoBanner() {
+    // only show on the main "All" tab with no active search
+    if (state.filter.type !== 'all' || state.filter.q) return '';
+    const n = countDemoItems();
+    if (n === 0) return '';
+    return `
+      <div class="demo-banner">
+        <div>
+          📘 في ذاكرتك <strong>${n} عنصر أمثلة</strong> جهّزناها لك.
+          احذفها متى شئت لتبقى محفوظاتك الشخصية فقط.
+        </div>
+        <button class="btn btn-ghost btn-sm" id="clear-demos">🗑 احذف الأمثلة</button>
+      </div>`;
+  }
+
   function renderList() {
     const items = filteredItems();
     const listWrap = $('#list');
@@ -389,9 +413,10 @@
     countEl.textContent = items.length + (items.length === 1 ? ' عنصر · 1 item' : ' عناصر · ' + items.length + ' items');
 
     const recentStripHTML = renderRecentStrip();
+    const demoBannerHTML = renderDemoBanner();
 
     if (items.length === 0) {
-      listWrap.innerHTML = recentStripHTML + `
+      listWrap.innerHTML = demoBannerHTML + recentStripHTML + `
         <div class="empty">
           <div class="empty-emoji">${state.filter.type === 'fav' ? '⭐' : '🧠'}</div>
           <h3>${
@@ -409,7 +434,7 @@
             : ''}
         </div>`;
     } else {
-      listWrap.innerHTML = recentStripHTML + items.map(entryHTML).join('');
+      listWrap.innerHTML = demoBannerHTML + recentStripHTML + items.map(entryHTML).join('');
     }
 
     $$('[data-item]').forEach((el) => {
@@ -417,6 +442,8 @@
     });
     const clear = $('#recent-clear');
     if (clear) clear.onclick = () => { state.recent = []; persist(); render(); };
+    const demoClearBtn = $('#clear-demos');
+    if (demoClearBtn) demoClearBtn.onclick = clearDemoItems;
   }
 
   function highlight(text, q) {
@@ -455,7 +482,7 @@
     return `
       <button class="entry" data-type="${it.type}" data-item="${it.id}">
         <div class="entry-head">
-          <span class="entry-type">${t.icon} ${esc(t.ar)} · ${esc(t.en)}</span>
+          <span class="entry-type">${t.icon} ${esc(t.ar)} · ${esc(t.en)}</span>${it.isDemo ? '<span class="entry-demo">مثال</span>' : ''}
           <div class="entry-meta-side">
             <span>${timeAgo(it.createdAt)}</span>
             <span class="entry-star ${it.important ? 'on' : ''}">${it.important ? '★' : '☆'}</span>
@@ -479,6 +506,46 @@
     persist, load, uid, esc, timeAgo, getType, countByType, toast,
     render, renderTabs, renderList, entryHTML, filteredItems, highlight,
   });
+
+  /* ============ WELCOME (first visit) ============ */
+  function openWelcome() {
+    $('#welcome-modal')?.classList.add('open');
+  }
+  function closeWelcome() {
+    $('#welcome-modal')?.classList.remove('open');
+  }
+
+  function startWithDemos() {
+    seedDemo();
+    seedCollections();
+    markWelcomed();
+    closeWelcome();
+    render();
+    toast('أهلاً! جهّزنا لك ٥ أمثلة', 'success');
+  }
+
+  function startBlank() {
+    markWelcomed();
+    persist();
+    closeWelcome();
+    render();
+    toast('ذاكرة فارغة — ابدأ الحين ✨', 'success');
+  }
+
+  function clearDemoItems() {
+    const demoCount = countDemoItems();
+    if (demoCount === 0) return;
+    if (!confirm(`حذف جميع الأمثلة (${demoCount} عنصر)؟ محفوظاتك الشخصية لن تُمسّ.`)) return;
+    state.items = state.items.filter((it) => !it.isDemo);
+    // also remove refs from collections + recent
+    state.collections.forEach((c) => {
+      c.itemIds = (c.itemIds || []).filter((id) => state.items.find((x) => x.id === id));
+    });
+    state.recent = state.recent.filter((id) => state.items.find((x) => x.id === id));
+    persist();
+    toast('اختفت الأمثلة ✓', 'success');
+    render();
+  }
 
   /* ============ CUSTOM TYPES ============ */
   function saveNewType() {
@@ -1276,6 +1343,7 @@
           </p>
           <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
             <a href="landing.html" class="btn btn-ghost btn-sm">📖 الصفحة التعريفية</a>
+            <button type="button" class="btn btn-ghost btn-sm" id="set-show-welcome">👋 إعادة الترحيب</button>
             <a href="/" class="btn btn-ghost btn-sm">🏠 CoffeZ</a>
           </div>
         </div>
@@ -1285,6 +1353,10 @@
     $('#set-export').onclick = exportAll;
     $('#set-import').onclick = () => $('#import-file').click();
     $('#set-clear').onclick = handleClearAll;
+    $('#set-show-welcome')?.addEventListener('click', () => {
+      closeSettings();
+      setTimeout(openWelcome, 160);
+    });
     $$('[data-del-type]').forEach((el) => {
       el.onclick = () => deleteCustomType(el.dataset.delType);
     });
@@ -1826,7 +1898,11 @@
   document.addEventListener('DOMContentLoaded', () => {
     load();
     bindGlobal();
+    // wire welcome CTAs (exist in DOM from first load)
+    $('#welcome-demo')?.addEventListener('click', startWithDemos);
+    $('#welcome-blank')?.addEventListener('click', startBlank);
     render();
+    if (shouldShowWelcome()) openWelcome();
   });
 
   // Expose what HTML/onclick handlers need

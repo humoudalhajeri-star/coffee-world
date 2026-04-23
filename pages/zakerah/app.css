@@ -967,6 +967,148 @@ mark {
 }
 
 /* ==========================================================
+   DEMO BADGE (on seeded example items)
+   ========================================================== */
+.entry-demo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: var(--gold-soft);
+  color: #7a6228;
+  font-size: 10px;
+  font-weight: 800;
+  border-radius: 999px;
+  letter-spacing: 0.5px;
+  margin-inline-start: 6px;
+}
+
+.demo-banner {
+  background: var(--gold-soft);
+  border: 1px solid #f0d1b3;
+  color: #7a6228;
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.demo-banner strong { color: var(--ink); font-weight: 800; }
+.demo-banner .btn { flex-shrink: 0; }
+
+/* ==========================================================
+   WELCOME MODAL (first visit)
+   ========================================================== */
+.welcome-body {
+  text-align: center;
+  padding: 8px 0 4px;
+}
+.welcome-emoji {
+  font-size: 52px;
+  margin-bottom: 12px;
+}
+.welcome-title {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--ink);
+  letter-spacing: -0.3px;
+  margin: 0 0 8px;
+  line-height: 1.35;
+}
+.welcome-sub {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.8;
+  margin: 0 0 22px;
+}
+
+.welcome-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 20px;
+  text-align: initial;
+}
+.welcome-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+.welcome-card-icon {
+  font-size: 22px;
+  margin-bottom: 4px;
+  display: inline-block;
+}
+.welcome-card strong {
+  display: block;
+  font-size: 13px;
+  color: var(--ink);
+  font-weight: 800;
+  margin-bottom: 2px;
+}
+.welcome-card p {
+  font-size: 11px;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.welcome-choose {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 20px 0 12px;
+  text-align: center;
+}
+
+.welcome-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 0 4px;
+}
+.welcome-btn {
+  padding: 14px 10px;
+  border-radius: var(--radius);
+  border: 2px solid var(--line);
+  background: var(--card);
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--dur);
+  text-align: center;
+}
+.welcome-btn:hover { border-color: var(--teal); }
+.welcome-btn.primary {
+  background: var(--teal);
+  color: #fff;
+  border-color: var(--teal);
+  box-shadow: 0 4px 0 var(--teal-2);
+}
+.welcome-btn.primary:hover { background: var(--teal-2); }
+.welcome-btn strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 2px;
+}
+.welcome-btn small {
+  display: block;
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+@media (max-width: 640px) {
+  .welcome-cards { grid-template-columns: 1fr; }
+  .welcome-actions { grid-template-columns: 1fr; }
+}
+
+/* ==========================================================
    TOOLBAR (keyword search + type filter)
    ========================================================== */
 .toolbar {
