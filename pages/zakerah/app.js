@@ -1533,7 +1533,8 @@
         <div style="flex:1; min-width:0;">
           <h3>${esc(c.name)}</h3>
           <p>${esc(c.description || 'لا يوجد وصف')}</p>
-          <div style="display:flex; gap:8px; margin-top:10px;">
+          <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+            <button class="btn btn-indigo btn-sm" id="coll-add-items">＋ إضافة عناصر</button>
             <button class="btn btn-ghost btn-sm" id="coll-edit">✎ تعديل</button>
             <button class="btn btn-ghost btn-sm" id="coll-export">⬇ تصدير JSON</button>
           </div>
@@ -1548,12 +1549,13 @@
         <div class="empty">
           <div class="empty-emoji">📭</div>
           <h3>الباقة فارغة</h3>
-          <p>افتح أي عنصر واضغط "أضف لباقة" لضمّه هنا.</p>
+          <p>اضغط "+ إضافة عناصر" أعلاه لاختيار ما تبي ضمّه هنا.</p>
         </div>
       `}
     `;
 
     $('#coll-back-list').onclick = renderCollectionsList;
+    $('#coll-add-items').onclick = () => openAddItemsPicker(id);
     $('#coll-edit').onclick = () => openCollForm(c);
     $('#coll-export').onclick = () => exportCollection(c);
 
@@ -1563,6 +1565,122 @@
         setTimeout(() => openDetail(el.dataset.item), 120);
       };
     });
+  }
+
+  function openAddItemsPicker(collId) {
+    const c = state.collections.find((x) => x.id === collId);
+    if (!c) return;
+    c.itemIds = c.itemIds || [];
+
+    const body = $('#coll-body');
+    $('#coll-modal-title').textContent = 'إضافة عناصر';
+
+    // picker state — start with items already in the collection selected
+    const selected = new Set(c.itemIds);
+    const query = { q: '', type: 'all' };
+
+    const typesOpts = allTypes()
+      .map((t) => `<option value="${t.id}">${t.icon} ${esc(t.ar)}</option>`).join('');
+
+    function paint() {
+      const q = query.q.toLowerCase();
+      const list = state.items
+        .filter((it) => {
+          if (query.type !== 'all' && it.type !== query.type) return false;
+          if (!q) return true;
+          const hay = (it.title + ' ' + it.body + ' ' + (it.tags || []).join(' ')).toLowerCase();
+          return hay.includes(q);
+        })
+        .sort((a, b) => b.createdAt - a.createdAt);
+
+      const existingInColl = c.itemIds.length;
+      const toAdd = [...selected].filter((id) => !c.itemIds.includes(id)).length;
+      const toRemove = c.itemIds.filter((id) => !selected.has(id)).length;
+
+      body.innerHTML = `
+        <div class="coll-breadcrumb">
+          <button id="pick-back">← رجوع للباقة</button>
+          <span>/</span>
+          <span>إضافة عناصر إلى "${esc(c.name)}"</span>
+        </div>
+
+        <p style="font-size:13px; color:var(--muted); margin:0 0 14px;">
+          اختر العناصر اللي تبي تضمّها. الأخضر = داخل الباقة، الرمادي = خارجها.
+          <br>
+          <strong style="color:var(--ink);">${selected.size}</strong> محدّد الآن
+          ${toAdd ? `· <span style="color:var(--success);">+${toAdd} جديد</span>` : ''}
+          ${toRemove ? `· <span style="color:var(--danger);">-${toRemove} سيُشال</span>` : ''}
+        </p>
+
+        <div class="toolbar" style="margin-bottom:14px;">
+          <div class="search-field has-value">
+            <span class="search-field-icon">⌕</span>
+            <input type="search" id="pick-q" placeholder="ابحث في العناصر..." value="${esc(query.q)}">
+          </div>
+          <select class="type-select" id="pick-type" style="width:100%;">
+            <option value="all">🗂 كل الأنواع (${state.items.length})</option>
+            ${typesOpts}
+          </select>
+        </div>
+
+        ${list.length === 0 ? `
+          <div class="empty">
+            <div class="empty-emoji">🔍</div>
+            <h3>لا توجد عناصر</h3>
+            <p>جرّب كلمة ثانية أو غيّر النوع.</p>
+          </div>
+        ` : `
+          <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:18px;">
+            ${list.map((it) => {
+              const t = getType(it.type);
+              const on = selected.has(it.id);
+              return `
+                <label class="pack-select ${on ? 'on' : ''}" data-pick-item="${it.id}" style="cursor:pointer;">
+                  <div class="pack-check">${on ? '✓' : ''}</div>
+                  <div style="flex:1; min-width:0;">
+                    <div style="font-size:13px; font-weight:700; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                      ${t.icon} ${esc(it.title)}
+                    </div>
+                    <div style="font-size:11px; color:var(--muted);">
+                      ${esc(t.ar)} · ${timeAgo(it.createdAt)}
+                      ${it.source ? `· ${esc(it.source)}` : ''}
+                    </div>
+                  </div>
+                </label>`;
+            }).join('')}
+          </div>
+        `}
+
+        <div style="position: sticky; bottom: 0; background: var(--card); padding: 12px 0; border-top: 1px solid var(--line); display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-indigo" id="pick-save" style="flex:1; min-width:150px;">💾 حفظ التغييرات</button>
+          <button class="btn btn-ghost" id="pick-cancel">إلغاء</button>
+        </div>
+      `;
+
+      $('#pick-back').onclick = () => openCollDetail(collId);
+      $('#pick-cancel').onclick = () => openCollDetail(collId);
+      $('#pick-q').addEventListener('input', (e) => { query.q = e.target.value; paint(); });
+      $('#pick-type').addEventListener('change', (e) => { query.type = e.target.value; paint(); });
+
+      $$('[data-pick-item]').forEach((el) => {
+        el.onclick = (ev) => {
+          ev.preventDefault();
+          const id = el.dataset.pickItem;
+          if (selected.has(id)) selected.delete(id); else selected.add(id);
+          paint();
+        };
+      });
+
+      $('#pick-save').onclick = () => {
+        c.itemIds = [...selected];
+        persist();
+        const added = c.itemIds.length - existingInColl + toRemove;
+        toast(`تم الحفظ ✓ (الباقة فيها ${c.itemIds.length})`, 'success');
+        openCollDetail(collId);
+      };
+    }
+
+    paint();
   }
 
   function exportCollection(c) {
