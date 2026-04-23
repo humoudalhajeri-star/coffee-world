@@ -31,17 +31,13 @@
 
     <div class="head-actions">
       <a class="icon-btn" href="landing.html" title="عن التطبيق · About" style="text-decoration:none;">ℹ</a>
-      <button class="kbd-search" id="btn-search" aria-label="بحث">
-        <span>⌕</span>
-        <span>ابحث في ذاكرتك</span>
-        <span class="kbd">⌘K</span>
-      </button>
       <button class="icon-btn" id="btn-collections" title="الباقات · Collections">📁</button>
       <button class="icon-btn" id="btn-monet" title="للبيع · Monetize">💰</button>
       <button class="icon-btn" id="btn-settings" title="الإعدادات · Settings">⚙</button>
       <button class="btn btn-primary" id="btn-new" aria-label="جديد">
         ＋ جديد
       </button>
+      <select class="type-select" id="type-filter" aria-label="فلتر النوع"></select>
     </div>
   </header>
 
@@ -49,6 +45,15 @@
     الذكاء الاصطناعي لا يتذكّر محادثاتك — <strong>لكنّك تستطيع</strong>.
     احفظ أفضل البرومبتس، الأكواد، الملاحظات، الإجابات، الأفكار والقوالب في مكان واحد منظّم — قابل للبحث والمشاركة وإعادة الاستخدام.
   </p>
+
+  <!-- ========== TOOLBAR (keyword search) ========== -->
+  <div class="toolbar">
+    <div class="search-field" id="search-wrap">
+      <span class="search-field-icon">⌕</span>
+      <input type="search" id="search-inline" placeholder="ابحث بالكلمة... / Search…" autocomplete="off">
+      <button type="button" class="search-field-clear" id="search-clear" aria-label="مسح">×</button>
+    </div>
+  </div>
 
   <!-- ========== TABS (filled by JS) ========== -->
   <nav id="tabs" class="tabs" aria-label="تصنيفات"></nav>

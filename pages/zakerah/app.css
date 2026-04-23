@@ -967,6 +967,82 @@ mark {
 }
 
 /* ==========================================================
+   TOOLBAR (keyword search + type filter)
+   ========================================================== */
+.toolbar {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.search-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 4px 14px 4px 8px;
+  transition: all var(--dur) var(--ease);
+}
+.search-field:focus-within {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12);
+}
+.search-field-icon {
+  font-size: 18px;
+  color: var(--muted);
+}
+.search-field input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 11px 0;
+  font-size: 14px;
+  color: var(--text);
+}
+.search-field input::placeholder { color: var(--muted-2); }
+.search-field-clear {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: var(--paper-2);
+  color: var(--muted);
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.search-field.has-value .search-field-clear { display: flex; }
+.search-field-clear:hover { background: var(--line); color: var(--ink); }
+
+/* Type-filter select in header */
+.type-select {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  min-width: 140px;
+  transition: all var(--dur);
+}
+.type-select:hover   { border-color: var(--ink); }
+.type-select:focus   { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(13,148,136,0.12); }
+.type-select option  { font-family: inherit; }
+
+@media (max-width: 640px) {
+  .type-select { min-width: 0; flex: 1; padding: 10px 10px; font-size: 12px; }
+  .search-field input { font-size: 15px; }
+}
+
+/* ==========================================================
    MONETIZE
    ========================================================== */
 .monet-banner {
