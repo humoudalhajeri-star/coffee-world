@@ -932,6 +932,123 @@
     toast('تم التصدير ✓', 'success');
   }
 
+  /* ============ SETTINGS ============ */
+  function openSettings() {
+    renderSettings();
+    $('#settings-modal').classList.add('open');
+  }
+  function closeSettings() {
+    $('#settings-modal').classList.remove('open');
+  }
+
+  function renderSettings() {
+    const totalItems = state.items.length;
+    const totalColls = state.collections.length;
+    const favs = state.items.filter((x) => x.important).length;
+    const sizeKb = Math.round(
+      (JSON.stringify({ items: state.items, collections: state.collections }).length / 1024) * 10
+    ) / 10;
+
+    $('#settings-body').innerHTML = `
+      <div class="settings-section">
+        <h4>البيانات · Data</h4>
+        <div class="settings-row">
+          <div class="settings-row-body">
+            <p class="settings-row-title">⬇ تصدير كل شي</p>
+            <p class="settings-row-desc">ملف JSON يحتوي جميع العناصر والباقات — نسخة احتياطية أو نقل بين أجهزة.</p>
+          </div>
+          <button class="btn btn-indigo btn-sm" id="set-export">تصدير</button>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-body">
+            <p class="settings-row-title">⬆ استيراد ملف</p>
+            <p class="settings-row-desc">ادمج بيانات من ملف JSON سابق التصدير. لن يُحذف أي شي — فقط تُضاف العناصر الجديدة.</p>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="set-import">اختر ملف</button>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-body">
+            <p class="settings-row-title" style="color: var(--danger);">🗑 مسح كل شي</p>
+            <p class="settings-row-desc">يحذف جميع العناصر والباقات والتاريخ المحفوظ في هذا الجهاز. لا يمكن التراجع.</p>
+          </div>
+          <button class="btn btn-danger btn-sm" id="set-clear">مسح كامل</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h4>إحصائيات · Stats</h4>
+        <div class="about-box">
+          <div class="about-kv"><span>عناصر · Items</span><span>${totalItems}</span></div>
+          <div class="about-kv"><span>باقات · Collections</span><span>${totalColls}</span></div>
+          <div class="about-kv"><span>مفضلة ⭐ · Favorites</span><span>${favs}</span></div>
+          <div class="about-kv"><span>حجم البيانات · Storage</span><span>${sizeKb} KB</span></div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h4>عن التطبيق · About</h4>
+        <div class="about-box">
+          <strong>ذاكرة الذكاء الاصطناعي</strong> · <span style="color:var(--muted);">AI Memory v1.0</span>
+          <p style="font-size:12px; color:var(--muted); margin:10px 0 0; line-height:1.7;">
+            دماغك الثاني لمحادثات الـAI. كل ما تحفظه يبقى محلياً على جهازك — بدون سحابة، بدون تتبّع.
+          </p>
+          <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
+            <a href="landing.html" class="btn btn-ghost btn-sm">📖 الصفحة التعريفية</a>
+            <a href="/" class="btn btn-ghost btn-sm">🏠 CoffeZ</a>
+          </div>
+        </div>
+      </div>
+    `;
+
+    $('#set-export').onclick = exportAll;
+    $('#set-import').onclick = () => $('#import-file').click();
+    $('#set-clear').onclick = handleClearAll;
+  }
+
+  function handleClearAll() {
+    if (!confirm('حذف جميع العناصر والباقات والتاريخ نهائياً؟ لا يمكن التراجع.')) return;
+    if (!confirm('متأكد 100%؟ آخر فرصة قبل المسح.')) return;
+    state.items = [];
+    state.collections = [];
+    state.recent = [];
+    persist();
+    toast('تم مسح كل شي', 'success');
+    closeSettings();
+    state.filter = { type: 'all', q: '' };
+    render();
+  }
+
+  function handleImportFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        const incomingItems = Array.isArray(data.items) ? data.items : [];
+        const incomingColls = Array.isArray(data.collections) ? data.collections : [];
+
+        const existingIds = new Set(state.items.map((x) => x.id));
+        const newItems = incomingItems.filter((x) => x && x.id && !existingIds.has(x.id));
+        const existingCollIds = new Set(state.collections.map((x) => x.id));
+        const newColls = incomingColls.filter((x) => x && x.id && !existingCollIds.has(x.id));
+
+        state.items = [...newItems, ...state.items];
+        state.collections = [...newColls, ...state.collections];
+        persist();
+        toast(`تم استيراد ${newItems.length} عنصر و ${newColls.length} باقة ✓`, 'success');
+        render();
+        renderSettings();
+      } catch (err) {
+        console.error(err);
+        toast('ملف غير صالح', 'error');
+      }
+    };
+    reader.onerror = () => toast('تعذّر قراءة الملف', 'error');
+    reader.readAsText(file);
+  }
+
   /* ============ COLLECTIONS ============ */
   function openCollections() {
     state.collCurrent = null;
@@ -1209,8 +1326,16 @@
     });
     $('#btn-new')?.addEventListener('click', () => openCreate('prompt'));
     $('#btn-search')?.addEventListener('click', openSearch);
-    $('#btn-export')?.addEventListener('click', exportAll);
     $('#btn-collections')?.addEventListener('click', openCollections);
+    $('#btn-settings')?.addEventListener('click', openSettings);
+    $('#settings-close')?.addEventListener('click', closeSettings);
+    $('#settings-modal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'settings-modal') closeSettings();
+    });
+    $('#import-file')?.addEventListener('change', (e) => {
+      handleImportFile(e.target.files[0]);
+      e.target.value = ''; // allow re-picking the same file
+    });
     $('#coll-close')?.addEventListener('click', closeCollections);
     $('#coll-modal')?.addEventListener('click', (e) => {
       if (e.target.id === 'coll-modal') closeCollections();
@@ -1246,7 +1371,7 @@
     // global shortcuts
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        closeEditor(); closeDetail(); closeSearch(); closeCollections();
+        closeEditor(); closeDetail(); closeSearch(); closeCollections(); closeSettings();
       }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
