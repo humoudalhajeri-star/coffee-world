@@ -1,869 +1,330 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>خِزنة — Khazna | AI Knowledge Vault Wireframe</title>
-<meta name="description" content="Low-fidelity grayscale wireframe for Khazna — an app that saves and organizes important AI conversations.">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>خِزنة — Khazna | خزِّن أذكى محادثاتك مع الـAI</title>
+<meta name="description" content="تطبيق ويب بسيط لحفظ وتنظيم والبحث في محادثات الذكاء الاصطناعي المهمة — ثم تحويلها لباقات قابلة للبيع." />
+
+<link rel="icon" type="image/svg+xml" href="/assets/img/coffez-icon.svg">
+<link rel="apple-touch-icon" href="/assets/img/coffez-icon.svg">
+<meta name="theme-color" content="#0F172A">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="khazna.css">
+<link rel="stylesheet" href="app.css">
 </head>
 <body>
 
-<!-- ============================================================
-     HERO
-============================================================ -->
-<header class="k-hero">
-  <div class="k-hero-tag">LOW-FIDELITY WIREFRAME · v1.0</div>
-  <h1>
-    خِزنة
-    <span class="en">KHAZNA — AI KNOWLEDGE VAULT</span>
-  </h1>
-  <p class="k-hero-sub">
-    تطبيق بسيط يحفظ ويرتّب محادثاتك المهمة مع الذكاء الاصطناعي — أسئلة، أجوبة، وصفات، كود، ونصائح — في مكان واحد قابل للبحث والمشاركة والبيع كحزم.
-    <span class="en-line">
-      Save, organize, and reuse your most valuable AI conversations — searchable, shareable, monetizable.
-    </span>
-  </p>
+<div class="drawer-scrim"></div>
 
-  <div class="k-hero-meta">
-    <div class="k-hero-meta-item"><strong>6+1</strong> Screens · شاشات</div>
-    <div class="k-hero-meta-item"><strong>1–2</strong> Taps · لمسة</div>
-    <div class="k-hero-meta-item"><strong>100%</strong> Grayscale</div>
-    <div class="k-hero-meta-item"><strong>AR / EN</strong> Bilingual</div>
-  </div>
-</header>
+<div class="app">
 
-<!-- ============================================================
-     LEGEND
-============================================================ -->
-<section class="k-legend">
-  <div class="k-legend-title">Wireframe Key · مفتاح الوايرفريم</div>
-  <div class="k-legend-grid">
-    <div class="k-legend-item">
-      <div class="k-legend-swatch sw-solid"></div>
-      Primary Action · زر رئيسي
-    </div>
-    <div class="k-legend-item">
-      <div class="k-legend-swatch sw-ghost"></div>
-      Static Element · عنصر ثابت
-    </div>
-    <div class="k-legend-item">
-      <div class="k-legend-swatch sw-dash"></div>
-      Placeholder · مؤقّت
-    </div>
-    <div class="k-legend-item">
-      <div class="k-legend-swatch sw-fill"></div>
-      Content Block · محتوى
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================
-     GRID OF SCREENS
-============================================================ -->
-<main class="k-grid">
-
-  <!-- ==========================================================
-       SCREEN 01 — HOME / DASHBOARD
-  ========================================================== -->
-  <article class="k-screen">
-    <div class="k-screen-label">
-      SCREEN 01
-      <strong>الرئيسية</strong>
-      Home / Dashboard
-    </div>
-    <div class="phone">
-      <div class="phone-screen">
-
-        <div class="status-bar">
-          <span>9:41</span>
-          <span class="dots">● ● ●</span>
-          <span>100%</span>
-        </div>
-
-        <div class="app-head">
-          <div class="app-head-btn">☰</div>
-          <div class="app-head-title" style="text-align:center;">
-            خِزنتي
-            <span class="en">MY VAULT</span>
-          </div>
-          <div class="app-head-btn">🔔</div>
-        </div>
-
-        <div class="app-body">
-
-          <div class="wf-cta big">
-            ＋ حفظ محادثة جديدة
-            <span class="en">+ SAVE NEW CONVERSATION</span>
-          </div>
-
-          <div class="wf-search">
-            ابحث في خِزنتك… / Search your vault…
-          </div>
-
-          <div class="wf-section-head">
-            <h4>
-              التصنيفات
-              <span class="en">CATEGORIES</span>
-            </h4>
-            <a>عرض الكل</a>
-          </div>
-
-          <div class="wf-cat-grid">
-            <div class="wf-cat">
-              <div class="wf-cat-icon">⌘</div>
-              <div class="wf-cat-name">كود / Code</div>
-              <div class="wf-cat-count">42 items</div>
-            </div>
-            <div class="wf-cat">
-              <div class="wf-cat-icon">✎</div>
-              <div class="wf-cat-name">كتابة / Writing</div>
-              <div class="wf-cat-count">18 items</div>
-            </div>
-            <div class="wf-cat">
-              <div class="wf-cat-icon">♡</div>
-              <div class="wf-cat-name">صحة / Health</div>
-              <div class="wf-cat-count">9 items</div>
-            </div>
-            <div class="wf-cat">
-              <div class="wf-cat-icon">☆</div>
-              <div class="wf-cat-name">أفكار / Ideas</div>
-              <div class="wf-cat-count">23 items</div>
-            </div>
-          </div>
-
-          <div class="wf-section-head" style="margin-top:4px;">
-            <h4>
-              الأحدث
-              <span class="en">RECENT SAVES</span>
-            </h4>
-          </div>
-
-          <div class="wf-item">
-            <div class="wf-item-icon">⌘</div>
-            <div class="wf-item-body">
-              <div class="wf-item-title">كيف أحسن أداء React؟</div>
-              <div class="wf-item-meta">Code · 2h ago</div>
-            </div>
-            <div class="wf-item-star">★</div>
-          </div>
-
-          <div class="wf-item">
-            <div class="wf-item-icon">✎</div>
-            <div class="wf-item-body">
-              <div class="wf-item-title">قالب إيميل احترافي</div>
-              <div class="wf-item-meta">Writing · yesterday</div>
-            </div>
-            <div class="wf-item-star">☆</div>
-          </div>
-
-          <div class="wf-item">
-            <div class="wf-item-icon">☆</div>
-            <div class="wf-item-body">
-              <div class="wf-item-title">10 أفكار محتوى للتسويق</div>
-              <div class="wf-item-meta">Ideas · 3d ago</div>
-            </div>
-            <div class="wf-item-star">★</div>
-          </div>
-        </div>
-
-        <!-- Bottom Nav -->
-        <div class="wf-nav">
-          <div class="wf-nav-item active">
-            <div class="wf-nav-icon">⌂</div>
-            الرئيسية
-          </div>
-          <div class="wf-nav-item">
-            <div class="wf-nav-icon">⌕</div>
-            بحث
-          </div>
-          <div class="wf-nav-item">
-            <div class="wf-nav-icon">◱</div>
-            حزم
-          </div>
-          <div class="wf-nav-item">
-            <div class="wf-nav-icon">◉</div>
-            حسابي
-          </div>
-        </div>
-
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-mark">خ</div>
+      <div class="sb-logo-text">
+        خِزنة
+        <span class="en">KHAZNA</span>
       </div>
     </div>
-    <div class="k-screen-flow">→ Tap "+ Save New" goes to Screen 02<br>→ Tap category / item goes to Screen 03</div>
-  </article>
 
-  <!-- ==========================================================
-       SCREEN 02 — SAVE / CAPTURE
-  ========================================================== -->
-  <article class="k-screen">
-    <div class="k-screen-label">
-      SCREEN 02
-      <strong>حفظ جديد</strong>
-      Save / Capture
+    <div class="sb-section-head">التنقّل · Navigate</div>
+
+    <button class="sb-item" data-route="home">
+      <span class="sb-ico">⌂</span>
+      <span>
+        الرئيسية
+        <span class="en">Home</span>
+      </span>
+    </button>
+
+    <button class="sb-item" data-route="save" data-save-new>
+      <span class="sb-ico">＋</span>
+      <span>
+        حفظ جديد
+        <span class="en">Save</span>
+      </span>
+    </button>
+
+    <button class="sb-item" data-route="search">
+      <span class="sb-ico">⌕</span>
+      <span>
+        بحث
+        <span class="en">Search</span>
+      </span>
+    </button>
+
+    <button class="sb-item" data-route="collection">
+      <span class="sb-ico">◱</span>
+      <span>
+        الباقات
+        <span class="en">Collections</span>
+      </span>
+    </button>
+
+    <button class="sb-item" data-route="library">
+      <span class="sb-ico">☰</span>
+      <span>
+        المكتبة
+        <span class="en">Library</span>
+      </span>
+    </button>
+
+    <div class="sb-footer">
+      <div>💾 محفوظ في جهازك فقط</div>
+      <div style="margin-top:4px; color: var(--muted-2);">Local · No cloud</div>
+      <a href="wireframe.html" style="display:block; margin-top:10px; color:var(--muted); text-decoration:underline; font-size:11px;">
+        شوف الوايرفريم
+      </a>
     </div>
-    <div class="phone">
-      <div class="phone-screen">
+  </aside>
 
-        <div class="status-bar">
-          <span>9:41</span>
-          <span class="dots">● ● ●</span>
-          <span>100%</span>
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+
+    <!-- Top bar -->
+    <header class="topbar">
+      <button class="menu-btn" id="menu-btn" aria-label="القائمة">☰</button>
+      <div class="topsearch">
+        <span class="topsearch-icon">⌕</span>
+        <input type="search" id="topsearch-input" placeholder="ابحث في خِزنتك... / Search your vault..." />
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" title="Save New" data-save-new>＋</button>
+        <div class="avatar">خ</div>
+      </div>
+    </header>
+
+    <!-- Views -->
+    <main class="views">
+
+      <!-- ==== HOME ==== -->
+      <section id="view-home" class="view">
+        <div class="welcome-line">
+          مرحباً بك في <strong>خِزنتك</strong> — كل محادثة مهمة في مكان واحد.
         </div>
 
-        <div class="app-head">
-          <div class="app-head-btn">✕</div>
-          <div class="app-head-title" style="text-align:center;">
-            حفظ محادثة
-            <span class="en">NEW ENTRY</span>
+        <div class="home-hero">
+          <div>
+            <h2>احفظ. رتّب. ابحث. بِع.</h2>
+            <p>Save · Organize · Search · Monetize</p>
           </div>
-          <div class="app-head-btn" style="font-size:10px; font-weight:700;">حفظ</div>
+          <button class="btn btn-gold btn-lg" data-save-new>＋ احفظ محادثة جديدة</button>
         </div>
 
-        <div class="app-body">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-num" id="home-stat-total">0</div><div class="stat-lbl">محفوظات <span class="en">Saves</span></div></div>
+          <div class="stat-card"><div class="stat-num" id="home-stat-cats">0</div><div class="stat-lbl">تصنيفات <span class="en">Categories</span></div></div>
+          <div class="stat-card"><div class="stat-num" id="home-stat-imp">0</div><div class="stat-lbl">مهمة ⭐ <span class="en">Starred</span></div></div>
+        </div>
 
-          <div class="wf-field">
-            <div class="wf-field-label">
-              <span>السؤال</span>
+        <div class="section">
+          <div class="section-head">
+            <h2>آخر المحفوظات <span class="en">RECENT SAVES</span></h2>
+            <button class="link" onclick="location.hash='#/search'">عرض الكل</button>
+          </div>
+          <div class="item-grid" id="home-recent"></div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <h2>التصنيفات <span class="en">CATEGORIES</span></h2>
+          </div>
+          <div class="cat-grid" id="home-cats"></div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <h2>⭐ مهم <span class="en">IMPORTANT</span></h2>
+          </div>
+          <div class="item-grid" id="home-important"></div>
+        </div>
+      </section>
+
+      <!-- ==== SAVE ==== -->
+      <section id="view-save" class="view">
+        <div class="page-head">
+          <h1 id="save-title">حفظ جديد <span class="en" id="save-title-en">NEW SAVE</span></h1>
+          <button class="btn btn-ghost btn-sm" onclick="history.back()">← رجوع</button>
+        </div>
+
+        <form id="save-form" class="form">
+          <div class="field">
+            <div class="field-label">
+              <span>السؤال <span class="req">*</span></span>
               <span class="en">Question</span>
             </div>
-            <div class="wf-field-input">
-              <div class="line w-90"></div>
-              <div class="line w-60"></div>
-            </div>
+            <input type="text" id="save-q" placeholder="مثلاً: كيف أحسّن أداء React؟" required>
           </div>
 
-          <div class="wf-field" style="min-height:120px;">
-            <div class="wf-field-label">
-              <span>الجواب</span>
+          <div class="field">
+            <div class="field-label">
+              <span>الإجابة <span class="req">*</span></span>
               <span class="en">Answer / AI Response</span>
             </div>
-            <div class="wf-field-input">
-              <div class="line w-90"></div>
-              <div class="line w-90"></div>
-              <div class="line w-75"></div>
-              <div class="line w-90"></div>
-              <div class="line w-45"></div>
+            <textarea id="save-a" placeholder="ألصق رد الذكاء الاصطناعي هنا..." required></textarea>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <div class="field-label">
+                <span>التصنيف</span>
+                <span class="en">Category</span>
+              </div>
+              <select id="save-cat"></select>
+            </div>
+
+            <div class="field toggle-row">
+              <div class="toggle-lbl">
+                ضع علامة مهم ⭐
+                <span class="en">Mark as Important</span>
+              </div>
+              <button type="button" class="toggle" id="save-important"></button>
             </div>
           </div>
 
-          <div class="wf-dropdown">
-            <span>
-              <strong style="color:var(--k-ink);">التصنيف:</strong>
-              كود / Code
-            </span>
-          </div>
-
-          <div class="wf-toggle-row">
-            <div class="wf-toggle-row-lbl">
-              ⭐ ضع علامة مهم
-              <span class="en">Mark as Important</span>
-            </div>
-            <div class="wf-toggle on"></div>
-          </div>
-
-          <div class="wf-field">
-            <div class="wf-field-label">
-              <span>وسوم (اختياري)</span>
+          <div class="field">
+            <div class="field-label">
+              <span>الوسوم (اختياري)</span>
               <span class="en">Tags (optional)</span>
             </div>
-            <div class="wf-chips" style="margin-top:4px;">
-              <div class="wf-chip filled">react ×</div>
-              <div class="wf-chip filled">performance ×</div>
-              <div class="wf-chip dash">＋ أضف</div>
-            </div>
+            <div class="chips" id="save-tags"></div>
           </div>
 
-          <div class="wf-cta big">
-            💾 احفظ في الخِزنة
-            <span class="en">SAVE TO VAULT</span>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button type="submit" class="btn btn-primary btn-lg">💾 احفظ</button>
+            <button type="button" class="btn btn-ghost btn-lg" onclick="history.back()">إلغاء</button>
           </div>
+        </form>
+      </section>
 
+      <!-- ==== DETAIL ==== -->
+      <section id="view-detail" class="view">
+        <div class="page-head">
+          <h1>التفاصيل <span class="en">DETAIL</span></h1>
+          <button class="btn btn-ghost btn-sm" onclick="location.hash='#/home'">← الرئيسية</button>
+        </div>
+        <div id="detail-body"></div>
+      </section>
+
+      <!-- ==== SEARCH ==== -->
+      <section id="view-search" class="view">
+        <div class="page-head">
+          <h1>البحث <span class="en">SEARCH</span></h1>
         </div>
 
-      </div>
-    </div>
-    <div class="k-screen-flow">→ On save: back to Home with new item on top<br>→ Or auto-route to Detail (Screen 03)</div>
-  </article>
-
-  <!-- ==========================================================
-       SCREEN 03 — VIEW ITEM DETAIL
-  ========================================================== -->
-  <article class="k-screen">
-    <div class="k-screen-label">
-      SCREEN 03
-      <strong>تفاصيل العنصر</strong>
-      View / Item Detail
-    </div>
-    <div class="phone">
-      <div class="phone-screen">
-
-        <div class="status-bar">
-          <span>9:41</span>
-          <span class="dots">● ● ●</span>
-          <span>100%</span>
+        <div class="search-bar-big">
+          <span class="s-ico">⌕</span>
+          <input type="search" id="search-input" placeholder="ابحث في السؤال أو الجواب أو الوسوم...">
         </div>
 
-        <div class="app-head">
-          <div class="app-head-btn">←</div>
-          <div class="app-head-title" style="text-align:center;">
-            التفاصيل
-            <span class="en">DETAIL</span>
-          </div>
-          <div class="app-head-btn">⋯</div>
+        <div class="chips" id="search-cat-chips" style="margin-bottom:20px;"></div>
+
+        <div class="result-count" id="search-count">0 نتيجة</div>
+        <div class="result-list" id="search-results"></div>
+      </section>
+
+      <!-- ==== COLLECTION ==== -->
+      <section id="view-collection" class="view">
+        <div class="page-head">
+          <h1>الباقات <span class="en">COLLECTIONS · MONETIZE</span></h1>
+          <div class="sub">اصنع باقات من أفضل محادثاتك وصدّرها أو شاركها.</div>
         </div>
+        <div id="collection-body"></div>
+      </section>
 
-        <div class="app-body">
-
-          <div class="wf-chips">
-            <div class="wf-chip">⌘ Code</div>
-            <div class="wf-chip">★ Important</div>
-            <div class="wf-chip">2h ago</div>
-          </div>
-
-          <div class="wf-qa-block">
-            <div class="wf-qa-question">
-              <div class="wf-label">
-                السؤال · QUESTION
-              </div>
-              <div class="wf-text big">
-                كيف أحسن أداء React؟
-                <span class="en-inline">How do I improve React performance?</span>
-              </div>
-            </div>
-
-            <div class="wf-qa-answer">
-              <div class="wf-label">
-                الجواب · ANSWER
-              </div>
-              <div class="line dark w-90"></div>
-              <div class="line dark w-90"></div>
-              <div class="line dark w-75"></div>
-              <div class="line w-90"></div>
-              <div class="line w-60"></div>
-              <div class="line w-90"></div>
-              <div class="line w-45"></div>
-              <div class="line w-75"></div>
-            </div>
-          </div>
-
-          <div class="wf-box solid">
-            <div class="wf-label">الوسوم · TAGS</div>
-            <div class="wf-chips">
-              <div class="wf-chip">#react</div>
-              <div class="wf-chip">#performance</div>
-              <div class="wf-chip dash">＋ وسم</div>
-            </div>
-          </div>
-
-          <div class="wf-action-row">
-            <div class="wf-action-btn">
-              <div class="wf-action-btn-icon">⧉</div>
-              نسخ<br>Copy
-            </div>
-            <div class="wf-action-btn">
-              <div class="wf-action-btn-icon">✎</div>
-              تعديل<br>Edit
-            </div>
-            <div class="wf-action-btn">
-              <div class="wf-action-btn-icon">↗</div>
-              مشاركة<br>Share
-            </div>
-            <div class="wf-action-btn">
-              <div class="wf-action-btn-icon">＋</div>
-              حزمة<br>Pack
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-    </div>
-    <div class="k-screen-flow">→ Tap Pack opens Screen 05<br>→ Tap Edit reopens Screen 02 pre-filled</div>
-  </article>
-
-  <!-- ==========================================================
-       SCREEN 04 — SEARCH
-  ========================================================== -->
-  <article class="k-screen">
-    <div class="k-screen-label">
-      SCREEN 04
-      <strong>البحث</strong>
-      Search
-    </div>
-    <div class="phone">
-      <div class="phone-screen">
-
-        <div class="status-bar">
-          <span>9:41</span>
-          <span class="dots">● ● ●</span>
-          <span>100%</span>
-        </div>
-
-        <div class="app-head">
-          <div class="app-head-btn">←</div>
-          <div class="app-head-title" style="text-align:center;">
-            بحث
-            <span class="en">SEARCH</span>
-          </div>
-          <div class="app-head-btn">⚙</div>
-        </div>
-
-        <div class="app-body">
-
-          <div class="wf-search" style="background:var(--k-white); border-color:var(--k-ink); color:var(--k-ink);">
-            react performance|
-          </div>
-
-          <div class="wf-label">كلمات مقترحة · SUGGESTED</div>
-          <div class="wf-chips">
-            <div class="wf-chip">react hooks</div>
-            <div class="wf-chip">performance</div>
-            <div class="wf-chip">useMemo</div>
-            <div class="wf-chip">optimize</div>
-          </div>
-
-          <div class="wf-label" style="margin-top:6px;">فلترة بالتصنيف · FILTER BY CATEGORY</div>
-          <div class="wf-chips">
-            <div class="wf-chip filled">الكل · All</div>
-            <div class="wf-chip">⌘ Code</div>
-            <div class="wf-chip">✎ Writing</div>
-            <div class="wf-chip">♡ Health</div>
-            <div class="wf-chip">☆ Ideas</div>
-          </div>
-
-          <div class="wf-section-head" style="margin-top:6px;">
-            <h4>
-              النتائج (5)
-              <span class="en">RESULTS</span>
-            </h4>
-            <a>فرز</a>
-          </div>
-
-          <div class="wf-item">
-            <div class="wf-item-icon">⌘</div>
-            <div class="wf-item-body">
-              <div class="wf-item-title">تحسين <b>performance</b> في React</div>
-              <div class="wf-item-meta">Code · ★ Important</div>
-            </div>
-          </div>
-
-          <div class="wf-item">
-            <div class="wf-item-icon">⌘</div>
-            <div class="wf-item-body">
-              <div class="wf-item-title"><b>React</b> hooks معادلات مهمة</div>
-              <div class="wf-item-meta">Code · 5d ago</div>
-            </div>
-          </div>
-
-          <div class="wf-item">
-            <div class="wf-item-icon">⌘</div>
-            <div class="wf-item-body">
-              <div class="wf-item-title">useMemo vs useCallback</div>
-              <div class="wf-item-meta">Code · 2w ago</div>
-            </div>
-          </div>
-
-          <div class="wf-item">
-            <div class="wf-item-icon">☆</div>
-            <div class="wf-item-body">
-              <div class="wf-item-title">أفكار مشاريع <b>React</b></div>
-              <div class="wf-item-meta">Ideas · 1mo ago</div>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-    </div>
-    <div class="k-screen-flow">→ Tap result → Screen 03 (detail)<br>→ Empty state shows recent queries</div>
-  </article>
-
-  <!-- ==========================================================
-       SCREEN 05 — PACK / COLLECTION CREATION (Monetization)
-  ========================================================== -->
-  <article class="k-screen">
-    <div class="k-screen-label">
-      SCREEN 05
-      <strong>إنشاء حزمة</strong>
-      Pack / Collection (Monetization)
-    </div>
-    <div class="phone">
-      <div class="phone-screen">
-
-        <div class="status-bar">
-          <span>9:41</span>
-          <span class="dots">● ● ●</span>
-          <span>100%</span>
-        </div>
-
-        <div class="app-head">
-          <div class="app-head-btn">←</div>
-          <div class="app-head-title" style="text-align:center;">
-            حزمة جديدة
-            <span class="en">NEW PACK</span>
-          </div>
-          <div class="app-head-btn" style="font-size:10px; font-weight:700;">تم</div>
-        </div>
-
-        <div class="app-body">
-
-          <div class="wf-field">
-            <div class="wf-field-label">
-              <span>اسم الحزمة</span>
-              <span class="en">Pack Name</span>
-            </div>
-            <div class="wf-text big">أفضل React Prompts</div>
-          </div>
-
-          <div class="wf-field">
-            <div class="wf-field-label">
-              <span>الوصف</span>
-              <span class="en">Description</span>
-            </div>
-            <div class="line w-90"></div>
-            <div class="line w-60"></div>
-          </div>
-
-          <div class="wf-pack-bar">
-            <span>🛒 العناصر المحددة</span>
-            <span class="count">3 selected</span>
-          </div>
-
-          <div class="wf-label">اختر من خزنتك · SELECT FROM VAULT</div>
-
-          <div class="wf-item selected">
-            <div class="wf-item-icon">✓</div>
-            <div class="wf-item-body">
-              <div class="wf-item-title">كيف أحسن أداء React؟</div>
-              <div class="wf-item-meta">Code · ★</div>
-            </div>
-          </div>
-
-          <div class="wf-item selected">
-            <div class="wf-item-icon">✓</div>
-            <div class="wf-item-body">
-              <div class="wf-item-title">useMemo vs useCallback</div>
-              <div class="wf-item-meta">Code</div>
-            </div>
-          </div>
-
-          <div class="wf-item selected">
-            <div class="wf-item-icon">✓</div>
-            <div class="wf-item-body">
-              <div class="wf-item-title">React hooks cheat sheet</div>
-              <div class="wf-item-meta">Code · ★</div>
-            </div>
-          </div>
-
-          <div class="wf-item">
-            <div class="wf-item-icon">○</div>
-            <div class="wf-item-body">
-              <div class="wf-item-title">Next.js vs Remix</div>
-              <div class="wf-item-meta">Code</div>
-            </div>
-          </div>
-
-          <div class="wf-field">
-            <div class="wf-field-label">
-              <span>السعر (للبيع)</span>
-              <span class="en">Price (for sale)</span>
-            </div>
-            <div class="wf-chips">
-              <div class="wf-chip dash">مجاني · Free</div>
-              <div class="wf-chip filled">$4.99</div>
-              <div class="wf-chip dash">$9.99</div>
-              <div class="wf-chip dash">مخصص</div>
-            </div>
-          </div>
-
-          <div class="wf-cta big">
-            📤 تصدير / بيع الحزمة
-            <span class="en">EXPORT OR SELL PACK</span>
-          </div>
-
-        </div>
-
-      </div>
-    </div>
-    <div class="k-screen-flow">→ Export = PDF / Notion / Markdown<br>→ Sell = public link, revenue share</div>
-  </article>
-
-  <!-- ==========================================================
-       SCREEN 06 — PROFILE / LIBRARY
-  ========================================================== -->
-  <article class="k-screen">
-    <div class="k-screen-label">
-      SCREEN 06
-      <strong>حسابي</strong>
-      Profile / Library
-    </div>
-    <div class="phone">
-      <div class="phone-screen">
-
-        <div class="status-bar">
-          <span>9:41</span>
-          <span class="dots">● ● ●</span>
-          <span>100%</span>
-        </div>
-
-        <div class="app-head">
-          <div class="app-head-btn">←</div>
-          <div class="app-head-title" style="text-align:center;">
-            حسابي
-            <span class="en">PROFILE</span>
-          </div>
-          <div class="app-head-btn">⚙</div>
-        </div>
-
-        <div class="app-body">
-
-          <div style="text-align:center; padding: 4px 0 8px;">
-            <div class="wf-avatar">◉</div>
-            <div class="wf-text big">حُمود</div>
-            <div class="wf-text muted">humoud@khazna.app</div>
-          </div>
-
-          <div class="wf-stats-row">
-            <div class="wf-stat">
-              <div class="wf-stat-num">92</div>
-              <div class="wf-stat-lbl">محفوظ · SAVED</div>
-            </div>
-            <div class="wf-stat">
-              <div class="wf-stat-num">7</div>
-              <div class="wf-stat-lbl">حزم · PACKS</div>
-            </div>
-            <div class="wf-stat">
-              <div class="wf-stat-num">$48</div>
-              <div class="wf-stat-lbl">ربح · EARNED</div>
-            </div>
-          </div>
-
-          <div class="wf-label">نظرة على التصنيفات · CATEGORIES</div>
-
-          <div class="wf-item">
-            <div class="wf-item-icon">⌘</div>
-            <div class="wf-item-body">
-              <div class="wf-item-title">كود · Code</div>
-              <div class="wf-item-meta">42 items · 45%</div>
-            </div>
-            <div class="wf-item-star">›</div>
-          </div>
-          <div class="wf-item">
-            <div class="wf-item-icon">☆</div>
-            <div class="wf-item-body">
-              <div class="wf-item-title">أفكار · Ideas</div>
-              <div class="wf-item-meta">23 items · 25%</div>
-            </div>
-            <div class="wf-item-star">›</div>
-          </div>
-          <div class="wf-item">
-            <div class="wf-item-icon">✎</div>
-            <div class="wf-item-body">
-              <div class="wf-item-title">كتابة · Writing</div>
-              <div class="wf-item-meta">18 items · 20%</div>
-            </div>
-            <div class="wf-item-star">›</div>
-          </div>
-          <div class="wf-item">
-            <div class="wf-item-icon">♡</div>
-            <div class="wf-item-body">
-              <div class="wf-item-title">صحة · Health</div>
-              <div class="wf-item-meta">9 items · 10%</div>
-            </div>
-            <div class="wf-item-star">›</div>
-          </div>
-
-          <div class="wf-cta ghost">
-            ⬇ تصدير كل بياناتي
-            <span class="en">EXPORT ALL MY DATA</span>
-          </div>
-
-        </div>
-
-      </div>
-    </div>
-    <div class="k-screen-flow">→ Export: JSON / CSV / PDF<br>→ Settings gear → theme, sync, logout</div>
-  </article>
-
-  <!-- ==========================================================
-       SCREEN 07 — BONUS: FLOATING "SAVE FROM AI"
-  ========================================================== -->
-  <article class="k-screen">
-    <div class="k-screen-label">
-      BONUS SCREEN
-      <strong>زر "احفظ من الـAI"</strong>
-      Floating "Save from AI"
-    </div>
-    <div class="phone">
-      <div class="phone-screen">
-
-        <div class="status-bar">
-          <span>9:41</span>
-          <span class="dots">● ● ●</span>
-          <span>100%</span>
-        </div>
-
-        <div class="app-head" style="background: var(--k-gray-8);">
-          <div class="app-head-btn">←</div>
-          <div class="app-head-title" style="text-align:center;">
-            ChatGPT / Claude
-            <span class="en">ANY AI APP</span>
-          </div>
-          <div class="app-head-btn">⋯</div>
-        </div>
-
-        <div class="app-body" style="background: var(--k-gray-8); gap:8px;">
-
-          <div class="wf-box solid" style="margin-inline-end: 20px;">
-            <div class="wf-label">YOU</div>
-            <div class="wf-text">اشرح لي useMemo في React</div>
-          </div>
-
-          <div class="wf-box" style="background:var(--k-white); border: var(--k-solid); margin-inline-start: 20px;">
-            <div class="wf-label">AI</div>
-            <div class="line dark w-90"></div>
-            <div class="line dark w-75"></div>
-            <div class="line w-90"></div>
-            <div class="line w-60"></div>
-            <div class="line w-90"></div>
-            <div class="line w-45"></div>
-          </div>
-
-          <div class="wf-box solid" style="margin-inline-end: 20px;">
-            <div class="wf-label">YOU</div>
-            <div class="wf-text">أعطني مثال عملي</div>
-          </div>
-
-          <div class="wf-box" style="background:var(--k-white); border: var(--k-solid); margin-inline-start: 20px;">
-            <div class="wf-label">AI</div>
-            <div class="line dark w-90"></div>
-            <div class="line dark w-60"></div>
-            <div class="line w-90"></div>
-            <div class="line w-75"></div>
-          </div>
-
-        </div>
-
-        <!-- Floating Button -->
-        <div class="wf-fab-label">
-          ◉ احفظ من الـAI · SAVE FROM AI
-        </div>
-        <div class="wf-fab">＋</div>
-
-        <!-- mini nav so phone looks complete -->
-        <div class="wf-nav">
-          <div class="wf-nav-item">
-            <div class="wf-nav-icon">⌂</div>
-            الرئيسية
-          </div>
-          <div class="wf-nav-item">
-            <div class="wf-nav-icon">⌕</div>
-            بحث
-          </div>
-          <div class="wf-nav-item">
-            <div class="wf-nav-icon">◱</div>
-            حزم
-          </div>
-          <div class="wf-nav-item">
-            <div class="wf-nav-icon">◉</div>
-            حسابي
+      <!-- ==== LIBRARY ==== -->
+      <section id="view-library" class="view">
+        <div class="page-head">
+          <h1>المكتبة <span class="en">LIBRARY</span></h1>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-ghost btn-sm" id="lib-export">⬇ تصدير كل البيانات</button>
+            <button class="btn btn-danger btn-sm" id="lib-clear">مسح الكل</button>
           </div>
         </div>
 
-      </div>
-    </div>
-    <div class="k-screen-flow">→ Floats on top of ANY AI app (share-extension on iOS / overlay on Android)<br>→ One tap: auto-fills Screen 02 with last Q&amp;A</div>
-  </article>
+        <div class="stats-grid" id="lib-stats"></div>
 
-</main>
+        <div class="section">
+          <div class="section-head">
+            <h2>توزيع التصنيفات <span class="en">CATEGORY BREAKDOWN</span></h2>
+          </div>
+          <div class="library-breakdown" id="lib-breakdown"></div>
+        </div>
+      </section>
 
-<!-- ============================================================
-     FLOW MAP
-============================================================ -->
-<section class="k-flow-map">
-  <h2>
-    تدفّق المستخدم
-    <span class="en">USER FLOW · END-TO-END</span>
-  </h2>
-
-  <div class="k-flow-steps">
-    <div class="k-flow-step">
-      فتح التطبيق
-      <span class="en">Open App</span>
-    </div>
-    <span class="k-flow-arrow">›</span>
-    <div class="k-flow-step">
-      الرئيسية (01)
-      <span class="en">Home</span>
-    </div>
-    <span class="k-flow-arrow">›</span>
-    <div class="k-flow-step cta">
-      ＋ حفظ جديد (02)
-      <span class="en">Save New</span>
-    </div>
-    <span class="k-flow-arrow">›</span>
-    <div class="k-flow-step">
-      تفاصيل (03)
-      <span class="en">Detail</span>
-    </div>
-    <span class="k-flow-arrow">›</span>
-    <div class="k-flow-step">
-      بحث (04)
-      <span class="en">Search</span>
-    </div>
-    <span class="k-flow-arrow">›</span>
-    <div class="k-flow-step cta">
-      حزمة (05)
-      <span class="en">Pack / Sell</span>
-    </div>
-    <span class="k-flow-arrow">›</span>
-    <div class="k-flow-step">
-      حسابي (06)
-      <span class="en">Profile</span>
-    </div>
+    </main>
   </div>
+</div>
 
-  <div class="k-flow-steps" style="margin-top:14px;">
-    <div class="k-flow-step">
-      داخل أي AI app
-      <span class="en">Inside AI app</span>
-    </div>
-    <span class="k-flow-arrow">›</span>
-    <div class="k-flow-step cta">
-      اضغط الزر العائم
-      <span class="en">Tap Floating FAB</span>
-    </div>
-    <span class="k-flow-arrow">›</span>
-    <div class="k-flow-step">
-      يُحفظ تلقائياً (02)
-      <span class="en">Auto-capture</span>
-    </div>
-    <span class="k-flow-arrow">›</span>
-    <div class="k-flow-step">
-      انتهى — 1 tap
-      <span class="en">Done · 1 tap</span>
-    </div>
-  </div>
-</section>
+<!-- ============ FAB ============ -->
+<button class="fab" id="fab" aria-label="احفظ من الـAI">
+  <span class="fab-icon">＋</span>
+  <span>
+    احفظ من الـAI
+    <span class="en">Save from AI</span>
+  </span>
+</button>
 
-<!-- ============================================================
-     FOOTER
-============================================================ -->
-<footer class="k-foot">
-  <p>
-    وايرفريم جاهز لتطوير MVP — minimal, grayscale, AR + EN bilingual.
-    <span class="en-line">
-      Ready for MVP development · Notion × Notes × ChatGPT aesthetic
-    </span>
-  </p>
-  <div class="k-foot-credit">
-    KHAZNA · خِزنة · v1.0 WIREFRAME
-  </div>
-</footer>
+<!-- ============ MODAL: Save from AI ============ -->
+<div class="modal-backdrop" id="fab-modal">
+  <form class="modal" id="fab-form">
+    <div class="modal-head">
+      <h3>احفظ من الـAI <span class="en">SAVE FROM AI</span></h3>
+      <button type="button" class="modal-close" id="fab-close">×</button>
+    </div>
 
+    <div class="modal-body">
+      <div class="paste-hint">
+        <span>📋</span>
+        <div>
+          ألصق محادثتك من ChatGPT / Claude / Gemini — نحاول استخراج السؤال والجواب تلقائياً.
+          <span class="en">Paste from any AI app — we'll auto-detect Q &amp; A.</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">
+          <span>النص الخام</span>
+          <span class="en">Raw text (paste here)</span>
+        </div>
+        <textarea id="fab-text" style="min-height:80px;" placeholder="ألصق المحادثة كاملة هنا..."></textarea>
+      </div>
+
+      <div style="display:flex; gap:8px;">
+        <button type="button" class="btn btn-ghost btn-sm" id="fab-paste">📋 ألصق من الحافظة</button>
+      </div>
+
+      <div class="field">
+        <div class="field-label">
+          <span>السؤال</span>
+          <span class="en">Question</span>
+        </div>
+        <input type="text" id="fab-q" placeholder="السؤال المستخرج...">
+      </div>
+
+      <div class="field">
+        <div class="field-label">
+          <span>الإجابة</span>
+          <span class="en">Answer</span>
+        </div>
+        <textarea id="fab-a" placeholder="الإجابة المستخرجة..."></textarea>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost" id="fab-cancel" onclick="document.getElementById('fab-close').click()">إلغاء</button>
+      <button type="submit" class="btn btn-primary">💾 احفظ بسرعة</button>
+    </div>
+  </form>
+</div>
+
+<!-- ============ TOAST ============ -->
+<div id="toast" class="toast"></div>
+
+<script src="app.js"></script>
 </body>
 </html>
