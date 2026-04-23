@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>ذاكِرة — Zakerah | ذاكرتك الخارجية للـAI</title>
+<meta name="description" content="احفظ أفضل الأكواد والبرومبتس والمعلومات والأفكار من محادثاتك مع ChatGPT وClaude — في مكان واحد قابل للبحث والمشاركة." />
+
+<link rel="icon" type="image/svg+xml" href="/assets/img/coffez-icon.svg">
+<link rel="apple-touch-icon" href="/assets/img/coffez-icon.svg">
+<meta name="theme-color" content="#4F46E5">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ========== HEADER ========== -->
+  <header class="header">
+    <button class="brand" id="brand-home" aria-label="الرئيسية">
+      <div class="brand-mark">ذ</div>
+      <div class="brand-name">
+        ذاكِرة
+        <span class="en">ZAKERAH</span>
+      </div>
+    </button>
+
+    <div class="head-actions">
+      <button class="kbd-search" id="btn-search" aria-label="بحث">
+        <span>⌕</span>
+        <span>ابحث في كل شي</span>
+        <span class="kbd">⌘K</span>
+      </button>
+      <button class="icon-btn" id="btn-export" title="تصدير JSON · Export">⬇</button>
+      <button class="btn btn-primary" id="btn-new" aria-label="جديد">
+        ＋ جديد
+      </button>
+    </div>
+  </header>
+
+  <p class="tagline">
+    الذكاء الاصطناعي <strong>ما يتذكّر</strong> محادثاتك — لكن أنت تقدر.
+    احفظ الأكواد والبرومبتس والمعلومات والأفكار هنا، ارجع لها متى شئت، وشاركها بلمسة.
+  </p>
+
+  <!-- ========== TABS (filled by JS) ========== -->
+  <nav id="tabs" class="tabs" aria-label="تصنيفات"></nav>
+
+  <!-- ========== LIST HEADER ========== -->
+  <div class="list-head">
+    <div class="count" id="count">0 عناصر</div>
+  </div>
+
+  <!-- ========== LIST (filled by JS) ========== -->
+  <div id="list" class="entries"></div>
+
+</div>
+
+<!-- ========== FAB (quick prompt save) ========== -->
+<button class="fab" id="fab" aria-label="برومبت سريع">
+  <span class="fab-ico">＋</span>
+  <span>
+    برومبت سريع
+    <span style="display:block; font-size:9px; opacity:.75; letter-spacing:1px; margin-top:1px;">QUICK PROMPT</span>
+  </span>
+</button>
+
+<!-- ========== EDITOR MODAL (create / edit) ========== -->
+<div class="modal-backdrop" id="editor-modal">
+  <form class="modal" id="editor-form">
+    <div class="modal-head">
+      <h3>
+        <span id="editor-title">عنصر جديد</span>
+        <span class="tag" id="editor-title-tag">NEW</span>
+      </h3>
+      <button type="button" class="modal-close" id="editor-close">×</button>
+    </div>
+
+    <div class="modal-body" id="editor-body"></div>
+
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost" onclick="document.getElementById('editor-close').click()">إلغاء</button>
+      <button type="submit" class="btn btn-indigo" id="editor-submit">＋ إضافة</button>
+    </div>
+  </form>
+</div>
+
+<!-- ========== DETAIL MODAL (view item) ========== -->
+<div class="modal-backdrop" id="detail-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>
+        <span>التفاصيل</span>
+        <span class="tag" id="detail-title-tag">ITEM</span>
+      </h3>
+      <button type="button" class="modal-close" id="detail-close">×</button>
+    </div>
+
+    <div class="modal-body" id="detail-body"></div>
+
+    <div class="modal-foot" id="detail-actions"></div>
+  </div>
+</div>
+
+<!-- ========== SEARCH MODAL ========== -->
+<div class="modal-backdrop" id="search-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>
+        <span>ابحث في ذاكرتك</span>
+        <span class="tag">SEARCH</span>
+      </h3>
+      <button type="button" class="modal-close" id="search-close">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="search-box">
+        <span style="font-size:18px; color:var(--muted);">⌕</span>
+        <input type="search" id="search-input" placeholder="ابحث في العنوان، المحتوى، الوسوم...">
+      </div>
+      <p style="font-size:12px; color:var(--muted); margin:0;">
+        ابدأ بالكتابة — النتائج تظهر مباشرة في القائمة خلفك.
+        اضغط <kbd style="background:var(--paper-2); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:11px;">Esc</kbd> للإغلاق.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ========== TOAST ========== -->
+<div id="toast" class="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
