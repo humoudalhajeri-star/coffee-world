@@ -715,6 +715,20 @@
       <div class="detail-body-text ${bodyClass}">${esc(it.body)}</div>
 
       ${varsBlock}
+
+      ${state.collections.length ? `
+        <div class="detail-label">الباقات · Collections</div>
+        <div class="add-to-coll-list">
+          ${state.collections.map((c) => {
+            const on = (c.itemIds || []).includes(it.id);
+            return `
+              <button type="button" class="coll-pill ${on ? 'on' : ''}" data-toggle-coll="${c.id}" style="--coll-color: ${esc(c.color)};">
+                <span class="coll-pill-dot"></span>
+                ${esc(c.icon)} ${esc(c.name)}
+              </button>`;
+          }).join('')}
+        </div>
+      ` : ''}
     `;
 
     // Actions
@@ -728,6 +742,10 @@
 
     $$('#detail-actions [data-act]').forEach((el) => {
       el.onclick = () => handleAction(el.dataset.act, it);
+    });
+
+    $$('#detail-body [data-toggle-coll]').forEach((el) => {
+      el.onclick = () => toggleItemInCollection(el.dataset.toggleColl, it.id);
     });
 
     // Bind variable inputs (live preview)
@@ -853,6 +871,274 @@
     toast('تم التصدير ✓', 'success');
   }
 
+  /* ============ COLLECTIONS ============ */
+  function openCollections() {
+    state.collCurrent = null;
+    renderCollectionsList();
+    $('#coll-modal').classList.add('open');
+  }
+  function closeCollections() {
+    $('#coll-modal').classList.remove('open');
+    state.collEditing = null;
+    state.collCurrent = null;
+  }
+
+  function renderCollectionsList() {
+    $('#coll-modal-title').textContent = 'الباقات';
+    const body = $('#coll-body');
+    const colls = state.collections.sort((a, b) => b.createdAt - a.createdAt);
+
+    body.innerHTML = `
+      <p style="font-size:13px; color:var(--muted); margin:0 0 16px;">
+        نظّم محفوظاتك في باقات مسمّاة — مثل "أفضل البرومبتس" أو "مكتبة الكود".
+      </p>
+      <div class="coll-grid">
+        <button class="coll-add" id="coll-new">
+          <span class="coll-add-plus">＋</span>
+          <span>باقة جديدة · New Collection</span>
+        </button>
+        ${colls.map((c) => {
+          const count = (c.itemIds || []).length;
+          return `
+            <button class="coll-card" data-coll="${c.id}" style="--coll-color: ${esc(c.color)};">
+              <div class="coll-card-head">
+                <div class="coll-icon">${esc(c.icon)}</div>
+                <div class="coll-count">${count}</div>
+              </div>
+              <h4 class="coll-name">${esc(c.name)}</h4>
+              <div class="coll-desc">${esc(c.description || '—')}</div>
+              <div class="coll-meta">${timeAgo(c.createdAt)} · ${count === 1 ? '١ عنصر' : count + ' عناصر'}</div>
+            </button>`;
+        }).join('')}
+      </div>
+    `;
+
+    $('#coll-new').onclick = () => openCollForm(null);
+    $$('#coll-body [data-coll]').forEach((el) => {
+      el.onclick = () => openCollDetail(el.dataset.coll);
+    });
+  }
+
+  function openCollForm(existing) {
+    state.collEditing = existing ? existing.id : null;
+    const c = existing || { name: '', description: '', icon: '📁', color: '#0D9488' };
+    $('#coll-modal-title').textContent = existing ? 'تعديل الباقة' : 'باقة جديدة';
+
+    $('#coll-body').innerHTML = `
+      <button class="back-link" id="coll-form-back" style="background:none; border:none; color:var(--muted); font-weight:700; font-size:12px; padding:0; cursor:pointer; margin-bottom:14px; display:inline-flex; gap:6px; align-items:center;">
+        ← رجوع للقائمة
+      </button>
+
+      <form id="coll-form">
+        <div class="field">
+          <div class="field-label">
+            <span>اسم الباقة <span class="req">*</span></span>
+            <span class="en">Name</span>
+          </div>
+          <input type="text" id="coll-name" required maxlength="60"
+                 placeholder="مثلاً: برومبتس التسويق"
+                 value="${esc(c.name)}">
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <span>وصف قصير (اختياري)</span>
+            <span class="en">Description</span>
+          </div>
+          <input type="text" id="coll-desc" maxlength="200"
+                 placeholder="ما الذي يميّز هذه الباقة؟"
+                 value="${esc(c.description || '')}">
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <span>الأيقونة</span>
+            <span class="en">Icon</span>
+          </div>
+          <div class="icon-pick-row" id="icon-pick-row">
+            ${COLL_ICONS.map((ic) =>
+              `<button type="button" class="icon-pick ${ic === c.icon ? 'active' : ''}" data-icon="${esc(ic)}">${esc(ic)}</button>`
+            ).join('')}
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <span>اللون</span>
+            <span class="en">Color</span>
+          </div>
+          <div class="picker-row" id="color-pick-row">
+            ${COLL_COLORS.map((col) =>
+              `<button type="button" class="swatch ${col.hex === c.color ? 'active' : ''}" data-color="${esc(col.hex)}" style="background: ${esc(col.hex)};" aria-label="${esc(col.id)}"></button>`
+            ).join('')}
+          </div>
+        </div>
+
+        <input type="hidden" id="coll-icon-val" value="${esc(c.icon)}">
+        <input type="hidden" id="coll-color-val" value="${esc(c.color)}">
+
+        <div style="display:flex; gap:8px; margin-top:18px; flex-wrap:wrap;">
+          <button type="submit" class="btn btn-indigo btn-lg" style="flex:1; min-width:160px;">
+            ${existing ? '💾 حفظ التعديلات' : '＋ إنشاء الباقة'}
+          </button>
+          ${existing ? '<button type="button" class="btn btn-danger" id="coll-delete">🗑 حذف</button>' : ''}
+        </div>
+      </form>
+    `;
+
+    $('#coll-form-back').onclick = renderCollectionsList;
+
+    $$('#icon-pick-row [data-icon]').forEach((el) => {
+      el.onclick = () => {
+        $$('#icon-pick-row [data-icon]').forEach((x) => x.classList.remove('active'));
+        el.classList.add('active');
+        $('#coll-icon-val').value = el.dataset.icon;
+      };
+    });
+    $$('#color-pick-row [data-color]').forEach((el) => {
+      el.onclick = () => {
+        $$('#color-pick-row [data-color]').forEach((x) => x.classList.remove('active'));
+        el.classList.add('active');
+        $('#coll-color-val').value = el.dataset.color;
+      };
+    });
+
+    $('#coll-form').addEventListener('submit', submitCollForm);
+
+    const delBtn = $('#coll-delete');
+    if (delBtn && existing) {
+      delBtn.onclick = () => {
+        if (!confirm('حذف هذه الباقة نهائياً؟ (العناصر تبقى محفوظة في ذاكرتك.)')) return;
+        state.collections = state.collections.filter((x) => x.id !== existing.id);
+        persist();
+        toast('تم حذف الباقة', 'success');
+        renderCollectionsList();
+      };
+    }
+  }
+
+  function submitCollForm(e) {
+    e.preventDefault();
+    const name = $('#coll-name').value.trim();
+    if (!name) { toast('اسم الباقة مطلوب', 'error'); return; }
+    const payload = {
+      name,
+      description: $('#coll-desc').value.trim(),
+      icon: $('#coll-icon-val').value || '📁',
+      color: $('#coll-color-val').value || '#0D9488',
+    };
+
+    if (state.collEditing) {
+      const idx = state.collections.findIndex((x) => x.id === state.collEditing);
+      if (idx >= 0) {
+        state.collections[idx] = { ...state.collections[idx], ...payload, updatedAt: Date.now() };
+      }
+      persist();
+      toast('تم التحديث ✓', 'success');
+    } else {
+      state.collections.unshift({
+        id: uid(),
+        ...payload,
+        itemIds: [],
+        createdAt: Date.now(),
+      });
+      persist();
+      toast('تم إنشاء الباقة ✓', 'success');
+    }
+    state.collEditing = null;
+    renderCollectionsList();
+  }
+
+  function openCollDetail(id) {
+    const c = state.collections.find((x) => x.id === id);
+    if (!c) return;
+    state.collCurrent = id;
+    $('#coll-modal-title').textContent = c.name;
+
+    const items = (c.itemIds || [])
+      .map((iid) => state.items.find((x) => x.id === iid))
+      .filter(Boolean)
+      .sort((a, b) => b.createdAt - a.createdAt);
+
+    $('#coll-body').innerHTML = `
+      <div class="coll-breadcrumb">
+        <button id="coll-back-list">← كل الباقات</button>
+        <span>/</span>
+        <span>${esc(c.name)}</span>
+      </div>
+
+      <div class="coll-header" style="--coll-color: ${esc(c.color)};">
+        <div class="coll-icon">${esc(c.icon)}</div>
+        <div style="flex:1; min-width:0;">
+          <h3>${esc(c.name)}</h3>
+          <p>${esc(c.description || 'لا يوجد وصف')}</p>
+          <div style="display:flex; gap:8px; margin-top:10px;">
+            <button class="btn btn-ghost btn-sm" id="coll-edit">✎ تعديل</button>
+            <button class="btn btn-ghost btn-sm" id="coll-export">⬇ تصدير JSON</button>
+          </div>
+        </div>
+      </div>
+
+      ${items.length ? `
+        <div class="entries">
+          ${items.map(entryHTML).join('')}
+        </div>
+      ` : `
+        <div class="empty">
+          <div class="empty-emoji">📭</div>
+          <h3>الباقة فارغة</h3>
+          <p>افتح أي عنصر واضغط "أضف لباقة" لضمّه هنا.</p>
+        </div>
+      `}
+    `;
+
+    $('#coll-back-list').onclick = renderCollectionsList;
+    $('#coll-edit').onclick = () => openCollForm(c);
+    $('#coll-export').onclick = () => exportCollection(c);
+
+    $$('#coll-body [data-item]').forEach((el) => {
+      el.onclick = () => {
+        closeCollections();
+        setTimeout(() => openDetail(el.dataset.item), 120);
+      };
+    });
+  }
+
+  function exportCollection(c) {
+    const items = (c.itemIds || [])
+      .map((iid) => state.items.find((x) => x.id === iid))
+      .filter(Boolean);
+    const data = {
+      app: 'AI Memory', collection: c.name, description: c.description,
+      exportedAt: new Date().toISOString(), items,
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (c.name || 'collection').replace(/\s+/g, '-').toLowerCase() + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    toast('تم التصدير ✓', 'success');
+  }
+
+  function toggleItemInCollection(collId, itemId) {
+    const c = state.collections.find((x) => x.id === collId);
+    if (!c) return;
+    c.itemIds = c.itemIds || [];
+    const i = c.itemIds.indexOf(itemId);
+    if (i >= 0) {
+      c.itemIds.splice(i, 1);
+      toast('أُزيل من "' + c.name + '"', 'success');
+    } else {
+      c.itemIds.unshift(itemId);
+      toast('أُضيف إلى "' + c.name + '"', 'success');
+    }
+    persist();
+    // refresh detail modal so pill state updates
+    openDetail(itemId);
+  }
+
   /* ============ BOOTSTRAP ============ */
   function bindGlobal() {
     // top buttons
@@ -863,6 +1149,11 @@
     $('#btn-new')?.addEventListener('click', () => openCreate('prompt'));
     $('#btn-search')?.addEventListener('click', openSearch);
     $('#btn-export')?.addEventListener('click', exportAll);
+    $('#btn-collections')?.addEventListener('click', openCollections);
+    $('#coll-close')?.addEventListener('click', closeCollections);
+    $('#coll-modal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'coll-modal') closeCollections();
+    });
     $('#fab')?.addEventListener('click', () => openCreate('prompt'));
 
     // editor modal
@@ -894,7 +1185,7 @@
     // global shortcuts
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        closeEditor(); closeDetail(); closeSearch();
+        closeEditor(); closeDetail(); closeSearch(); closeCollections();
       }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
