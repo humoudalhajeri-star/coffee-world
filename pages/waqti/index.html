@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>وقتي — Wireframe</title>
+<meta name="description" content="وقتي: منصة تحوّل ساعات الدوام الفارغة إلى دخل إضافي." />
+<link rel="icon" type="image/svg+xml" href="/assets/img/coffez-icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="waqti.css" />
+</head>
+<body class="waqti-page">
+
+  <nav class="waqti-nav">
+    <a href="#" class="waqti-brand">
+      <span class="waqti-brand-mark">و</span>
+      <span class="waqti-brand-name">وقتي</span>
+    </a>
+    <a href="/" class="waqti-nav-back">← رجوع لـ CoffeZ</a>
+  </nav>
+
+  <!-- Hero -->
+  <section class="waqti-hero">
+    <div class="waqti-hero-badge">💼 WIREFRAME — سوق ذو طرفين</div>
+    <h1>
+      وقت الدوام الفارغ<br>
+      = <span class="accent">دخل + قيمة</span>
+    </h1>
+    <p class="waqti-hero-tag">
+      منصة تربط الموظفين الفاضيين بأشخاص يحتاجون مهام صغيرة —
+      <strong>كلاهما يستفيد</strong>: الموظف يكسب 100-500 KWD شهرياً،
+      والعميل يحصل على خدمة سريعة بسعر معقول.
+    </p>
+
+    <div class="formula">
+      <div class="formula-side">
+        <span class="formula-side-icon">👔</span>
+        موظف فاضي
+        <div style="font-size:11px; color:var(--w-muted); margin-top:2px;">عنده مهارة + وقت</div>
+      </div>
+      <div class="formula-op">+</div>
+      <div class="formula-side">
+        <span class="formula-side-icon">🎯</span>
+        عميل محتاج
+        <div style="font-size:11px; color:var(--w-muted); margin-top:2px;">مهمة صغيرة + ميزانية</div>
+      </div>
+      <div class="formula-op">=</div>
+      <div class="formula-side" style="color:var(--w-amber);">
+        <span class="formula-side-icon">💰</span>
+        <strong>وقتي</strong>
+        <div style="font-size:11px; color:var(--w-muted); margin-top:2px;">عمولة 18%</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Revenue -->
+  <section class="revenue-section">
+    <div class="revenue-head">
+      <h2>💰 نموذج الدخل — ٦ قنوات</h2>
+      <p>المتوقع شهرياً بعد السنة الأولى: ~$8,000</p>
+    </div>
+    <div class="revenue-grid">
+      <div class="revenue-card">
+        <div class="revenue-card-icon">💸</div>
+        <h3>عمولة الصفقات</h3>
+        <p>18% من كل مهمة تتم بنجاح</p>
+        <div class="revenue-card-amount">~$3,000/شهر</div>
+      </div>
+      <div class="revenue-card">
+        <div class="revenue-card-icon">⭐</div>
+        <h3>اشتراك Pro</h3>
+        <p>$5/شهر للموظف (أولوية في البحث + شارة موثقة)</p>
+        <div class="revenue-card-amount">~$1,500/شهر</div>
+      </div>
+      <div class="revenue-card">
+        <div class="revenue-card-icon">🏢</div>
+        <h3>اشتراك الشركات</h3>
+        <p>$30/شهر للشركات الصغيرة تنشر مهام بلا حدود</p>
+        <div class="revenue-card-amount">~$2,000/شهر</div>
+      </div>
+      <div class="revenue-card">
+        <div class="revenue-card-icon">🚀</div>
+        <h3>إعلانات مدفوعة</h3>
+        <p>ترويج مهنة أو مهارة معينة في الصفحة الرئيسية</p>
+        <div class="revenue-card-amount">~$500/شهر</div>
+      </div>
+      <div class="revenue-card">
+        <div class="revenue-card-icon">🎓</div>
+        <h3>شراكات تدريب</h3>
+        <p>عمولة من SCA, ACCA, Udemy لو المستخدم ارتقى</p>
+        <div class="revenue-card-amount">~$800/شهر</div>
+      </div>
+      <div class="revenue-card">
+        <div class="revenue-card-icon">✅</div>
+        <h3>شارة التوثيق</h3>
+        <p>$20 مرة واحدة للحصول على ✓ موثّق</p>
+        <div class="revenue-card-amount">~$200/شهر</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screens -->
+  <section class="wireframe-section">
+    <div class="wf-head">
+      <h2>٧ شاشات تشرح الفكرة</h2>
+      <p>طرفان: الموظف (العامل) + العميل (صاحب المهمة)</p>
+    </div>
+
+    <div class="screens-grid">
+
+      <!-- Screen 1: Welcome -->
+      <div class="phone-wrap">
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="p-statusbar"></div>
+            <div class="s-welcome">
+              <div class="s-welcome-logo">و</div>
+              <h2>وقتي<br><span style="font-size:14px; font-weight:800;">وقت الدوام قيمة</span></h2>
+              <p>كيف تبي تبدأ؟</p>
+              <div class="s-welcome-choice">
+                <div class="s-welcome-btn">
+                  <div class="s-welcome-btn-icon">💼</div>
+                  <div class="s-welcome-btn-body">
+                    <div class="s-welcome-btn-title">أقدّم خدماتي</div>
+                    <div class="s-welcome-btn-sub">عندي وقت + مهارات</div>
+                  </div>
+                </div>
+                <div class="s-welcome-btn amber">
+                  <div class="s-welcome-btn-icon">🎯</div>
+                  <div class="s-welcome-btn-body">
+                    <div class="s-welcome-btn-title">أحتاج خدمة</div>
+                    <div class="s-welcome-btn-sub">عندي مهمة صغيرة</div>
+                  </div>
+                </div>
+              </div>
+              <div style="font-size:10px; opacity:.7; margin-top:6px;">
+                تقدر تسوي الاثنين — مجاني للتسجيل
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-label-num">1</div>
+          <h3>الترحيب — طرفان واضحان</h3>
+          <p>المستخدم يختار دوره من البداية: عامل أم عميل. (يقدر يبدّل لاحقاً.)</p>
+        </div>
+      </div>
+
+      <!-- WORKER SIDE DIVIDER -->
+      <div style="grid-column:1/-1; margin: 10px 0;">
+        <div class="side-divider">👔 جانب الموظف (العامل)</div>
+      </div>
+
+      <!-- Screen 2: Worker profile setup -->
+      <div class="phone-wrap">
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="p-statusbar"></div>
+            <div class="s-profile-head">
+              <h3>ابنِ ملفك</h3>
+              <p>خطوة ١ من ٣ · ٢ دقيقة</p>
+            </div>
+            <div class="s-profile-body">
+              <div class="s-profile-step">شنو مهاراتك؟</div>
+              <div class="s-profile-q">اختار اللي تتقنه</div>
+
+              <div class="s-skill-grid">
+                <div class="s-skill-chip selected">
+                  <span class="s-skill-chip-icon">📊</span>Excel
+                </div>
+                <div class="s-skill-chip">
+                  <span class="s-skill-chip-icon">🌐</span>ترجمة
+                </div>
+                <div class="s-skill-chip selected">
+                  <span class="s-skill-chip-icon">✍️</span>كتابة
+                </div>
+                <div class="s-skill-chip">
+                  <span class="s-skill-chip-icon">🎨</span>تصميم
+                </div>
+                <div class="s-skill-chip">
+                  <span class="s-skill-chip-icon">💻</span>برمجة
+                </div>
+                <div class="s-skill-chip">
+                  <span class="s-skill-chip-icon">📈</span>محاسبة
+                </div>
+              </div>
+
+              <div class="s-hours">
+                <div class="s-hours-label">⏰ ساعات التوفّر</div>
+                <div class="s-hours-val">9 صباحاً → 1 ظهراً</div>
+                <div class="s-hours-range"></div>
+              </div>
+
+              <div class="s-profile-cta">استمر →</div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-label-num">2</div>
+          <h3>إنشاء ملف العامل</h3>
+          <p>اختر مهاراتك + ساعات توفّرك (ساعات الدوام). الخوارزمية تطابقك بمهام مناسبة.</p>
+        </div>
+      </div>
+
+      <!-- Screen 3: Browse tasks -->
+      <div class="phone-wrap">
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="p-statusbar"></div>
+            <div class="p-header">
+              <span>☰</span>
+              <span class="p-header-title">مهام متاحة</span>
+              <span>🔍</span>
+            </div>
+            <div class="p-body">
+              <div class="s-tasks-stats">
+                <div>
+                  <div class="s-tasks-stats-num">١٤</div>
+                  <div class="s-tasks-stats-lbl">مهمة تطابق مهاراتك</div>
+                </div>
+                <span style="font-size:22px;">🎯</span>
+              </div>
+
+              <div class="s-task-filter">
+                <span class="s-task-chip active">الكل</span>
+                <span class="s-task-chip">Excel</span>
+                <span class="s-task-chip">كتابة</span>
+                <span class="s-task-chip">أقل من ساعة</span>
+              </div>
+
+              <div class="s-task-card hot">
+                <div class="s-task-title">مراجعة ملف Excel — مبيعات شهرية</div>
+                <div class="s-task-desc">أحتاج عين خبيرة تدقّق الجداول وتتأكد من الصيغ قبل الاجتماع</div>
+                <div class="s-task-meta">
+                  <div>
+                    <span class="s-task-skill">📊 Excel</span>
+                    <span class="s-task-duration">30 د</span>
+                  </div>
+                  <span class="s-task-price">15 KWD</span>
+                </div>
+              </div>
+
+              <div class="s-task-card">
+                <div class="s-task-title">تلخيص كتاب لتقرير جامعي</div>
+                <div class="s-task-desc">كتاب 120 صفحة، أبيه ملخص 3 صفحات بنقاط رئيسية</div>
+                <div class="s-task-meta">
+                  <div>
+                    <span class="s-task-skill">✍️ كتابة</span>
+                    <span class="s-task-duration">2 ساعة</span>
+                  </div>
+                  <span class="s-task-price">25 KWD</span>
+                </div>
+              </div>
+
+              <div class="s-task-card">
+                <div class="s-task-title">تدقيق إيميل رسمي إنجليزي</div>
+                <div class="s-task-desc">إيميل للعميل، أبي فحص القواعد والأسلوب</div>
+                <div class="s-task-meta">
+                  <div>
+                    <span class="s-task-skill">🌐 ترجمة</span>
+                    <span class="s-task-duration">10 د</span>
+                  </div>
+                  <span class="s-task-price">5 KWD</span>
+                </div>
+              </div>
+            </div>
+            <div class="p-tabbar">
+              <div class="p-tab active"><span class="p-tab-icon">🎯</span>المهام</div>
+              <div class="p-tab"><span class="p-tab-icon">💼</span>النشطة</div>
+              <div class="p-tab"><span class="p-tab-icon">💰</span>دخلي</div>
+              <div class="p-tab"><span class="p-tab-icon">👤</span>ملفي</div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-label-num">3</div>
+          <h3>استعرض المهام</h3>
+          <p>مهام مطابقة لمهاراتك — مصنّفة بالمدة والسعر. تختار اللي يناسب وقتك.</p>
+        </div>
+      </div>
+
+      <!-- Screen 4: Task detail -->
+      <div class="phone-wrap">
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="p-statusbar"></div>
+            <div class="p-header">
+              <span>←</span>
+              <span class="p-header-title">تفاصيل المهمة</span>
+              <span>❤️</span>
+            </div>
+            <div class="p-body" style="padding:0;">
+              <div class="s-detail-hero">
+                <div class="s-detail-price-row">
+                  <div class="s-detail-price">15 KWD</div>
+                  <div class="s-detail-duration">⏱ 30 دقيقة · 🔥 جديد</div>
+                </div>
+                <div class="s-detail-title">مراجعة ملف Excel — مبيعات شهرية</div>
+                <div class="s-detail-desc">
+                  أحتاج عين خبيرة تدقّق الجداول وتتأكد من الصيغ قبل اجتماع السبت.
+                  الملف يحتوي على 4 Sheets، بياناتي منظّمة لكن أخاف في غلطة صغيرة.
+                </div>
+                <div class="s-detail-poster">
+                  <div class="s-detail-poster-avatar">س</div>
+                  <div>
+                    <div class="s-detail-poster-name">سعود ك.</div>
+                    <div class="s-detail-poster-stars">⭐ 4.9 · 23 مهمة سابقة</div>
+                  </div>
+                </div>
+                <div style="font-size:11px; color:var(--w-muted); line-height:1.8;">
+                  <strong style="color:var(--w-ink);">📋 المطلوب:</strong><br>
+                  ✓ التأكد من صيغ SUM و VLOOKUP<br>
+                  ✓ تظليل أي أخطاء<br>
+                  ✓ رد بسيط في ملاحظة
+                </div>
+              </div>
+              <div class="s-detail-actions">
+                <div class="s-detail-accept">✅ اقبل المهمة — 15 KWD</div>
+                <div class="s-detail-decline">تخطي</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-label-num">4</div>
+          <h3>تفاصيل المهمة</h3>
+          <p>وصف كامل + سعر واضح + تقييم العميل. تقرر قبل ما تلتزم.</p>
+        </div>
+      </div>
+
+      <!-- Screen 5: Earnings -->
+      <div class="phone-wrap">
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="p-statusbar"></div>
+            <div class="p-header">
+              <span>☰</span>
+              <span class="p-header-title">دخلي</span>
+              <span>📊</span>
+            </div>
+            <div class="p-body">
+              <div class="s-earn-hero">
+                <div class="s-earn-big">247 KWD</div>
+                <div class="s-earn-lbl">أرباح هذا الشهر</div>
+                <div class="s-earn-note">💰 تحويل للحساب كل أسبوع</div>
+              </div>
+
+              <div class="s-earn-stat-row">
+                <div class="s-earn-stat-box">
+                  <div class="s-earn-stat-num">18</div>
+                  <div class="s-earn-stat-lbl">مهمة مكتملة</div>
+                </div>
+                <div class="s-earn-stat-box">
+                  <div class="s-earn-stat-num">4.9</div>
+                  <div class="s-earn-stat-lbl">⭐ تقييمك</div>
+                </div>
+                <div class="s-earn-stat-box">
+                  <div class="s-earn-stat-num">1.2ك</div>
+                  <div class="s-earn-stat-lbl">منذ انضمامك</div>
+                </div>
+              </div>
+
+              <div class="s-earn-list-title">آخر المعاملات</div>
+
+              <div class="s-earn-item">
+                <div>
+                  <div class="s-earn-item-title">مراجعة Excel</div>
+                  <div class="s-earn-item-when">سعود · قبل ساعة</div>
+                </div>
+                <div class="s-earn-item-amt">+12.3 KWD</div>
+              </div>
+
+              <div class="s-earn-item">
+                <div>
+                  <div class="s-earn-item-title">تدقيق إيميل</div>
+                  <div class="s-earn-item-when">فاطمة · اليوم</div>
+                </div>
+                <div class="s-earn-item-amt">+4.1 KWD</div>
+              </div>
+
+              <div class="s-earn-item">
+                <div>
+                  <div class="s-earn-item-title">تلخيص كتاب</div>
+                  <div class="s-earn-item-when">خالد · أمس</div>
+                </div>
+                <div class="s-earn-item-amt">+20.5 KWD</div>
+              </div>
+
+              <div style="background:rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.3); padding:10px; border-radius:10px; margin-top:10px; font-size:11px; color:var(--w-green); text-align:center; font-weight:800;">
+                🎯 مستواك التالي: 500 KWD/شهر
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-label-num">5</div>
+          <h3>لوحة الدخل</h3>
+          <p>كل مهمة = دخل مباشر. تحويل تلقائي أسبوعي. رؤية واضحة لتقدّمك.</p>
+        </div>
+      </div>
+
+      <!-- CLIENT SIDE DIVIDER -->
+      <div style="grid-column:1/-1; margin: 10px 0;">
+        <div class="side-divider client">🎯 جانب العميل (صاحب المهمة)</div>
+      </div>
+
+      <!-- Screen 6: Post new task -->
+      <div class="phone-wrap">
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="p-statusbar"></div>
+            <div class="p-header" style="background:linear-gradient(135deg, var(--w-amber), #D97706); color:var(--w-navy-dark);">
+              <span>←</span>
+              <span class="p-header-title">نشر مهمة</span>
+              <span></span>
+            </div>
+            <div class="p-body">
+              <div class="s-post-step">الخطوة 2/3</div>
+              <div style="font-size:16px; font-weight:900; margin-bottom:12px; color:var(--w-ink);">
+                شنو تحتاج؟
+              </div>
+
+              <div class="s-post-label">📝 عنوان المهمة</div>
+              <div class="s-post-input">مراجعة ملف Excel — مبيعات شهرية</div>
+
+              <div class="s-post-label">📂 المهارة المطلوبة</div>
+              <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                <span class="s-task-chip active">📊 Excel</span>
+                <span class="s-task-chip">✍️ كتابة</span>
+                <span class="s-task-chip">🎨 تصميم</span>
+                <span class="s-task-chip">🌐 ترجمة</span>
+              </div>
+
+              <div class="s-post-label">📋 الوصف</div>
+              <div class="s-post-textarea">
+                "أحتاج عين خبيرة تدقّق الجداول وتتأكد من الصيغ قبل اجتماع السبت..."
+              </div>
+
+              <div class="s-post-label">💰 الميزانية (KWD)</div>
+              <div class="s-post-price-grid">
+                <div class="s-post-price-chip">5</div>
+                <div class="s-post-price-chip">10</div>
+                <div class="s-post-price-chip selected">15</div>
+                <div class="s-post-price-chip">25+</div>
+              </div>
+
+              <div class="s-post-submit">
+                📤 نشر المهمة
+              </div>
+
+              <div style="font-size:10px; color:var(--w-muted); text-align:center; margin-top:8px;">
+                يوصل لـ ~30 عامل مطابق في أقل من 5 دقائق
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-label-num client">6</div>
+          <h3>انشر مهمة</h3>
+          <p>العميل يحدّد المهمة + السعر + المهارة. تنتشر لعشرات العمّال المطابقين.</p>
+        </div>
+      </div>
+
+      <!-- Screen 7: Browse workers -->
+      <div class="phone-wrap">
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="p-statusbar"></div>
+            <div class="p-header" style="background:linear-gradient(135deg, var(--w-amber), #D97706); color:var(--w-navy-dark);">
+              <span>←</span>
+              <span class="p-header-title">اختر العامل</span>
+              <span>🔍</span>
+            </div>
+            <div class="p-body">
+              <div style="background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.3); padding:10px; border-radius:10px; margin-bottom:12px; font-size:11px; color:var(--w-navy-dark); font-weight:800; text-align:center;">
+                🎯 5 عمّال قدّموا على مهمتك
+              </div>
+
+              <div class="s-worker-card">
+                <div class="s-worker-avatar">
+                  م
+                  <div class="s-worker-badge">✓</div>
+                </div>
+                <div class="s-worker-body">
+                  <div class="s-worker-name">محمد ع.</div>
+                  <div class="s-worker-skills">📊 Excel · محاسبة</div>
+                  <div class="s-worker-meta">
+                    <span>⭐ 4.9</span>
+                    <span>💼 47 مهمة</span>
+                  </div>
+                </div>
+                <div>
+                  <div class="s-worker-rate">15 KWD</div>
+                  <div class="s-worker-rate-lbl">للمهمة</div>
+                </div>
+              </div>
+
+              <div class="s-worker-card">
+                <div class="s-worker-avatar">ن</div>
+                <div class="s-worker-body">
+                  <div class="s-worker-name">نورة ك.</div>
+                  <div class="s-worker-skills">📊 Excel · تحليل</div>
+                  <div class="s-worker-meta">
+                    <span>⭐ 4.8</span>
+                    <span>💼 23 مهمة</span>
+                  </div>
+                </div>
+                <div>
+                  <div class="s-worker-rate">12 KWD</div>
+                  <div class="s-worker-rate-lbl">للمهمة</div>
+                </div>
+              </div>
+
+              <div class="s-worker-card">
+                <div class="s-worker-avatar">
+                  ع
+                  <div class="s-worker-badge">✓</div>
+                </div>
+                <div class="s-worker-body">
+                  <div class="s-worker-name">عبدالله ح.</div>
+                  <div class="s-worker-skills">📊 Excel · برمجة</div>
+                  <div class="s-worker-meta">
+                    <span>⭐ 5.0</span>
+                    <span>💼 81 مهمة</span>
+                  </div>
+                </div>
+                <div>
+                  <div class="s-worker-rate">20 KWD</div>
+                  <div class="s-worker-rate-lbl">للمهمة</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-label">
+          <div class="phone-label-num client">7</div>
+          <h3>اختر العامل المناسب</h3>
+          <p>العميل يرى العمّال المتقدّمين مع تقييماتهم وسعرهم. يختار بناءً على الثقة.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Decision CTA -->
+  <section class="waqti-cta">
+    <h2>هل نبني <span>وقتي</span>؟</h2>
+    <p>
+      سوق خليجي ذو طرفين — مليوني موظف فاضي + آلاف الطلاب ورواد الأعمال.
+      لا منافس عربي جدّي. نموذج دخل متنوّع من 6 قنوات.
+    </p>
+
+    <div class="waqti-cta-row">
+      <a href="/" class="waqti-cta-btn">💼 نبدأ بناء MVP</a>
+      <a href="/" class="waqti-cta-btn waqti-cta-btn-outline">💭 نعدّل الفكرة</a>
+    </div>
+
+    <div class="waqti-projections">
+      <h4>📈 توقعات 3 سنوات</h4>
+      <div class="waqti-proj-row">
+        <span>سنة 1 (500 مستخدم نشط)</span>
+        <strong>$50,000 دخل</strong>
+      </div>
+      <div class="waqti-proj-row">
+        <span>سنة 2 (5,000 مستخدم)</span>
+        <strong>$400,000 دخل</strong>
+      </div>
+      <div class="waqti-proj-row">
+        <span>سنة 3 (20,000 مستخدم)</span>
+        <strong>$1.5M دخل</strong>
+      </div>
+      <div class="waqti-proj-row" style="border-bottom:none; padding-top:14px;">
+        <span>الاستثمار الأولي المقدّر</span>
+        <strong>$5,000-$10,000</strong>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const phones = document.querySelectorAll('.phone-wrap');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.2 });
+    phones.forEach(p => {
+      p.style.opacity = '0';
+      p.style.transform = 'translateY(30px)';
+      p.style.transition = 'opacity .7s ease, transform .7s ease';
+      io.observe(p);
+    });
+  </script>
+</body>
+</html>
