@@ -116,7 +116,19 @@
     return TYPES.concat(state.customTypes || []);
   }
 
+  // Seeded demo items — titles are unique and used to flag legacy data.
+  const LEGACY_DEMO_TITLES = new Set([
+    'إيميل احترافي موجَّه',
+    'useMemo للعمليات الثقيلة في React',
+    'الفرق بين useMemo و useCallback',
+    'أفضل أدوات إدارة المهام لفريق صغير',
+    'تطبيق يجمع screenshots المقاهي من انستقرام',
+    'قالب مراجعة منتج (Product Review Outline)',
+  ]);
+  const LEGACY_DEMO_COLLS = new Set(['أفضل البرومبتس', 'مكتبة الكود']);
+
   function load() {
+    let dirty = false;
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
@@ -127,8 +139,22 @@
         state.recent = Array.isArray(d.recent) ? d.recent : [];
         // migrate legacy type 'info' → 'note'
         state.items.forEach((it) => { if (it.type === 'info') it.type = 'note'; });
+        // back-fill isDemo for legacy seeded items so the banner + badge work
+        state.items.forEach((it) => {
+          if (it.isDemo === undefined && LEGACY_DEMO_TITLES.has(it.title)) {
+            it.isDemo = true;
+            dirty = true;
+          }
+        });
+        state.collections.forEach((c) => {
+          if (c.isDemo === undefined && LEGACY_DEMO_COLLS.has(c.name)) {
+            c.isDemo = true;
+            dirty = true;
+          }
+        });
       }
     } catch {}
+    if (dirty) persist();
     // Intentionally no auto-seed here — welcome modal drives first-visit.
   }
 
@@ -167,6 +193,7 @@
         icon: '✨',
         color: '#7C3AED',
         itemIds: [],
+        isDemo: true,
         createdAt: now,
       },
       {
@@ -176,6 +203,7 @@
         icon: '📚',
         color: '#0D9488',
         itemIds: [],
+        isDemo: true,
         createdAt: now,
       },
     ];
@@ -534,10 +562,13 @@
 
   function clearDemoItems() {
     const demoCount = countDemoItems();
-    if (demoCount === 0) return;
-    if (!confirm(`حذف جميع الأمثلة (${demoCount} عنصر)؟ محفوظاتك الشخصية لن تُمسّ.`)) return;
+    const demoCollCount = state.collections.filter((c) => c.isDemo).length;
+    if (demoCount === 0 && demoCollCount === 0) return;
+    const msg = `حذف جميع الأمثلة (${demoCount} عنصر + ${demoCollCount} باقة)؟\nمحفوظاتك الشخصية لن تُمسّ.`;
+    if (!confirm(msg)) return;
     state.items = state.items.filter((it) => !it.isDemo);
-    // also remove refs from collections + recent
+    state.collections = state.collections.filter((c) => !c.isDemo);
+    // also clean remaining collections' itemIds of any now-missing refs
     state.collections.forEach((c) => {
       c.itemIds = (c.itemIds || []).filter((id) => state.items.find((x) => x.id === id));
     });
