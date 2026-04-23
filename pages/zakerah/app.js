@@ -1643,7 +1643,9 @@
           <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
             <button class="btn btn-indigo btn-sm" id="coll-add-items">＋ إضافة عناصر</button>
             <button class="btn btn-ghost btn-sm" id="coll-edit">✎ تعديل</button>
-            <button class="btn btn-ghost btn-sm" id="coll-export">⬇ تصدير JSON</button>
+            <button class="btn btn-ghost btn-sm" id="coll-export-pdf">📄 PDF</button>
+            <button class="btn btn-ghost btn-sm" id="coll-export-md">📝 Markdown</button>
+            <button class="btn btn-ghost btn-sm" id="coll-export">⬇ JSON</button>
           </div>
         </div>
       </div>
@@ -1665,6 +1667,8 @@
     $('#coll-add-items').onclick = () => openAddItemsPicker(id);
     $('#coll-edit').onclick = () => openCollForm(c);
     $('#coll-export').onclick = () => exportCollection(c);
+    $('#coll-export-pdf').onclick = () => exportCollectionPDF(c);
+    $('#coll-export-md').onclick = () => exportCollectionMarkdown(c);
 
     $$('#coll-body [data-item]').forEach((el) => {
       el.onclick = () => {
@@ -1790,10 +1794,19 @@
     paint();
   }
 
-  function exportCollection(c) {
-    const items = (c.itemIds || [])
+  function collectionItems(c) {
+    return (c.itemIds || [])
       .map((iid) => state.items.find((x) => x.id === iid))
-      .filter(Boolean);
+      .filter(Boolean)
+      .sort((a, b) => b.createdAt - a.createdAt);
+  }
+
+  function safeFileName(name) {
+    return (name || 'collection').replace(/\s+/g, '-').toLowerCase();
+  }
+
+  function exportCollection(c) {
+    const items = collectionItems(c);
     const data = {
       app: 'AI Memory', collection: c.name, description: c.description,
       exportedAt: new Date().toISOString(), items,
@@ -1802,10 +1815,152 @@
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = (c.name || 'collection').replace(/\s+/g, '-').toLowerCase() + '.json';
+    a.download = safeFileName(c.name) + '.json';
     document.body.appendChild(a); a.click(); a.remove();
     URL.revokeObjectURL(url);
-    toast('تم التصدير ✓', 'success');
+    toast('تم التصدير JSON ✓', 'success');
+  }
+
+  function exportCollectionMarkdown(c) {
+    const items = collectionItems(c);
+    if (items.length === 0) { toast('الباقة فارغة', 'error'); return; }
+
+    const today = new Date().toLocaleDateString('ar');
+    const lines = [];
+    lines.push(`# ${c.name}`);
+    lines.push('');
+    if (c.description) { lines.push(`> ${c.description}`); lines.push(''); }
+    lines.push(`*${items.length} عنصر · صُدِّر في ${today}*`);
+    lines.push('');
+    lines.push('---');
+    lines.push('');
+
+    items.forEach((it, i) => {
+      const t = getType(it.type);
+      lines.push(`## ${i + 1}. ${it.title}`);
+      lines.push('');
+      const meta = [];
+      meta.push(`**النوع**: ${t.icon} ${t.ar} · ${t.en}`);
+      if (it.source) meta.push(`**المصدر**: ${it.source}`);
+      if (it.lang) meta.push(`**اللغة**: \`${it.lang}\``);
+      if (it.targetAi) meta.push(`**موجَّه لـ**: ${it.targetAi}`);
+      if (it.tags && it.tags.length) meta.push(`**وسوم**: ${it.tags.map((x) => '#' + x).join(' ')}`);
+      lines.push(meta.join(' · '));
+      lines.push('');
+
+      if (it.type === 'code') {
+        lines.push('```' + (it.lang || ''));
+        lines.push(it.body);
+        lines.push('```');
+      } else {
+        lines.push(it.body);
+      }
+      lines.push('');
+      lines.push('---');
+      lines.push('');
+    });
+
+    lines.push(`_صُدِّر من ذاكرة الذكاء الاصطناعي · AI Memory · coffez.net/pages/zakerah_`);
+
+    const blob = new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = safeFileName(c.name) + '.md';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    toast('تم التصدير Markdown ✓', 'success');
+  }
+
+  function exportCollectionPDF(c) {
+    const items = collectionItems(c);
+    if (items.length === 0) { toast('الباقة فارغة', 'error'); return; }
+
+    const today = new Date().toLocaleDateString('ar');
+    const css = `
+      @page { size: A4; margin: 18mm; }
+      * { box-sizing: border-box; }
+      body {
+        font-family: 'Tajawal', -apple-system, sans-serif;
+        color: #0F1B2E; line-height: 1.7; margin: 0;
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+      }
+      .cover { padding: 24px 0 32px; border-bottom: 3px solid ${c.color || '#0D9488'}; margin-bottom: 28px; }
+      .cover .icon {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 56px; height: 56px; border-radius: 14px;
+        background: ${c.color || '#0D9488'}; color: #fff; font-size: 26px;
+        margin-bottom: 12px;
+      }
+      h1 { font-size: 30px; margin: 0 0 8px; font-weight: 900; color: #0B1F3A; }
+      .desc { font-size: 14px; color: #5B6A81; margin: 0 0 8px; }
+      .meta-row { font-size: 12px; color: #8E99AC; }
+
+      .item { page-break-inside: avoid; padding: 16px 0 18px; border-bottom: 1px dashed #E2E6EE; }
+      .item-num { font-size: 11px; color: #8E99AC; letter-spacing: 1px; font-weight: 700; }
+      .item-title { font-size: 18px; font-weight: 800; margin: 4px 0 8px; color: #0B1F3A; }
+      .badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+      .badge {
+        background: #EEF1F6; color: #0F1B2E; font-size: 10px; font-weight: 700;
+        padding: 3px 8px; border-radius: 999px; letter-spacing: 0.3px;
+      }
+      .badge.t { background: ${c.color || '#0D9488'}; color: #fff; }
+      .body { font-size: 13px; color: #0F1B2E; white-space: pre-wrap; word-wrap: break-word; }
+      .body.code {
+        font-family: 'SFMono-Regular', Menlo, Consolas, monospace;
+        background: #0B1F3A; color: #B8EAE6; padding: 12px 14px;
+        border-radius: 6px; font-size: 12px; line-height: 1.6;
+      }
+      .footer { margin-top: 28px; padding-top: 14px; border-top: 1px solid #E2E6EE;
+        font-size: 11px; color: #8E99AC; text-align: center; }
+    `;
+
+    const itemHTML = items.map((it, i) => {
+      const t = getType(it.type);
+      const badges = [
+        `<span class="badge t">${t.icon} ${esc(t.ar)} · ${esc(t.en)}</span>`,
+        it.source ? `<span class="badge">📎 ${esc(it.source)}</span>` : '',
+        it.lang ? `<span class="badge">${esc(it.lang)}</span>` : '',
+        it.targetAi ? `<span class="badge">→ ${esc(it.targetAi)}</span>` : '',
+        ...(it.tags || []).map((x) => `<span class="badge">#${esc(x)}</span>`),
+      ].filter(Boolean).join('');
+      const isCode = it.type === 'code';
+      return `
+        <div class="item">
+          <div class="item-num">${String(i + 1).padStart(2, '0')} / ${items.length}</div>
+          <div class="item-title">${esc(it.title)}</div>
+          <div class="badges">${badges}</div>
+          <div class="body ${isCode ? 'code' : ''}">${esc(it.body)}</div>
+        </div>`;
+    }).join('');
+
+    const html = `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>${esc(c.name)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>${css}</style>
+</head>
+<body>
+  <div class="cover">
+    <div class="icon">${esc(c.icon)}</div>
+    <h1>${esc(c.name)}</h1>
+    ${c.description ? `<p class="desc">${esc(c.description)}</p>` : ''}
+    <div class="meta-row">${items.length} عنصر · صُدِّر في ${today}</div>
+  </div>
+  ${itemHTML}
+  <div class="footer">صُدِّر من ذاكرة الذكاء الاصطناعي · AI Memory · coffez.net/pages/zakerah</div>
+  <script>
+    window.addEventListener('load', () => setTimeout(() => window.print(), 500));
+  <\/script>
+</body>
+</html>`;
+
+    const w = window.open('', '_blank');
+    if (!w) { toast('السماح بالنوافذ مطلوب لإنشاء PDF', 'error'); return; }
+    w.document.open(); w.document.write(html); w.document.close();
+    toast('افتح حوار الطباعة → احفظ كـPDF', 'success');
   }
 
   function toggleItemInCollection(collId, itemId) {
