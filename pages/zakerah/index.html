@@ -37,6 +37,7 @@
         <span class="kbd">⌘K</span>
       </button>
       <button class="icon-btn" id="btn-collections" title="الباقات · Collections">📁</button>
+      <button class="icon-btn" id="btn-monet" title="للبيع · Monetize">💰</button>
       <button class="icon-btn" id="btn-settings" title="الإعدادات · Settings">⚙</button>
       <button class="btn btn-primary" id="btn-new" aria-label="جديد">
         ＋ جديد
@@ -128,6 +129,21 @@
         اضغط <kbd style="background:var(--paper-2); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:11px;">Esc</kbd> للإغلاق.
       </p>
     </div>
+  </div>
+</div>
+
+<!-- ========== MONETIZE MODAL ========== -->
+<div class="modal-backdrop" id="monet-modal">
+  <div class="modal" style="max-width: 720px;">
+    <div class="modal-head">
+      <h3>
+        <span>للبيع</span>
+        <span class="tag">MONETIZE</span>
+      </h3>
+      <button type="button" class="modal-close" id="monet-close">×</button>
+    </div>
+
+    <div class="modal-body" id="monet-body"></div>
   </div>
 </div>
 
