@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>خِزنة — Khazna | خزِّن أذكى محادثاتك مع الـAI</title>
-<meta name="description" content="تطبيق ويب بسيط لحفظ وتنظيم والبحث في محادثات الذكاء الاصطناعي المهمة — ثم تحويلها لباقات قابلة للبيع." />
+<title>خِزنة — Khazna | أرشفة ذكية لمحادثاتك مع الـAI</title>
+<meta name="description" content="مكتبتك الشخصية: احفظ ورتّب محادثات الذكاء الاصطناعي حسب التصنيف، ابحث فيها، وصدّرها كباقات." />
 
 <link rel="icon" type="image/svg+xml" href="/assets/img/coffez-icon.svg">
 <link rel="apple-touch-icon" href="/assets/img/coffez-icon.svg">
-<meta name="theme-color" content="#0F172A">
+<meta name="theme-color" content="#3E4E34">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,259 +17,130 @@
 </head>
 <body>
 
-<div class="drawer-scrim"></div>
-
 <div class="app">
 
-  <!-- ============ SIDEBAR ============ -->
-  <aside class="sidebar">
-    <div class="sb-logo">
-      <div class="sb-logo-mark">خ</div>
-      <div class="sb-logo-text">
+  <!-- ============ TOP BAR ============ -->
+  <header class="topbar">
+    <button class="brand" id="brand-home">
+      <div class="brand-mark">خ</div>
+      <div class="brand-text">
         خِزنة
         <span class="en">KHAZNA</span>
       </div>
+    </button>
+
+    <div class="top-actions">
+      <button class="icon-btn" id="nav-search"    title="بحث · Search">⌕</button>
+      <button class="icon-btn" id="nav-packs"     title="الباقات · Collections">◱</button>
+      <button class="icon-btn" id="nav-library"   title="المكتبة · Library">☰</button>
+    </div>
+  </header>
+
+  <!-- ============ HOME ============ -->
+  <section class="view active" data-view="home" id="view-home">
+    <div class="home-hero">
+      <h2>خِزنتك — مكتبتك الشخصية للمعرفة</h2>
+      <p>احفظ ورتّب محادثاتك المهمة مع الذكاء الاصطناعي حسب التصنيف.</p>
+      <div class="stat-strip">
+        <div class="stat-strip-item"><strong id="home-stat-total">0</strong>محفوظات</div>
+        <div class="stat-strip-item"><strong id="home-stat-cats">0</strong>تصنيفات</div>
+        <div class="stat-strip-item"><strong id="home-stat-imp">0</strong>مهمة ⭐</div>
+      </div>
     </div>
 
-    <div class="sb-section-head">التنقّل · Navigate</div>
-
-    <button class="sb-item" data-route="home">
-      <span class="sb-ico">⌂</span>
-      <span>
-        الرئيسية
-        <span class="en">Home</span>
-      </span>
-    </button>
-
-    <button class="sb-item" data-route="save" data-save-new>
-      <span class="sb-ico">＋</span>
-      <span>
-        حفظ جديد
-        <span class="en">Save</span>
-      </span>
-    </button>
-
-    <button class="sb-item" data-route="search">
-      <span class="sb-ico">⌕</span>
-      <span>
-        بحث
-        <span class="en">Search</span>
-      </span>
-    </button>
-
-    <button class="sb-item" data-route="collection">
-      <span class="sb-ico">◱</span>
-      <span>
-        الباقات
-        <span class="en">Collections</span>
-      </span>
-    </button>
-
-    <button class="sb-item" data-route="library">
-      <span class="sb-ico">☰</span>
-      <span>
-        المكتبة
-        <span class="en">Library</span>
-      </span>
-    </button>
-
-    <div class="sb-footer">
-      <div>💾 محفوظ في جهازك فقط</div>
-      <div style="margin-top:4px; color: var(--muted-2);">Local · No cloud</div>
-      <a href="wireframe.html" style="display:block; margin-top:10px; color:var(--muted); text-decoration:underline; font-size:11px;">
-        شوف الوايرفريم
-      </a>
+    <div class="search-hero">
+      <span class="s-ico">⌕</span>
+      <input type="search" id="home-search" placeholder="ابحث في كل خِزنتك... / Search everything...">
     </div>
-  </aside>
 
-  <!-- ============ MAIN ============ -->
-  <div class="main">
-
-    <!-- Top bar -->
-    <header class="topbar">
-      <button class="menu-btn" id="menu-btn" aria-label="القائمة">☰</button>
-      <div class="topsearch">
-        <span class="topsearch-icon">⌕</span>
-        <input type="search" id="topsearch-input" placeholder="ابحث في خِزنتك... / Search your vault..." />
+    <div class="section">
+      <div class="section-head">
+        <h2>اختر تصنيفاً <span class="en">PICK A CATEGORY</span></h2>
       </div>
-      <div class="top-actions">
-        <button class="icon-btn" title="Save New" data-save-new>＋</button>
-        <div class="avatar">خ</div>
+      <div class="cat-grid" id="home-cat-grid"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <h2>الأحدث <span class="en">RECENT</span></h2>
       </div>
-    </header>
+      <div class="entry-list" id="home-recent"></div>
+    </div>
+  </section>
 
-    <!-- Views -->
-    <main class="views">
+  <!-- ============ CATEGORY PAGE (rendered by JS) ============ -->
+  <section class="view" data-view="cat" id="view-cat"></section>
 
-      <!-- ==== HOME ==== -->
-      <section id="view-home" class="view">
-        <div class="welcome-line">
-          مرحباً بك في <strong>خِزنتك</strong> — كل محادثة مهمة في مكان واحد.
-        </div>
+  <!-- ============ ITEM DETAIL (rendered by JS) ============ -->
+  <section class="view" data-view="item" id="view-item"></section>
 
-        <div class="home-hero">
-          <div>
-            <h2>احفظ. رتّب. ابحث. بِع.</h2>
-            <p>Save · Organize · Search · Monetize</p>
-          </div>
-          <button class="btn btn-gold btn-lg" data-save-new>＋ احفظ محادثة جديدة</button>
-        </div>
+  <!-- ============ SEARCH (rendered by JS) ============ -->
+  <section class="view" data-view="search" id="view-search"></section>
 
-        <div class="stats-grid">
-          <div class="stat-card"><div class="stat-num" id="home-stat-total">0</div><div class="stat-lbl">محفوظات <span class="en">Saves</span></div></div>
-          <div class="stat-card"><div class="stat-num" id="home-stat-cats">0</div><div class="stat-lbl">تصنيفات <span class="en">Categories</span></div></div>
-          <div class="stat-card"><div class="stat-num" id="home-stat-imp">0</div><div class="stat-lbl">مهمة ⭐ <span class="en">Starred</span></div></div>
-        </div>
+  <!-- ============ PACKS (rendered by JS) ============ -->
+  <section class="view" data-view="packs" id="view-packs"></section>
 
-        <div class="section">
-          <div class="section-head">
-            <h2>آخر المحفوظات <span class="en">RECENT SAVES</span></h2>
-            <button class="link" onclick="location.hash='#/search'">عرض الكل</button>
-          </div>
-          <div class="item-grid" id="home-recent"></div>
-        </div>
+  <!-- ============ LIBRARY (rendered by JS) ============ -->
+  <section class="view" data-view="library" id="view-library"></section>
 
-        <div class="section">
-          <div class="section-head">
-            <h2>التصنيفات <span class="en">CATEGORIES</span></h2>
-          </div>
-          <div class="cat-grid" id="home-cats"></div>
-        </div>
-
-        <div class="section">
-          <div class="section-head">
-            <h2>⭐ مهم <span class="en">IMPORTANT</span></h2>
-          </div>
-          <div class="item-grid" id="home-important"></div>
-        </div>
-      </section>
-
-      <!-- ==== SAVE ==== -->
-      <section id="view-save" class="view">
-        <div class="page-head">
-          <h1 id="save-title">حفظ جديد <span class="en" id="save-title-en">NEW SAVE</span></h1>
-          <button class="btn btn-ghost btn-sm" onclick="history.back()">← رجوع</button>
-        </div>
-
-        <form id="save-form" class="form">
-          <div class="field">
-            <div class="field-label">
-              <span>السؤال <span class="req">*</span></span>
-              <span class="en">Question</span>
-            </div>
-            <input type="text" id="save-q" placeholder="مثلاً: كيف أحسّن أداء React؟" required>
-          </div>
-
-          <div class="field">
-            <div class="field-label">
-              <span>الإجابة <span class="req">*</span></span>
-              <span class="en">Answer / AI Response</span>
-            </div>
-            <textarea id="save-a" placeholder="ألصق رد الذكاء الاصطناعي هنا..." required></textarea>
-          </div>
-
-          <div class="field-row">
-            <div class="field">
-              <div class="field-label">
-                <span>التصنيف</span>
-                <span class="en">Category</span>
-              </div>
-              <select id="save-cat"></select>
-            </div>
-
-            <div class="field toggle-row">
-              <div class="toggle-lbl">
-                ضع علامة مهم ⭐
-                <span class="en">Mark as Important</span>
-              </div>
-              <button type="button" class="toggle" id="save-important"></button>
-            </div>
-          </div>
-
-          <div class="field">
-            <div class="field-label">
-              <span>الوسوم (اختياري)</span>
-              <span class="en">Tags (optional)</span>
-            </div>
-            <div class="chips" id="save-tags"></div>
-          </div>
-
-          <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <button type="submit" class="btn btn-primary btn-lg">💾 احفظ</button>
-            <button type="button" class="btn btn-ghost btn-lg" onclick="history.back()">إلغاء</button>
-          </div>
-        </form>
-      </section>
-
-      <!-- ==== DETAIL ==== -->
-      <section id="view-detail" class="view">
-        <div class="page-head">
-          <h1>التفاصيل <span class="en">DETAIL</span></h1>
-          <button class="btn btn-ghost btn-sm" onclick="location.hash='#/home'">← الرئيسية</button>
-        </div>
-        <div id="detail-body"></div>
-      </section>
-
-      <!-- ==== SEARCH ==== -->
-      <section id="view-search" class="view">
-        <div class="page-head">
-          <h1>البحث <span class="en">SEARCH</span></h1>
-        </div>
-
-        <div class="search-bar-big">
-          <span class="s-ico">⌕</span>
-          <input type="search" id="search-input" placeholder="ابحث في السؤال أو الجواب أو الوسوم...">
-        </div>
-
-        <div class="chips" id="search-cat-chips" style="margin-bottom:20px;"></div>
-
-        <div class="result-count" id="search-count">0 نتيجة</div>
-        <div class="result-list" id="search-results"></div>
-      </section>
-
-      <!-- ==== COLLECTION ==== -->
-      <section id="view-collection" class="view">
-        <div class="page-head">
-          <h1>الباقات <span class="en">COLLECTIONS · MONETIZE</span></h1>
-          <div class="sub">اصنع باقات من أفضل محادثاتك وصدّرها أو شاركها.</div>
-        </div>
-        <div id="collection-body"></div>
-      </section>
-
-      <!-- ==== LIBRARY ==== -->
-      <section id="view-library" class="view">
-        <div class="page-head">
-          <h1>المكتبة <span class="en">LIBRARY</span></h1>
-          <div style="display:flex; gap:8px;">
-            <button class="btn btn-ghost btn-sm" id="lib-export">⬇ تصدير كل البيانات</button>
-            <button class="btn btn-danger btn-sm" id="lib-clear">مسح الكل</button>
-          </div>
-        </div>
-
-        <div class="stats-grid" id="lib-stats"></div>
-
-        <div class="section">
-          <div class="section-head">
-            <h2>توزيع التصنيفات <span class="en">CATEGORY BREAKDOWN</span></h2>
-          </div>
-          <div class="library-breakdown" id="lib-breakdown"></div>
-        </div>
-      </section>
-
-    </main>
-  </div>
 </div>
 
 <!-- ============ FAB ============ -->
 <button class="fab" id="fab" aria-label="احفظ من الـAI">
   <span class="fab-icon">＋</span>
-  <span>
+  <span class="fab-text">
     احفظ من الـAI
-    <span class="en">Save from AI</span>
+    <span class="en">SAVE FROM AI</span>
   </span>
 </button>
 
-<!-- ============ MODAL: Save from AI ============ -->
+<!-- ============ EDIT MODAL ============ -->
+<div class="modal-backdrop" id="edit-modal">
+  <form class="modal" id="edit-form">
+    <div class="modal-head">
+      <h3>تعديل <span class="en">EDIT ENTRY</span></h3>
+      <button type="button" class="modal-close" id="edit-close">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="field">
+        <div class="field-label">
+          <span>العنوان / السؤال</span>
+          <span class="en">Title</span>
+        </div>
+        <input type="text" id="edit-q" required>
+      </div>
+
+      <div class="field">
+        <div class="field-label">
+          <span>المحتوى / الإجابة</span>
+          <span class="en">Content</span>
+        </div>
+        <textarea id="edit-a" rows="7" required></textarea>
+      </div>
+
+      <div class="field">
+        <div class="field-label">
+          <span>التصنيف</span>
+          <span class="en">Category</span>
+        </div>
+        <select id="edit-cat" style="width:100%; border:none; outline:none; background:transparent; font-size:14px; color:var(--text);"></select>
+      </div>
+
+      <div class="toggle-row">
+        <div class="toggle-lbl">مهم ⭐ <span class="en">Important</span></div>
+        <button type="button" class="toggle" id="edit-imp"></button>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost" onclick="document.getElementById('edit-close').click()">إلغاء</button>
+      <button type="submit" class="btn btn-olive">💾 حفظ التعديلات</button>
+    </div>
+  </form>
+</div>
+
+<!-- ============ SAVE-FROM-AI MODAL ============ -->
 <div class="modal-backdrop" id="fab-modal">
   <form class="modal" id="fab-form">
     <div class="modal-head">
@@ -278,25 +149,19 @@
     </div>
 
     <div class="modal-body">
-      <div class="paste-hint">
-        <span>📋</span>
-        <div>
-          ألصق محادثتك من ChatGPT / Claude / Gemini — نحاول استخراج السؤال والجواب تلقائياً.
-          <span class="en">Paste from any AI app — we'll auto-detect Q &amp; A.</span>
-        </div>
+      <div class="hint">
+        📋 ألصق محادثتك من ChatGPT / Claude / Gemini — نحاول استخراج السؤال والجواب تلقائياً.
       </div>
 
       <div class="field">
         <div class="field-label">
           <span>النص الخام</span>
-          <span class="en">Raw text (paste here)</span>
+          <span class="en">Raw text</span>
         </div>
-        <textarea id="fab-text" style="min-height:80px;" placeholder="ألصق المحادثة كاملة هنا..."></textarea>
+        <textarea id="fab-text" rows="4" placeholder="ألصق المحادثة كاملة هنا..."></textarea>
       </div>
 
-      <div style="display:flex; gap:8px;">
-        <button type="button" class="btn btn-ghost btn-sm" id="fab-paste">📋 ألصق من الحافظة</button>
-      </div>
+      <button type="button" class="btn btn-ghost btn-sm" id="fab-paste" style="margin-bottom:8px;">📋 ألصق من الحافظة</button>
 
       <div class="field">
         <div class="field-label">
@@ -311,13 +176,21 @@
           <span>الإجابة</span>
           <span class="en">Answer</span>
         </div>
-        <textarea id="fab-a" placeholder="الإجابة المستخرجة..."></textarea>
+        <textarea id="fab-a" rows="5" placeholder="الإجابة المستخرجة..."></textarea>
+      </div>
+
+      <div class="field">
+        <div class="field-label">
+          <span>التصنيف</span>
+          <span class="en">Category</span>
+        </div>
+        <select id="fab-cat" style="width:100%; border:none; outline:none; background:transparent; font-size:14px; color:var(--text);"></select>
       </div>
     </div>
 
     <div class="modal-foot">
-      <button type="button" class="btn btn-ghost" id="fab-cancel" onclick="document.getElementById('fab-close').click()">إلغاء</button>
-      <button type="submit" class="btn btn-primary">💾 احفظ بسرعة</button>
+      <button type="button" class="btn btn-ghost" onclick="document.getElementById('fab-close').click()">إلغاء</button>
+      <button type="submit" class="btn btn-copper">💾 احفظ</button>
     </div>
   </form>
 </div>
