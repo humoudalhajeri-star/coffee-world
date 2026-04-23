@@ -285,6 +285,24 @@
     toast._t = setTimeout(() => { el.className = 'toast ' + kind; }, 2400);
   }
 
+  /* ============ TYPE FILTER DROPDOWN (next to "+ جديد") ============ */
+  function renderTypeFilter() {
+    const sel = $('#type-filter');
+    if (!sel) return;
+    const types = allTypes();
+    const favCount = state.items.filter((x) => x.important).length;
+    sel.innerHTML = `
+      <option value="all">🗂 الكل (${state.items.length})</option>
+      <option value="fav">⭐ المفضلة (${favCount})</option>
+      <optgroup label="الأنواع · Types">
+        ${types.map((t) =>
+          `<option value="${esc(t.id)}">${t.icon} ${esc(t.ar)} (${countByType(t.id)})</option>`
+        ).join('')}
+      </optgroup>
+    `;
+    sel.value = state.filter.type || 'all';
+  }
+
   /* ============ TABS ============ */
   function renderTabs() {
     const wrap = $('#tabs');
@@ -316,6 +334,7 @@
 
   /* ============ LIST ============ */
   function render() {
+    renderTypeFilter();
     renderTabs();
     renderList();
   }
@@ -1586,10 +1605,11 @@
     // top buttons
     $('#brand-home')?.addEventListener('click', () => {
       state.filter = { type: 'all', q: '' };
+      const inp = $('#search-inline');
+      if (inp) { inp.value = ''; $('#search-wrap')?.classList.remove('has-value'); }
       render();
     });
     $('#btn-new')?.addEventListener('click', () => openCreate('prompt'));
-    $('#btn-search')?.addEventListener('click', openSearch);
     $('#btn-collections')?.addEventListener('click', openCollections);
     $('#btn-monet')?.addEventListener('click', openMonetize);
     $('#monet-close')?.addEventListener('click', closeMonetize);
@@ -1624,13 +1644,42 @@
       if (e.target.id === 'detail-modal') closeDetail();
     });
 
-    // search modal
+    // inline keyword search
+    const searchInline = $('#search-inline');
+    const searchWrap   = $('#search-wrap');
+    const searchClear  = $('#search-clear');
+    searchInline?.addEventListener('input', (e) => {
+      state.filter.q = e.target.value;
+      searchWrap?.classList.toggle('has-value', !!e.target.value);
+      renderList();
+    });
+    searchClear?.addEventListener('click', () => {
+      if (!searchInline) return;
+      searchInline.value = '';
+      state.filter.q = '';
+      searchWrap?.classList.remove('has-value');
+      searchInline.focus();
+      renderList();
+    });
+
+    // type dropdown next to "+ جديد"
+    const typeSelect = $('#type-filter');
+    if (typeSelect) {
+      typeSelect.addEventListener('change', (e) => {
+        state.filter.type = e.target.value;
+        render();
+      });
+    }
+
+    // legacy search modal (kept for Cmd+K but not in the header anymore)
     $('#search-close')?.addEventListener('click', closeSearch);
     $('#search-modal')?.addEventListener('click', (e) => {
       if (e.target.id === 'search-modal') closeSearch();
     });
     $('#search-input')?.addEventListener('input', (e) => {
       state.filter.q = e.target.value;
+      if (searchInline) searchInline.value = e.target.value;
+      searchWrap?.classList.toggle('has-value', !!e.target.value);
       renderList();
     });
     $('#search-input')?.addEventListener('keydown', (e) => {
@@ -1645,7 +1694,9 @@
       }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        openSearch();
+        const inline = $('#search-inline');
+        if (inline) { inline.focus(); inline.select(); }
+        else openSearch();
       }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'n') {
         e.preventDefault();
