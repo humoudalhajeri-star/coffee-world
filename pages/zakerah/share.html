@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>مشاركة · ذاكرة الذكاء الاصطناعي</title>
+<meta name="description" content="عنصر مشارك من ذاكرة الذكاء الاصطناعي — احفظ نسختك." />
+
+<link rel="icon" type="image/svg+xml" href="/assets/img/coffez-icon.svg">
+<meta name="theme-color" content="#0B1F3A">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --paper: #F7F8FA; --card: #FFFFFF;
+    --ink: #0B1F3A; --text: #0F1B2E; --muted: #5B6A81; --line: #E2E6EE;
+    --teal: #0D9488; --teal-soft: #CCFBF1;
+    --gold: #C89B3C; --gold-soft: #FAEBCE;
+    --code-bg: #0B1F3A; --code-text: #B8EAE6;
+    --mono: 'SFMono-Regular', Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Tajawal', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--paper); color: var(--text);
+    min-height: 100vh; line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  .nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 20px; border-bottom: 1px solid var(--line); margin-bottom: 30px;
+  }
+  .brand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+  .brand-mark {
+    width: 40px; height: 40px; border-radius: 11px;
+    background: var(--ink); color: #fff; display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 20px; position: relative; overflow: hidden;
+  }
+  .brand-mark::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, transparent 50%, var(--teal) 50%);
+    opacity: 0.45;
+  }
+  .brand-name { font-weight: 900; font-size: 17px; line-height: 1.2; }
+  .brand-name small {
+    display: block; font-size: 9px; color: var(--teal);
+    letter-spacing: 2.5px; font-weight: 700; margin-top: 3px;
+  }
+
+  .cta {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px; background: var(--teal); color: #fff;
+    border-radius: 10px; font-weight: 800; font-size: 13px;
+    text-decoration: none; border: none; cursor: pointer;
+    transition: transform .15s ease, background .15s ease;
+  }
+  .cta:hover { background: #0B7F75; transform: translateY(-1px); }
+
+  .notice {
+    background: var(--gold-soft); color: #7a6228;
+    border: 1px solid #f0d1b3;
+    padding: 12px 16px; border-radius: 10px;
+    font-size: 13px; margin-bottom: 26px; line-height: 1.6;
+  }
+
+  .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+  .badge {
+    padding: 4px 10px; border-radius: 999px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
+    background: var(--card); color: var(--text); border: 1px solid var(--line);
+  }
+  .badge.type { color: #fff; border: none; }
+  .badge.type.prompt   { background: #7C3AED; }
+  .badge.type.code     { background: #0EA5A4; }
+  .badge.type.note     { background: #475569; }
+  .badge.type.answer   { background: #1D4ED8; }
+  .badge.type.idea     { background: #C89B3C; }
+  .badge.type.template { background: #B45309; }
+
+  h1 {
+    font-size: clamp(24px, 4vw, 32px);
+    font-weight: 900; color: var(--ink); letter-spacing: -0.4px;
+    margin: 0 0 20px; line-height: 1.35;
+  }
+
+  .section-label {
+    font-size: 10px; font-weight: 800;
+    color: var(--muted); letter-spacing: 1.5px;
+    text-transform: uppercase; margin: 24px 0 10px;
+    padding-top: 20px; border-top: 1px dashed var(--line);
+  }
+  .body-text {
+    font-size: 15px; color: var(--text);
+    line-height: 1.85; white-space: pre-wrap; word-wrap: break-word;
+  }
+  .body-text.mono {
+    font-family: var(--mono);
+    background: var(--code-bg); color: var(--code-text);
+    border-radius: 10px; padding: 18px 20px;
+    font-size: 13px; line-height: 1.75; overflow-x: auto;
+  }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+  .tag {
+    padding: 4px 10px; border-radius: 999px;
+    background: var(--card); border: 1px solid var(--line);
+    font-size: 11px; font-weight: 600;
+  }
+
+  .actions {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    margin-top: 32px; padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 11px 18px; border-radius: 10px;
+    font-weight: 700; font-size: 13px; border: 1px solid transparent;
+    cursor: pointer; transition: all .15s ease;
+    font-family: inherit; text-decoration: none;
+  }
+  .btn-ink { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .btn-ink:hover { background: #13294B; }
+  .btn-ghost { background: var(--card); color: var(--ink); border-color: var(--line); }
+  .btn-ghost:hover { border-color: var(--ink); }
+
+  .err {
+    text-align: center; padding: 60px 20px; color: var(--muted);
+  }
+  .err-emoji { font-size: 50px; margin-bottom: 14px; opacity: 0.6; }
+  .err h2 { font-size: 20px; color: var(--ink); margin: 0 0 8px; }
+
+  .footer {
+    margin-top: 40px; padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-size: 12px; color: var(--muted); text-align: center;
+  }
+  .footer a { color: var(--teal); }
+
+  .toast {
+    position: fixed; bottom: 22px; inset-inline-end: 22px;
+    background: var(--ink); color: #fff;
+    padding: 12px 18px; border-radius: 10px;
+    font-size: 12px; font-weight: 700;
+    transform: translateY(120%); opacity: 0;
+    transition: all .25s ease; z-index: 100;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="nav">
+    <a class="brand" href="landing.html">
+      <div class="brand-mark">ذ</div>
+      <div class="brand-name">
+        ذاكرة الذكاء الاصطناعي
+        <small>AI MEMORY</small>
+      </div>
+    </a>
+    <a href="index.html" class="cta">افتح التطبيق →</a>
+  </div>
+
+  <div class="notice">
+    💌 هذا العنصر مُشارَك معك من ذاكرة شخص ما. يمكنك نسخه والاستفادة منه، أو حفظه في ذاكرتك الخاصة.
+  </div>
+
+  <div id="content"></div>
+
+  <div class="footer">
+    مشاركة من ذاكرة الذكاء الاصطناعي — <a href="landing.html">تعرّف على التطبيق</a>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+(function () {
+  const TYPES = {
+    prompt: { ar: 'برومبت', en: 'Prompt', icon: '✨' },
+    code: { ar: 'كود', en: 'Code', icon: '{ }' },
+    note: { ar: 'ملاحظة', en: 'Note', icon: '✎' },
+    answer: { ar: 'إجابة', en: 'Answer', icon: '💬' },
+    idea: { ar: 'فكرة', en: 'Idea', icon: '💡' },
+    template: { ar: 'قالب', en: 'Template', icon: '◳' },
+  };
+
+  const esc = (s) => (s || '').replace(/[&<>"']/g, (c) =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  function b64ToUnicode(b64) {
+    try {
+      return decodeURIComponent(escape(atob(b64.replace(/-/g, '+').replace(/_/g, '/'))));
+    } catch { return null; }
+  }
+
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2000);
+  }
+
+  function render() {
+    const params = new URLSearchParams(location.search);
+    const raw = params.get('d');
+    const content = document.getElementById('content');
+
+    if (!raw) {
+      content.innerHTML = `
+        <div class="err">
+          <div class="err-emoji">🤷</div>
+          <h2>لا يوجد عنصر لعرضه</h2>
+          <p>هذه صفحة مخصصة للروابط المُشارَكة. تأكد من الرابط أو افتح التطبيق.</p>
+          <a href="index.html" class="btn btn-ink" style="margin-top:16px;">افتح التطبيق ←</a>
+        </div>`;
+      return;
+    }
+
+    const jsonStr = b64ToUnicode(raw);
+    let data;
+    try { data = JSON.parse(jsonStr); } catch { data = null; }
+    if (!data || !data.title) {
+      content.innerHTML = `
+        <div class="err">
+          <div class="err-emoji">⚠️</div>
+          <h2>الرابط غير صالح</h2>
+          <p>تعذّر قراءة بيانات العنصر. اطلب من صاحب الرابط إعادة مشاركته.</p>
+        </div>`;
+      return;
+    }
+
+    const t = TYPES[data.type] || TYPES.note;
+    const isMono = data.type === 'code';
+
+    const badges = [
+      `<span class="badge type ${data.type}">${t.icon} ${esc(t.ar)} · ${esc(t.en)}</span>`,
+      data.source ? `<span class="badge">📎 ${esc(data.source)}</span>` : '',
+      data.lang ? `<span class="badge" style="font-family: var(--mono); background: var(--code-bg); color: var(--code-text); border:none;">${esc(data.lang)}</span>` : '',
+      data.targetAi ? `<span class="badge">→ ${esc(data.targetAi)}</span>` : '',
+    ].filter(Boolean).join('');
+
+    const tags = (data.tags || []).length
+      ? `<div class="tags">${data.tags.map((x) => `<span class="tag">#${esc(x)}</span>`).join('')}</div>`
+      : '';
+
+    content.innerHTML = `
+      <div class="badges">${badges}</div>
+      <h1>${esc(data.title)}</h1>
+
+      <div class="section-label">${
+        data.type === 'code' ? 'الكود · Code' :
+        data.type === 'prompt' ? 'البرومبت · Prompt' :
+        data.type === 'answer' ? 'الإجابة · Answer' :
+        data.type === 'template' ? 'القالب · Template' :
+        data.type === 'idea' ? 'الفكرة · Idea' :
+        'المحتوى · Content'
+      }</div>
+      <div class="body-text ${isMono ? 'mono' : ''}">${esc(data.body || '')}</div>
+      ${tags}
+
+      <div class="actions">
+        <button class="btn btn-ink" id="copy">⧉ نسخ المحتوى</button>
+        <a href="index.html" class="btn btn-ghost">💾 احفظ في ذاكرتي</a>
+      </div>
+    `;
+
+    document.getElementById('copy').onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(data.body || '');
+        toast('تم النسخ ✓');
+      } catch { toast('تعذّر النسخ'); }
+    };
+  }
+
+  document.addEventListener('DOMContentLoaded', render);
+})();
+</script>
+</body>
+</html>
