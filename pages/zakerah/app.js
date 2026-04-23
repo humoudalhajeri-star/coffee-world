@@ -580,7 +580,8 @@
 
   /* ============ PRO / PAYWALL ============ */
   const PRO_KEY = 'zakerah.pro';
-  const FREE_TYPE_LIMIT = 3;
+  const FREE_TYPE_LIMIT = 1;   // 1 custom type on free tier
+  const FREE_ITEM_LIMIT = 5;   // 5 saved items on free tier
   // Update this Gumroad product URL once you publish it. Until then, the
   // button explains the next step instead of opening a 404.
   const GUMROAD_PRO_URL = 'https://coffez.gumroad.com/l/zakerah-pro';
@@ -598,11 +599,17 @@
 
   function openPaywall(reason = 'types') {
     const sub = $('#paywall-sub');
+    const titleEl = $('#paywall-title');
+    if (titleEl) {
+      titleEl.textContent = reason === 'items'
+        ? 'وصلت حد الحفظ المجاني'
+        : 'وصلت حد الأنواع المجاني';
+    }
     if (sub) {
-      if (reason === 'types') {
-        sub.innerHTML = `النسخة المجانية تسمح بـ<strong>${FREE_TYPE_LIMIT} أنواع مخصصة</strong>. لإضافة أنواع غير محدودة، رقِّ إلى Pro لمرة واحدة.`;
+      if (reason === 'items') {
+        sub.innerHTML = `النسخة المجانية تسمح بحفظ <strong>${FREE_ITEM_LIMIT} عناصر</strong> فقط. رقِّ إلى Pro بـ$2 (مرة واحدة) لحفظ عدد غير محدود + فتح الأنواع المخصصة بالكامل.`;
       } else {
-        sub.innerHTML = `لإلغاء الحد المجاني، رقِّ إلى Pro بدفعة واحدة.`;
+        sub.innerHTML = `النسخة المجانية تسمح بـ<strong>${FREE_TYPE_LIMIT === 1 ? 'نوع مخصص واحد' : FREE_TYPE_LIMIT + ' أنواع مخصصة'}</strong>. رقِّ إلى Pro بـ$2 (مرة واحدة) لإضافة أنواع غير محدودة + حفظ عدد غير محدود من العناصر.`;
       }
     }
     $('#paywall-license').value = '';
@@ -944,6 +951,14 @@
   function submitEditor(e) {
     if (e) e.preventDefault();
     const isEdit = !!state.editing;
+
+    // freemium gate: limit free users on new saves only (edits always allowed)
+    if (!isEdit && !isPro() && state.items.length >= FREE_ITEM_LIMIT) {
+      closeEditor();
+      setTimeout(() => openPaywall('items'), 160);
+      return;
+    }
+
     const type = isEdit
       ? state.items.find((x) => x.id === state.editing).type
       : state.creatingType;
@@ -1391,22 +1406,32 @@
         </div>
       </div>
 
+      ${!isPro() ? `
+        <div class="settings-section">
+          <h4>الحدود المجانية · Free Limits</h4>
+          <div class="usage-meter">
+            <span class="usage-meter-text">العناصر: ${state.items.length} / ${FREE_ITEM_LIMIT}</span>
+            <div class="usage-meter-bar">
+              <div class="usage-meter-fill" style="width: ${Math.min(100, (state.items.length / FREE_ITEM_LIMIT) * 100)}%"></div>
+            </div>
+          </div>
+          <div class="usage-meter">
+            <span class="usage-meter-text">أنواع مخصصة: ${state.customTypes.length} / ${FREE_TYPE_LIMIT}</span>
+            <div class="usage-meter-bar">
+              <div class="usage-meter-fill" style="width: ${Math.min(100, (state.customTypes.length / FREE_TYPE_LIMIT) * 100)}%"></div>
+            </div>
+          </div>
+          ${(state.items.length >= FREE_ITEM_LIMIT || state.customTypes.length >= FREE_TYPE_LIMIT)
+            ? '<button class="btn btn-primary" id="set-upgrade" style="width:100%; margin-top:8px;">💎 ترقية إلى Pro — $2</button>'
+            : '<p style="font-size:12px; color:var(--muted); margin:8px 0 0;">رقِّ إلى Pro بـ$2 (مرة واحدة) لإزالة كل الحدود.</p>'}
+        </div>
+      ` : ''}
+
       <div class="settings-section">
         <h4>
           الأنواع المخصصة · Custom Types
           ${isPro() ? '<span class="pro-badge">💎 PRO</span>' : ''}
         </h4>
-        ${!isPro() ? `
-          <div class="usage-meter">
-            <span class="usage-meter-text">${state.customTypes.length} / ${FREE_TYPE_LIMIT} مجاني</span>
-            <div class="usage-meter-bar">
-              <div class="usage-meter-fill" style="width: ${Math.min(100, (state.customTypes.length / FREE_TYPE_LIMIT) * 100)}%"></div>
-            </div>
-            ${state.customTypes.length >= FREE_TYPE_LIMIT
-              ? '<button class="btn btn-primary btn-sm" id="set-upgrade">💎 ترقية</button>'
-              : ''}
-          </div>
-        ` : ''}
         ${state.customTypes.length === 0 ? `
           <p style="font-size:12px; color:var(--muted); margin:0; line-height:1.7;">
             لا توجد أنواع مخصصة بعد. عند إضافة عنصر جديد، استخدم زر "+ إضافة" في شريط اختيار النوع لإنشاء نوع خاص بك.
