@@ -967,6 +967,132 @@ mark {
 }
 
 /* ==========================================================
+   PAYWALL (freemium upgrade prompt)
+   ========================================================== */
+.paywall {
+  text-align: center;
+  padding: 8px 0 4px;
+}
+.paywall-emoji { font-size: 52px; margin-bottom: 12px; }
+.paywall h2 {
+  font-size: 22px; font-weight: 900; color: var(--ink);
+  letter-spacing: -0.3px; margin: 0 0 8px; line-height: 1.35;
+}
+.paywall-sub {
+  font-size: 14px; color: var(--muted);
+  line-height: 1.8; margin: 0 0 22px;
+}
+
+.paywall-perks {
+  background: var(--paper); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 16px 18px;
+  text-align: start; margin-bottom: 20px;
+}
+.paywall-perks h4 {
+  font-size: 11px; font-weight: 800;
+  color: var(--gold); letter-spacing: 1.5px;
+  text-transform: uppercase; margin: 0 0 12px;
+}
+.paywall-perks li {
+  font-size: 13px; color: var(--ink);
+  margin-bottom: 8px; display: flex;
+  align-items: flex-start; gap: 8px;
+  list-style: none;
+}
+.paywall-perks li::before {
+  content: '✓'; color: var(--success);
+  font-weight: 900; font-size: 13px; flex-shrink: 0;
+}
+.paywall-perks ul { padding: 0; margin: 0; }
+
+.paywall-price {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 18px;
+}
+.paywall-price-num {
+  font-size: 38px; font-weight: 900;
+  color: var(--ink); letter-spacing: -1px; line-height: 1;
+}
+.paywall-price-currency { font-size: 16px; color: var(--muted); font-weight: 700; }
+.paywall-price-once { font-size: 12px; color: var(--muted); margin-inline-start: 8px; }
+
+.paywall-cta {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--gold) 0%, #b88729 100%);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform var(--dur);
+  box-shadow: 0 6px 18px rgba(200, 155, 60, 0.4);
+}
+.paywall-cta:hover { transform: translateY(-2px); }
+
+.paywall-divider {
+  display: flex; align-items: center; gap: 10px;
+  margin: 18px 0; color: var(--muted-2);
+  font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+}
+.paywall-divider::before, .paywall-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--line);
+}
+
+.paywall-license-row {
+  display: flex; gap: 8px;
+}
+.paywall-license-row input {
+  flex: 1; padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  font-family: var(--mono);
+  font-size: 13px;
+  outline: none;
+  text-align: center;
+  letter-spacing: 1px;
+}
+.paywall-license-row input:focus { border-color: var(--teal); }
+
+.pro-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  background: linear-gradient(135deg, var(--gold) 0%, #b88729 100%);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  border-radius: 999px;
+  letter-spacing: 1px;
+}
+
+.usage-meter {
+  background: var(--paper); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 12px 14px;
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 12px;
+  font-size: 12px;
+}
+.usage-meter-bar {
+  flex: 1; height: 6px;
+  background: var(--line);
+  border-radius: 999px; overflow: hidden;
+}
+.usage-meter-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--teal), var(--gold));
+  border-radius: 999px;
+  transition: width 0.3s var(--ease);
+}
+.usage-meter-text { font-weight: 700; color: var(--ink); white-space: nowrap; }
+
+/* ==========================================================
    DEMO BADGE (on seeded example items)
    ========================================================== */
 .entry-demo {

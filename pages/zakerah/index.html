@@ -137,6 +137,59 @@
   </div>
 </div>
 
+<!-- ========== PAYWALL MODAL ========== -->
+<div class="modal-backdrop" id="paywall-modal">
+  <div class="modal" style="max-width: 480px; border-top-color: var(--gold);">
+    <div class="modal-head">
+      <h3>
+        <span>ترقية إلى Pro</span>
+        <span class="tag" style="color: var(--gold); border-color: var(--gold);">UPGRADE</span>
+      </h3>
+      <button type="button" class="modal-close" id="paywall-close">×</button>
+    </div>
+
+    <div class="modal-body paywall">
+      <div class="paywall-emoji">💎</div>
+      <h2 id="paywall-title">وصلت الحدّ المجاني</h2>
+      <p class="paywall-sub" id="paywall-sub">
+        النسخة المجانية تسمح بـ<strong>3 أنواع مخصصة</strong>.
+        لإضافة أنواع غير محدودة، رقّ إلى Pro لمرة واحدة.
+      </p>
+
+      <div class="paywall-perks">
+        <h4>ما يشمل Pro</h4>
+        <ul>
+          <li>أنواع مخصصة <strong>غير محدودة</strong></li>
+          <li>باقات غير محدودة</li>
+          <li>دعم تطوير التطبيق</li>
+          <li>تفعيل دائم — دفعة واحدة</li>
+        </ul>
+      </div>
+
+      <div class="paywall-price">
+        <span class="paywall-price-currency">$</span>
+        <span class="paywall-price-num">2</span>
+        <span class="paywall-price-once">مرة واحدة فقط</span>
+      </div>
+
+      <button class="paywall-cta" id="paywall-buy">
+        🛒 اشترِ الآن عبر Gumroad
+      </button>
+
+      <div class="paywall-divider">أو · OR</div>
+
+      <p style="font-size:12px; color:var(--muted); margin:0 0 8px;">
+        عندك رمز تفعيل من شراء سابق؟
+      </p>
+      <div class="paywall-license-row">
+        <input type="text" id="paywall-license" placeholder="ZAKERAH-PRO-XXXX" maxlength="40">
+        <button class="btn btn-primary btn-sm" id="paywall-activate">فعّل</button>
+      </div>
+      <p id="paywall-msg" style="font-size:11px; margin-top:8px; min-height:14px;"></p>
+    </div>
+  </div>
+</div>
+
 <!-- ========== WELCOME MODAL (first visit) ========== -->
 <div class="modal-backdrop" id="welcome-modal">
   <div class="modal" style="max-width: 520px; border-top-color: var(--teal);">
