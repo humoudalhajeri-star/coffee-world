@@ -61,6 +61,18 @@
 
   const SOURCES = ['ChatGPT', 'Claude', 'Gemini', 'Grok', 'Perplexity', 'Manual', 'Other'];
 
+  const COLL_COLORS = [
+    { id: 'teal',    hex: '#0D9488' },
+    { id: 'indigo',  hex: '#4F46E5' },
+    { id: 'purple',  hex: '#7C3AED' },
+    { id: 'rose',    hex: '#E11D48' },
+    { id: 'amber',   hex: '#D97706' },
+    { id: 'emerald', hex: '#059669' },
+    { id: 'blue',    hex: '#1D4ED8' },
+    { id: 'slate',   hex: '#475569' },
+  ];
+  const COLL_ICONS = ['📁', '⭐', '💼', '💡', '🎨', '📚', '🧠', '☕', '🚀', '🔧', '✨', '🏷️'];
+
   const LANGS = [
     'javascript', 'typescript', 'python', 'html', 'css',
     'sql', 'bash', 'json', 'php', 'go', 'rust', 'swift', 'other',
@@ -88,9 +100,12 @@
   /* ============ STATE ============ */
   let state = {
     items: [],
+    collections: [],
     filter: { type: 'all', q: '' },
     editing: null, // item being edited in modal
     creatingType: 'code',
+    collEditing: null,    // collection being edited
+    collCurrent: null,    // collection currently viewed (detail mode)
   };
 
   function load() {
@@ -99,15 +114,45 @@
       if (raw) {
         const d = JSON.parse(raw);
         state.items = Array.isArray(d.items) ? d.items : [];
+        state.collections = Array.isArray(d.collections) ? d.collections : [];
         // migrate legacy type 'info' → 'note'
         state.items.forEach((it) => { if (it.type === 'info') it.type = 'note'; });
       }
     } catch {}
     if (state.items.length === 0) seedDemo();
+    if (state.collections.length === 0) seedCollections();
   }
 
   function persist() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ items: state.items }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      items: state.items,
+      collections: state.collections,
+    }));
+  }
+
+  function seedCollections() {
+    const now = Date.now();
+    state.collections = [
+      {
+        id: uid(),
+        name: 'أفضل البرومبتس',
+        description: 'البرومبتس اللي تشتغل في ChatGPT و Claude بشكل ممتاز.',
+        icon: '✨',
+        color: '#7C3AED',
+        itemIds: [],
+        createdAt: now,
+      },
+      {
+        id: uid(),
+        name: 'مكتبة الكود',
+        description: 'Snippets جاهزة للنسخ — React, JS, CSS.',
+        icon: '📚',
+        color: '#0D9488',
+        itemIds: [],
+        createdAt: now,
+      },
+    ];
+    persist();
   }
 
   function seedDemo() {
