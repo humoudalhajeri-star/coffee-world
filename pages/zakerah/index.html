@@ -36,6 +36,7 @@
         <span>ابحث في ذاكرتك</span>
         <span class="kbd">⌘K</span>
       </button>
+      <button class="icon-btn" id="btn-collections" title="الباقات · Collections">📁</button>
       <button class="icon-btn" id="btn-export" title="تصدير JSON · Export">⬇</button>
       <button class="btn btn-primary" id="btn-new" aria-label="جديد">
         ＋ جديد
@@ -127,6 +128,21 @@
         اضغط <kbd style="background:var(--paper-2); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:11px;">Esc</kbd> للإغلاق.
       </p>
     </div>
+  </div>
+</div>
+
+<!-- ========== COLLECTIONS MODAL (list + create) ========== -->
+<div class="modal-backdrop" id="coll-modal">
+  <div class="modal" style="max-width: 720px;">
+    <div class="modal-head">
+      <h3>
+        <span id="coll-modal-title">الباقات</span>
+        <span class="tag">COLLECTIONS</span>
+      </h3>
+      <button type="button" class="modal-close" id="coll-close">×</button>
+    </div>
+
+    <div class="modal-body" id="coll-body"></div>
   </div>
 </div>
 
