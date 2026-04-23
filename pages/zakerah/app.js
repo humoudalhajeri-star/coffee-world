@@ -956,6 +956,100 @@
     toast('تم التصدير ✓', 'success');
   }
 
+  /* ============ MONETIZE ============ */
+  const PRICE_OPTIONS = ['مجاني', '$4.99', '$9.99', '$19.99', '$49.99'];
+
+  function openMonetize() {
+    renderMonetize();
+    $('#monet-modal').classList.add('open');
+  }
+  function closeMonetize() {
+    $('#monet-modal').classList.remove('open');
+  }
+
+  function renderMonetize() {
+    const colls = state.collections;
+
+    $('#monet-body').innerHTML = `
+      <div class="monet-banner">
+        <span class="monet-banner-tag">🚀 قريباً · COMING SOON</span>
+        <strong>حوّل معرفتك إلى دخل.</strong>
+        <p>
+          مبيعات الباقات قادمة قريباً. جهّز أفضل باقاتك الآن — اضبط السعر والحالة، وحالما نفتح البيع
+          ستكون باقاتك أول الجاهزة على الرف.
+        </p>
+      </div>
+
+      ${colls.length === 0 ? `
+        <div class="empty">
+          <div class="empty-emoji">📦</div>
+          <h3>لا توجد باقات بعد</h3>
+          <p>أنشئ باقة من زر الباقات 📁 ثم ارجع هنا.</p>
+        </div>
+      ` : `
+        <p style="font-size:12px; color:var(--muted); margin:0 0 14px;">
+          ${colls.length} ${colls.length === 1 ? 'باقة' : 'باقات'} · اضبط السعر والحالة لكل باقة
+        </p>
+        ${colls.map((c) => {
+          const m = c.monetize || { status: 'draft', visibility: 'private', price: 'مجاني' };
+          const count = (c.itemIds || []).length;
+          const statusLabel =
+            m.status === 'ready'  ? { cls: 'monet-status-ready',  ar: 'جاهزة' } :
+            m.status === 'paused' ? { cls: 'monet-status-paused', ar: 'موقوفة' } :
+                                    { cls: 'monet-status-draft',  ar: 'مسودّة' };
+          return `
+            <div class="monet-row" style="--coll-color: ${esc(c.color)};">
+              <div class="monet-row-head">
+                <div class="monet-row-icon">${esc(c.icon)}</div>
+                <div style="flex:1; min-width:0;">
+                  <div class="monet-row-name">${esc(c.name)}</div>
+                  <div class="monet-row-meta">
+                    ${count} ${count === 1 ? 'عنصر' : 'عناصر'} ·
+                    <span class="monet-status-pill ${statusLabel.cls}">${statusLabel.ar}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="monet-row-controls">
+                <select class="monet-select" data-monet-status="${c.id}">
+                  <option value="draft"  ${m.status === 'draft'  ? 'selected' : ''}>مسودّة · Draft</option>
+                  <option value="ready"  ${m.status === 'ready'  ? 'selected' : ''}>جاهزة · Ready</option>
+                  <option value="paused" ${m.status === 'paused' ? 'selected' : ''}>موقوفة · Paused</option>
+                </select>
+                <select class="monet-select" data-monet-vis="${c.id}">
+                  <option value="private" ${m.visibility === 'private' ? 'selected' : ''}>خاصة · Private</option>
+                  <option value="public"  ${m.visibility === 'public'  ? 'selected' : ''}>عامة · Public</option>
+                </select>
+                <select class="monet-select" data-monet-price="${c.id}">
+                  ${PRICE_OPTIONS.map((p) =>
+                    `<option value="${esc(p)}" ${m.price === p ? 'selected' : ''}>${esc(p)}</option>`
+                  ).join('')}
+                </select>
+              </div>
+            </div>`;
+        }).join('')}
+      `}
+    `;
+
+    $$('[data-monet-status]').forEach((el) => {
+      el.onchange = () => updateMonet(el.dataset.monetStatus, { status: el.value });
+    });
+    $$('[data-monet-vis]').forEach((el) => {
+      el.onchange = () => updateMonet(el.dataset.monetVis, { visibility: el.value });
+    });
+    $$('[data-monet-price]').forEach((el) => {
+      el.onchange = () => updateMonet(el.dataset.monetPrice, { price: el.value });
+    });
+  }
+
+  function updateMonet(collId, patch) {
+    const c = state.collections.find((x) => x.id === collId);
+    if (!c) return;
+    c.monetize = { ...(c.monetize || { status: 'draft', visibility: 'private', price: 'مجاني' }), ...patch };
+    persist();
+    toast('تم الحفظ ✓', 'success');
+    renderMonetize();
+  }
+
   /* ============ SETTINGS ============ */
   function openSettings() {
     renderSettings();
@@ -1351,6 +1445,11 @@
     $('#btn-new')?.addEventListener('click', () => openCreate('prompt'));
     $('#btn-search')?.addEventListener('click', openSearch);
     $('#btn-collections')?.addEventListener('click', openCollections);
+    $('#btn-monet')?.addEventListener('click', openMonetize);
+    $('#monet-close')?.addEventListener('click', closeMonetize);
+    $('#monet-modal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'monet-modal') closeMonetize();
+    });
     $('#btn-settings')?.addEventListener('click', openSettings);
     $('#settings-close')?.addEventListener('click', closeSettings);
     $('#settings-modal')?.addEventListener('click', (e) => {
@@ -1395,7 +1494,8 @@
     // global shortcuts
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        closeEditor(); closeDetail(); closeSearch(); closeCollections(); closeSettings();
+        closeEditor(); closeDetail(); closeSearch();
+        closeCollections(); closeSettings(); closeMonetize();
       }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
