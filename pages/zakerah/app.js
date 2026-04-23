@@ -101,13 +101,20 @@
   let state = {
     items: [],
     collections: [],
-    recent: [], // recently viewed item ids (newest first, capped at 10)
+    customTypes: [],     // user-defined types, same shape as built-in TYPES
+    recent: [],          // recently viewed item ids (newest first, capped at 10)
     filter: { type: 'all', q: '' },
-    editing: null, // item being edited in modal
+    editing: null,       // item being edited in modal
     creatingType: 'code',
-    collEditing: null,    // collection being edited
-    collCurrent: null,    // collection currently viewed (detail mode)
+    collEditing: null,   // collection being edited
+    collCurrent: null,   // collection currently viewed (detail mode)
+    newTypeOpen: false,  // inline "create type" form open?
   };
+
+  /** Built-in TYPES merged with user-defined customTypes. Used everywhere. */
+  function allTypes() {
+    return TYPES.concat(state.customTypes || []);
+  }
 
   function load() {
     try {
@@ -116,6 +123,7 @@
         const d = JSON.parse(raw);
         state.items = Array.isArray(d.items) ? d.items : [];
         state.collections = Array.isArray(d.collections) ? d.collections : [];
+        state.customTypes = Array.isArray(d.customTypes) ? d.customTypes : [];
         state.recent = Array.isArray(d.recent) ? d.recent : [];
         // migrate legacy type 'info' → 'note'
         state.items.forEach((it) => { if (it.type === 'info') it.type = 'note'; });
@@ -129,6 +137,7 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       items: state.items,
       collections: state.collections,
+      customTypes: state.customTypes,
       recent: state.recent,
     }));
   }
@@ -259,7 +268,9 @@
     return new Date(ts).toLocaleDateString('ar');
   }
 
-  function getType(id) { return TYPES.find((t) => t.id === id) || TYPES[0]; }
+  function getType(id) {
+    return allTypes().find((t) => t.id === id) || TYPES[0];
+  }
 
   function countByType(id) {
     return state.items.filter((it) => it.type === id).length;
@@ -287,9 +298,9 @@
         ⭐ المفضلة · Favorites
         <span class="tab-count" style="${state.filter.type === 'fav' ? 'background:#C89B3C; color:#fff;' : ''}">${favCount}</span>
       </button>
-      ${TYPES.map((t) => `
+      ${allTypes().map((t) => `
         <button class="tab ${state.filter.type === t.id ? 'active' : ''}" data-tab="${t.id}" data-type="${t.id}">
-          <span class="tab-dot"></span>
+          <span class="tab-dot" ${t.isCustom ? `style="background:${esc(t.color || '#0D9488')};"` : ''}></span>
           ${t.icon} ${esc(t.ar)} · ${esc(t.en)}
           <span class="tab-count">${countByType(t.id)}</span>
         </button>
@@ -450,6 +461,48 @@
     render, renderTabs, renderList, entryHTML, filteredItems, highlight,
   });
 
+  /* ============ CUSTOM TYPES ============ */
+  function saveNewType() {
+    const ar = ($('#new-type-ar')?.value || '').trim();
+    const en = ($('#new-type-en')?.value || '').trim() || ar;
+    const icon = ($('#new-type-icon')?.value || '').trim() || '🌟';
+    const color = ($('#new-type-colors .swatch.active')?.dataset.newColor) || '#0D9488';
+    if (!ar) { toast('اسم النوع مطلوب', 'error'); return; }
+
+    // derive an id from AR name + random suffix for uniqueness
+    const base = ar.toLowerCase().replace(/\s+/g, '-') || 'custom';
+    const id = 'x_' + base.slice(0, 12) + '_' + Math.random().toString(36).slice(2, 6);
+
+    const newType = {
+      id, ar, en, icon, color,
+      verb: 'إضافة ' + ar,
+      verbEn: 'NEW ' + en.toUpperCase(),
+      isCustom: true,
+    };
+    state.customTypes = (state.customTypes || []).concat(newType);
+    state.newTypeOpen = false;
+    state.creatingType = id;
+    persist();
+    toast('أُضيف النوع "' + ar + '" ✓', 'success');
+    renderEditor(null, id);
+  }
+
+  function deleteCustomType(id) {
+    const hasItems = state.items.some((it) => it.type === id);
+    const warning = hasItems
+      ? 'بعض العناصر تستخدم هذا النوع. ستُحوّل إلى "ملاحظة". تابع؟'
+      : 'حذف هذا النوع؟';
+    if (!confirm(warning)) return;
+
+    state.customTypes = state.customTypes.filter((t) => t.id !== id);
+    // reassign items to 'note' so they don't disappear
+    state.items.forEach((it) => { if (it.type === id) it.type = 'note'; });
+    persist();
+    toast('تم الحذف', 'success');
+    render();
+    renderSettings();
+  }
+
   /* ============ MODAL: CREATE / EDIT ============ */
   function openCreate(presetType) {
     state.editing = null;
@@ -489,15 +542,62 @@
           <span class="en">Type</span>
         </div>
         <div class="type-picker">
-          ${TYPES.map((tt) => `
+          ${allTypes().map((tt) => `
             <button type="button" class="type-pick ${tt.id === typeId ? 'active' : ''}"
-                    data-pick="${tt.id}" data-pick-type="${tt.id}">
+                    data-pick="${tt.isCustom ? 'custom' : tt.id}" data-pick-type="${tt.id}"
+                    ${tt.isCustom ? `style="--pick-accent: ${esc(tt.color || '#0D9488')};"` : ''}>
               <span class="type-pick-icon">${tt.icon}</span>
               ${esc(tt.ar)}
               <div style="font-size:9px; opacity:.7; margin-top:2px;">${esc(tt.en)}</div>
             </button>
           `).join('')}
+          <button type="button" class="type-pick" id="type-pick-add"
+                  style="border-style: dashed; color: var(--muted);">
+            <span class="type-pick-icon">＋</span>
+            إضافة
+            <div style="font-size:9px; opacity:.7; margin-top:2px;">ADD TYPE</div>
+          </button>
         </div>
+
+        ${state.newTypeOpen ? `
+          <div style="background: var(--paper-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; margin-top: 10px;">
+            <div class="field-label" style="margin-bottom:10px;">
+              <span>نوع مخصص جديد</span>
+              <span class="en">NEW CUSTOM TYPE</span>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <div class="field-label"><span>الاسم العربي <span class="req">*</span></span><span class="en">AR</span></div>
+                <input type="text" id="new-type-ar" maxlength="30" placeholder="مثلاً: فوائد" required>
+              </div>
+              <div class="field">
+                <div class="field-label"><span>الاسم الإنجليزي</span><span class="en">EN</span></div>
+                <input type="text" id="new-type-en" maxlength="30" placeholder="Benefits">
+              </div>
+            </div>
+            <div class="field-row" style="margin-top:10px;">
+              <div class="field">
+                <div class="field-label"><span>أيقونة (إيموجي)</span><span class="en">ICON</span></div>
+                <input type="text" id="new-type-icon" maxlength="4" placeholder="🌟" value="🌟">
+              </div>
+              <div class="field">
+                <div class="field-label"><span>اللون</span><span class="en">COLOR</span></div>
+                <div class="picker-row" id="new-type-colors">
+                  ${COLL_COLORS.map((c, i) =>
+                    `<button type="button" class="swatch ${i === 0 ? 'active' : ''}"
+                             data-new-color="${esc(c.hex)}"
+                             style="background:${esc(c.hex)};"
+                             aria-label="${esc(c.id)}"></button>`
+                  ).join('')}
+                </div>
+              </div>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:12px;">
+              <button type="button" class="btn btn-indigo btn-sm" id="new-type-save">💾 احفظ النوع</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="new-type-cancel">إلغاء</button>
+            </div>
+          </div>
+        ` : ''}
       </div>`;
 
     // Type-specific extra fields
@@ -627,9 +727,32 @@
     $$('[data-pick-type]').forEach((el) => {
       el.onclick = () => {
         state.creatingType = el.dataset.pickType;
+        state.newTypeOpen = false;
         renderEditor(null, state.creatingType);
       };
     });
+
+    // "+ إضافة نوع" button
+    const addTypeBtn = $('#type-pick-add');
+    if (addTypeBtn) addTypeBtn.onclick = () => {
+      state.newTypeOpen = true;
+      renderEditor(null, state.creatingType);
+    };
+
+    // inline new-type form
+    const cancelBtn = $('#new-type-cancel');
+    if (cancelBtn) cancelBtn.onclick = () => {
+      state.newTypeOpen = false;
+      renderEditor(null, state.creatingType);
+    };
+    $$('[data-new-color]').forEach((el) => {
+      el.onclick = () => {
+        $$('[data-new-color]').forEach((x) => x.classList.remove('active'));
+        el.classList.add('active');
+      };
+    });
+    const saveBtn = $('#new-type-save');
+    if (saveBtn) saveBtn.onclick = saveNewType;
 
     $('#ed-imp').onclick = (e) => e.currentTarget.classList.toggle('on');
 
@@ -1096,6 +1219,26 @@
       </div>
 
       <div class="settings-section">
+        <h4>الأنواع المخصصة · Custom Types</h4>
+        ${state.customTypes.length === 0 ? `
+          <p style="font-size:12px; color:var(--muted); margin:0; line-height:1.7;">
+            لا توجد أنواع مخصصة بعد. عند إضافة عنصر جديد، استخدم زر "+ إضافة" في شريط اختيار النوع لإنشاء نوع خاص بك.
+          </p>
+        ` : state.customTypes.map((t) => `
+          <div class="settings-row">
+            <div class="settings-row-body" style="display:flex; align-items:center; gap:10px;">
+              <div style="width:32px; height:32px; border-radius:8px; background:${esc(t.color || '#0D9488')}; color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;">${esc(t.icon)}</div>
+              <div style="flex:1; min-width:0;">
+                <p class="settings-row-title">${esc(t.ar)} · ${esc(t.en)}</p>
+                <p class="settings-row-desc">${state.items.filter((it) => it.type === t.id).length} عنصر يستخدم هذا النوع</p>
+              </div>
+            </div>
+            <button class="btn btn-danger btn-sm" data-del-type="${esc(t.id)}">🗑 حذف</button>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="settings-section">
         <h4>إحصائيات · Stats</h4>
         <div class="about-box">
           <div class="about-kv"><span>عناصر · Items</span><span>${totalItems}</span></div>
@@ -1123,6 +1266,9 @@
     $('#set-export').onclick = exportAll;
     $('#set-import').onclick = () => $('#import-file').click();
     $('#set-clear').onclick = handleClearAll;
+    $$('[data-del-type]').forEach((el) => {
+      el.onclick = () => deleteCustomType(el.dataset.delType);
+    });
   }
 
   function handleClearAll() {
