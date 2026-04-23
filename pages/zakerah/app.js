@@ -1,7 +1,7 @@
 /**
- * ZAKERAH — ذاكِرة
- * Your external memory for AI conversations.
- * Types: code · prompt · info · idea.
+ * ذاكرة الذكاء الاصطناعي — AI MEMORY
+ * Premium memory system for AI users.
+ * Types: prompt · code · note · answer · idea · template.
  */
 (function () {
   'use strict';
@@ -10,42 +10,56 @@
 
   const TYPES = [
     {
-      id: 'code',
-      ar: 'كود',
-      en: 'Code',
-      icon: '{ }',
-      verb: 'أضف كود',
-      verbEn: 'NEW CODE',
-      accent: 'var(--code)',
-    },
-    {
       id: 'prompt',
       ar: 'برومبت',
       en: 'Prompt',
       icon: '✨',
-      verb: 'أضف برومبت',
+      verb: 'برومبت جديد',
       verbEn: 'NEW PROMPT',
-      accent: 'var(--prompt)',
     },
     {
-      id: 'info',
-      ar: 'معلومة',
-      en: 'Info',
-      icon: '📝',
-      verb: 'أضف معلومة',
-      verbEn: 'NEW INFO',
-      accent: 'var(--info)',
+      id: 'code',
+      ar: 'كود',
+      en: 'Code',
+      icon: '{ }',
+      verb: 'كود جديد',
+      verbEn: 'NEW CODE',
+    },
+    {
+      id: 'note',
+      ar: 'ملاحظة',
+      en: 'Note',
+      icon: '✎',
+      verb: 'ملاحظة جديدة',
+      verbEn: 'NEW NOTE',
+    },
+    {
+      id: 'answer',
+      ar: 'إجابة',
+      en: 'Answer',
+      icon: '💬',
+      verb: 'إجابة محفوظة',
+      verbEn: 'NEW ANSWER',
     },
     {
       id: 'idea',
       ar: 'فكرة',
       en: 'Idea',
       icon: '💡',
-      verb: 'أضف فكرة',
+      verb: 'فكرة جديدة',
       verbEn: 'NEW IDEA',
-      accent: 'var(--idea)',
+    },
+    {
+      id: 'template',
+      ar: 'قالب',
+      en: 'Template',
+      icon: '◳',
+      verb: 'قالب جديد',
+      verbEn: 'NEW TEMPLATE',
     },
   ];
+
+  const SOURCES = ['ChatGPT', 'Claude', 'Gemini', 'Grok', 'Perplexity', 'Manual', 'Other'];
 
   const LANGS = [
     'javascript', 'typescript', 'python', 'html', 'css',
@@ -85,6 +99,8 @@
       if (raw) {
         const d = JSON.parse(raw);
         state.items = Array.isArray(d.items) ? d.items : [];
+        // migrate legacy type 'info' → 'note'
+        state.items.forEach((it) => { if (it.type === 'info') it.type = 'note'; });
       }
     } catch {}
     if (state.items.length === 0) seedDemo();
@@ -99,46 +115,69 @@
     state.items = [
       {
         id: uid(),
-        type: 'code',
-        title: 'useMemo للعمليات الثقيلة في React',
-        body: "import { useMemo } from 'react';\n\nfunction TotalBill({ items }) {\n  const total = useMemo(\n    () => items.reduce((s, i) => s + i.price, 0),\n    [items]\n  );\n  return <h3>{total} KWD</h3>;\n}",
-        lang: 'javascript',
-        tags: ['react', 'performance'],
-        important: true,
-        createdAt: now - 1000 * 60 * 60 * 3,
-      },
-      {
-        id: uid(),
         type: 'prompt',
-        title: 'إيميل احترافي بالعربي',
-        body: 'اكتب لي إيميل احترافي بالعربي لـ{{recipient}} بخصوص {{topic}}. الأسلوب: {{tone}}. اجعله موجزاً (3-4 فقرات) واختم بدعوة واضحة للتواصل.',
+        title: 'إيميل احترافي موجَّه',
+        body: 'اكتب إيميلاً احترافياً لـ{{recipient}} بخصوص {{topic}}. الأسلوب: {{tone}}. اجعله موجزاً (3-4 فقرات) واختم بدعوة واضحة للتواصل.',
+        source: 'ChatGPT',
         targetAi: 'ChatGPT',
         tags: ['email', 'writing'],
         usedCount: 0,
+        important: true,
+        createdAt: now - 1000 * 60 * 60 * 2,
+      },
+      {
+        id: uid(),
+        type: 'code',
+        title: 'useMemo للعمليات الثقيلة في React',
+        body: "import { useMemo } from 'react';\n\nfunction TotalBill({ items }) {\n  const total = useMemo(\n    () => items.reduce((s, i) => s + i.price, 0),\n    [items]\n  );\n  return <h3>{total} KWD</h3>;\n}",
+        source: 'Claude',
+        lang: 'javascript',
+        tags: ['react', 'performance'],
+        important: true,
+        createdAt: now - 1000 * 60 * 60 * 6,
+      },
+      {
+        id: uid(),
+        type: 'note',
+        title: 'الفرق بين useMemo و useCallback',
+        body: 'useMemo يحفظ قيمة ناتج حساب ثقيل.\nuseCallback يحفظ مرجع الدالة نفسها.\n\nالقاعدة: استخدم useMemo للقيم، و useCallback للدوال الممرّرة كـprops لمكوّنات محفوظة بـReact.memo.',
+        source: 'ChatGPT',
+        sourceUrl: '',
+        tags: ['react', 'hooks'],
         important: false,
         createdAt: now - 1000 * 60 * 60 * 24,
       },
       {
         id: uid(),
-        type: 'info',
-        title: 'فرق useMemo عن useCallback',
-        body: 'useMemo يحفظ قيمة ناتج حساب ثقيل.\nuseCallback يحفظ مرجع الدالة نفسها.\n\nالقاعدة: استخدم useMemo للقيم، واستخدم useCallback للدوال الممرّرة كـprops لمكوّنات محفوظة بـReact.memo.',
-        source: 'ChatGPT',
-        sourceUrl: '',
-        tags: ['react', 'hooks'],
-        important: true,
+        type: 'answer',
+        title: 'أفضل أدوات إدارة المهام لفريق صغير',
+        body: '١) Linear — أفضل للفرق التقنية.\n٢) Notion — الأكثر مرونة لكن يحتاج إعداد.\n٣) Things 3 — للأفراد فقط.\n٤) Asana — مناسب لفرق التسويق.\n\nالتوصية: Linear + Notion معاً.',
+        source: 'Claude',
+        tags: ['productivity', 'tools'],
+        important: false,
         createdAt: now - 1000 * 60 * 60 * 24 * 2,
       },
       {
         id: uid(),
         type: 'idea',
-        title: 'تطبيق يجمع screenshots القهوة من انستقرام',
+        title: 'تطبيق يجمع screenshots المقاهي من انستقرام',
         body: 'فكرة: تطبيق يلتقط screenshots المقاهي من قصص انستقرام، يصنّفها حسب المدينة، ويُنبّه المستخدم عند قرب أي منها.',
+        source: 'Manual',
         status: 'exploring',
         priority: 'high',
         tags: ['coffee', 'app'],
         important: false,
         createdAt: now - 1000 * 60 * 60 * 24 * 5,
+      },
+      {
+        id: uid(),
+        type: 'template',
+        title: 'قالب مراجعة منتج (Product Review Outline)',
+        body: '1. ملخص بسطر واحد\n2. الجمهور المستهدف\n3. أهم 3 مزايا\n4. أهم 3 عيوب\n5. مقارنة مع منافس قريب\n6. التوصية النهائية + لمن يناسب',
+        source: 'Manual',
+        tags: ['content', 'review'],
+        important: false,
+        createdAt: now - 1000 * 60 * 60 * 24 * 7,
       },
     ];
     persist();
@@ -267,9 +306,10 @@
       accessory = `<span class="entry-lang">${esc(it.lang)}</span>`;
     } else if (it.type === 'prompt' && it.targetAi) {
       accessory = `<span class="entry-tag">→ ${esc(it.targetAi)}</span>`;
-    } else if (it.type === 'info' && it.source) {
+    } else if (it.source) {
       accessory = `<span class="entry-tag">📎 ${esc(it.source)}</span>`;
-    } else if (it.type === 'idea') {
+    }
+    if (it.type === 'idea') {
       const st = STATUSES.find((s) => s.id === it.status);
       const pr = PRIORITIES.find((p) => p.id === it.priority);
       accessory =
@@ -386,17 +426,11 @@
         <div style="font-size:11px; color:var(--muted); padding: 0 2px;">
           💡 استخدم <code style="background:var(--prompt-soft); color:var(--prompt); padding:2px 6px; border-radius:4px; font-family:var(--mono);">{{name}}</code> للمتغيّرات — بتقدر تعبّيها عند الاستخدام.
         </div>`;
-    } else if (typeId === 'info') {
+    } else if (typeId === 'note' || typeId === 'answer') {
       extra = `
-        <div class="field-row">
-          <div class="field">
-            <div class="field-label"><span>المصدر</span><span class="en">Source</span></div>
-            <input type="text" id="ed-source" placeholder="ChatGPT، Claude، كتاب..." value="${esc(item && item.source || '')}">
-          </div>
-          <div class="field">
-            <div class="field-label"><span>رابط (اختياري)</span><span class="en">URL</span></div>
-            <input type="url" id="ed-url" placeholder="https://..." value="${esc(item && item.sourceUrl || '')}">
-          </div>
+        <div class="field">
+          <div class="field-label"><span>رابط (اختياري)</span><span class="en">Reference URL</span></div>
+          <input type="url" id="ed-url" placeholder="https://..." value="${esc(item && item.sourceUrl || '')}">
         </div>`;
     } else if (typeId === 'idea') {
       extra = `
@@ -421,18 +455,22 @@
     }
 
     const bodyFieldClass = typeId === 'code' ? 'field code-field' : 'field';
-    const bodyLabelAr =
-      typeId === 'code'   ? 'الكود' :
-      typeId === 'prompt' ? 'نص البرومبت' :
-      typeId === 'info'   ? 'المحتوى' : 'الفكرة';
-    const bodyLabelEn =
-      typeId === 'code'   ? 'Code' :
-      typeId === 'prompt' ? 'Prompt text' :
-      typeId === 'info'   ? 'Content' : 'Idea';
-    const bodyPlaceholder =
-      typeId === 'code'   ? '// ألصق الكود هنا' :
-      typeId === 'prompt' ? 'اكتب البرومبت… استخدم {{placeholder}} للمتغيّرات' :
-      typeId === 'info'   ? 'اكتب ما تبي تحفظه…' : 'اشرح الفكرة بإيجاز…';
+    const bodyLabelAr = {
+      code: 'الكود', prompt: 'نص البرومبت', note: 'المحتوى',
+      answer: 'الإجابة', idea: 'الفكرة', template: 'القالب',
+    }[typeId] || 'المحتوى';
+    const bodyLabelEn = {
+      code: 'Code', prompt: 'Prompt text', note: 'Content',
+      answer: 'Answer', idea: 'Idea', template: 'Template',
+    }[typeId] || 'Content';
+    const bodyPlaceholder = {
+      code:     '// ألصق الكود هنا',
+      prompt:   'اكتب البرومبت… استخدم {{placeholder}} للمتغيّرات',
+      note:     'اكتب ما تبي تحفظه…',
+      answer:   'ألصق إجابة الـAI…',
+      idea:     'اشرح الفكرة بإيجاز…',
+      template: 'اكتب القالب (خطوات أو هيكل قابل لإعادة الاستخدام)…',
+    }[typeId] || '';
 
     body.innerHTML = `
       ${typePickerHTML}
@@ -457,6 +495,15 @@
       </div>
 
       ${extra}
+
+      <div class="field">
+        <div class="field-label"><span>المصدر</span><span class="en">Source</span></div>
+        <select id="ed-source">
+          ${SOURCES.map((s) =>
+            `<option value="${esc(s)}" ${(item && item.source || 'ChatGPT') === s ? 'selected' : ''}>${esc(s)}</option>`
+          ).join('')}
+        </select>
+      </div>
 
       <div class="field">
         <div class="field-label"><span>وسوم (افصل بفاصلة)</span><span class="en">Tags</span></div>
@@ -509,14 +556,16 @@
     const important = $('#ed-imp').classList.contains('on');
 
     const base = { title, body, tags, important, type };
+    const sourceSelect = $('#ed-source');
+    if (sourceSelect) base.source = sourceSelect.value;
     if (type === 'code') base.lang = $('#ed-lang').value;
     else if (type === 'prompt') {
       base.targetAi = $('#ed-target').value;
       base.usedCount = isEdit ? state.items.find((x) => x.id === state.editing).usedCount || 0 : 0;
     }
-    else if (type === 'info') {
-      base.source = $('#ed-source').value.trim();
-      base.sourceUrl = $('#ed-url').value.trim();
+    else if (type === 'note' || type === 'answer') {
+      const urlInp = $('#ed-url');
+      if (urlInp) base.sourceUrl = urlInp.value.trim();
     }
     else if (type === 'idea') {
       base.status = $('#ed-status').value;
@@ -555,6 +604,7 @@
     const badges = [
       `<span class="badge type">${t.icon} ${esc(t.ar)} · ${esc(t.en)}</span>`,
       it.important ? '<span class="badge important">⭐ مهم</span>' : '',
+      it.source ? `<span class="badge">📎 ${esc(it.source)}</span>` : '',
       `<span class="badge">${timeAgo(it.createdAt)}</span>`,
     ].filter(Boolean);
 
@@ -564,9 +614,8 @@
       accessoryBlock = `<span class="badge" style="font-family:var(--mono); background:var(--code-bg); color:var(--code-text); border:none;">${esc(it.lang)}</span>`;
     } else if (it.type === 'prompt' && it.targetAi) {
       accessoryBlock = `<span class="badge">→ ${esc(it.targetAi)}</span>${it.usedCount ? `<span class="badge">استُخدم ${it.usedCount}×</span>` : ''}`;
-    } else if (it.type === 'info') {
-      if (it.source) accessoryBlock += `<span class="badge">📎 ${esc(it.source)}</span>`;
-      if (it.sourceUrl) accessoryBlock += `<a class="badge" href="${esc(it.sourceUrl)}" target="_blank" rel="noopener" style="color:var(--indigo);">↗ فتح الرابط</a>`;
+    } else if ((it.type === 'note' || it.type === 'answer') && it.sourceUrl) {
+      accessoryBlock += `<a class="badge" href="${esc(it.sourceUrl)}" target="_blank" rel="noopener" style="color:var(--teal);">↗ فتح المرجع</a>`;
     } else if (it.type === 'idea') {
       const st = STATUSES.find((s) => s.id === it.status);
       const pr = PRIORITIES.find((p) => p.id === it.priority);
@@ -610,7 +659,14 @@
       ${accessoryBlock ? `<div class="detail-badges">${accessoryBlock}</div>` : ''}
       ${tags}
 
-      <div class="detail-label">${it.type === 'code' ? 'الكود · Code' : it.type === 'prompt' ? 'البرومبت · Prompt' : 'المحتوى · Content'}</div>
+      <div class="detail-label">${
+        it.type === 'code'     ? 'الكود · Code' :
+        it.type === 'prompt'   ? 'البرومبت · Prompt' :
+        it.type === 'answer'   ? 'الإجابة · Answer' :
+        it.type === 'template' ? 'القالب · Template' :
+        it.type === 'idea'     ? 'الفكرة · Idea' :
+        'المحتوى · Content'
+      }</div>
       <div class="detail-body-text ${bodyClass}">${esc(it.body)}</div>
 
       ${varsBlock}
@@ -759,7 +815,7 @@
       state.filter = { type: 'all', q: '' };
       render();
     });
-    $('#btn-new')?.addEventListener('click', () => openCreate('code'));
+    $('#btn-new')?.addEventListener('click', () => openCreate('prompt'));
     $('#btn-search')?.addEventListener('click', openSearch);
     $('#btn-export')?.addEventListener('click', exportAll);
     $('#fab')?.addEventListener('click', () => openCreate('prompt'));
@@ -801,7 +857,7 @@
       }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'n') {
         e.preventDefault();
-        openCreate('code');
+        openCreate('prompt');
       }
     });
   }

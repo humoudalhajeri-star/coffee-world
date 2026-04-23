@@ -1,55 +1,71 @@
 /* ==========================================================
-   ZAKERAH — ذاكِرة
-   Your external memory for AI conversations
-   Palette: warm paper + ink + indigo + per-type accents
+   ذاكرة الذكاء الاصطناعي — AI MEMORY
+   Premium memory system for AI users
+   Palette: deep navy + off-white + teal + warm gold
    ========================================================== */
 
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 
 :root {
-  --paper:      #FBFAF7;
-  --paper-2:    #F5F3EE;
+  --paper:      #F7F8FA;
+  --paper-2:    #EEF1F6;
   --card:       #FFFFFF;
-  --ink:        #0A0A0A;
-  --ink-soft:   #1F1F1F;
-  --text:       #171717;
-  --muted:      #6B6B6B;
-  --muted-2:    #9A9A9A;
-  --line:       #EBE9E4;
-  --line-soft:  #F4F2EC;
+  --ink:        #0B1F3A;
+  --ink-soft:   #13294B;
+  --text:       #0F1B2E;
+  --muted:      #5B6A81;
+  --muted-2:    #8E99AC;
+  --line:       #E2E6EE;
+  --line-soft:  #F0F3F8;
 
-  --indigo:     #4F46E5;
-  --indigo-2:   #4338CA;
-  --indigo-soft:#EEF2FF;
+  --teal:       #0D9488;
+  --teal-2:     #0B7F75;
+  --teal-soft:  #CCFBF1;
 
-  --danger:     #E11D48;
+  --gold:       #C89B3C;
+  --gold-soft:  #FAEBCE;
+
+  --indigo:     var(--teal);
+  --indigo-2:   var(--teal-2);
+  --indigo-soft:var(--teal-soft);
+
+  --danger:     #DC2626;
   --success:    #059669;
 
-  /* Per-type accents */
-  --code:       #10B981;
-  --code-bg:    #0C1410;
-  --code-text:  #A7F3D0;
-  --code-soft:  #D1FAE5;
+  /* Per-type accents (calmer, premium) */
+  --code:       #0EA5A4;
+  --code-bg:    #0B1F3A;
+  --code-text:  #B8EAE6;
+  --code-soft:  #D4F5F2;
 
-  --prompt:     #8B5CF6;
+  --prompt:     #7C3AED;
   --prompt-soft:#EDE9FE;
 
-  --info:       #D97706;
-  --info-soft:  #FEF3C7;
+  --info:       #0B7F75;
+  --info-soft:  #CCFBF1;
 
-  --idea:       #E11D48;
-  --idea-soft:  #FFE4E6;
+  --idea:       #C89B3C;
+  --idea-soft:  #FAEBCE;
 
-  --radius:     10px;
-  --radius-lg:  16px;
-  --radius-xl:  22px;
+  --note:       #475569;
+  --note-soft:  #E2E8F0;
 
-  --shadow-sm:  0 1px 2px rgba(10, 10, 10, 0.05);
-  --shadow:     0 2px 8px rgba(10, 10, 10, 0.06);
-  --shadow-lg:  0 24px 60px rgba(10, 10, 10, 0.15);
+  --answer:     #1D4ED8;
+  --answer-soft:#DBEAFE;
 
-  --dur: 0.18s;
+  --template:   #B45309;
+  --template-soft:#FEF3C7;
+
+  --radius:     12px;
+  --radius-lg:  18px;
+  --radius-xl:  24px;
+
+  --shadow-sm:  0 1px 2px rgba(11, 31, 58, 0.05);
+  --shadow:     0 4px 14px rgba(11, 31, 58, 0.06);
+  --shadow-lg:  0 28px 64px rgba(11, 31, 58, 0.18);
+
+  --dur: 0.2s;
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
 
   --mono: 'SFMono-Regular', Menlo, Consolas, 'IBM Plex Mono', monospace;
@@ -125,8 +141,8 @@ a { color: var(--indigo); text-decoration: none; }
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, transparent 50%, var(--indigo) 50%);
-  opacity: 0.35;
+  background: linear-gradient(135deg, transparent 50%, var(--teal) 50%);
+  opacity: 0.45;
 }
 .brand-name {
   font-weight: 900;
@@ -628,7 +644,7 @@ a { color: var(--indigo); text-decoration: none; }
 
 .type-picker {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
   gap: 6px;
 }
 .type-pick {
@@ -951,15 +967,21 @@ mark {
 }
 
 /* ========== TYPE PALETTES (applied by data attr) ========== */
-[data-type=code]   { --type-accent: var(--code);   --type-soft: var(--code-soft); }
-[data-type=prompt] { --type-accent: var(--prompt); --type-soft: var(--prompt-soft); }
-[data-type=info]   { --type-accent: var(--info);   --type-soft: var(--info-soft); }
-[data-type=idea]   { --type-accent: var(--idea);   --type-soft: var(--idea-soft); }
+[data-type=code]     { --type-accent: var(--code);     --type-soft: var(--code-soft); }
+[data-type=prompt]   { --type-accent: var(--prompt);   --type-soft: var(--prompt-soft); }
+[data-type=info]     { --type-accent: var(--info);     --type-soft: var(--info-soft); }
+[data-type=idea]     { --type-accent: var(--idea);     --type-soft: var(--idea-soft); }
+[data-type=note]     { --type-accent: var(--note);     --type-soft: var(--note-soft); }
+[data-type=answer]   { --type-accent: var(--answer);   --type-soft: var(--answer-soft); }
+[data-type=template] { --type-accent: var(--template); --type-soft: var(--template-soft); }
 
-[data-pick=code]   { --pick-accent: var(--code); }
-[data-pick=prompt] { --pick-accent: var(--prompt); }
-[data-pick=info]   { --pick-accent: var(--info); }
-[data-pick=idea]   { --pick-accent: var(--idea); }
+[data-pick=code]     { --pick-accent: var(--code); }
+[data-pick=prompt]   { --pick-accent: var(--prompt); }
+[data-pick=info]     { --pick-accent: var(--info); }
+[data-pick=idea]     { --pick-accent: var(--idea); }
+[data-pick=note]     { --pick-accent: var(--note); }
+[data-pick=answer]   { --pick-accent: var(--answer); }
+[data-pick=template] { --pick-accent: var(--template); }
 
 /* ========== RESPONSIVE ========== */
 @media (max-width: 640px) {
