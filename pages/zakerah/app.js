@@ -305,6 +305,518 @@
     render, renderTabs, renderList, entryHTML, filteredItems, highlight,
   });
 
-  /* part 2 provides: openCreate, openDetail, openEdit, bindGlobal, bootstrap */
+  /* ============ MODAL: CREATE / EDIT ============ */
+  function openCreate(presetType) {
+    state.editing = null;
+    state.creatingType = presetType || 'code';
+    renderEditor(null, state.creatingType);
+    $('#editor-modal').classList.add('open');
+  }
+
+  function openEdit(id) {
+    const it = state.items.find((x) => x.id === id);
+    if (!it) return;
+    state.editing = id;
+    renderEditor(it, it.type);
+    $('#editor-modal').classList.add('open');
+  }
+
+  function closeEditor() {
+    $('#editor-modal').classList.remove('open');
+    state.editing = null;
+  }
+
+  function renderEditor(item, typeId) {
+    const modal = $('#editor-modal .modal');
+    const isEdit = !!item;
+    const t = getType(typeId);
+    const body = $('#editor-body');
+    modal.setAttribute('data-type', typeId);
+
+    $('#editor-title').textContent = isEdit ? 'تعديل' : t.verb;
+    $('#editor-title-tag').textContent = isEdit ? 'EDIT · ' + t.en : t.verbEn;
+
+    // Type picker (only when creating)
+    const typePickerHTML = isEdit ? '' : `
+      <div>
+        <div class="field-label" style="margin-bottom:8px;">
+          <span>النوع <span class="req">*</span></span>
+          <span class="en">Type</span>
+        </div>
+        <div class="type-picker">
+          ${TYPES.map((tt) => `
+            <button type="button" class="type-pick ${tt.id === typeId ? 'active' : ''}"
+                    data-pick="${tt.id}" data-pick-type="${tt.id}">
+              <span class="type-pick-icon">${tt.icon}</span>
+              ${esc(tt.ar)}
+              <div style="font-size:9px; opacity:.7; margin-top:2px;">${esc(tt.en)}</div>
+            </button>
+          `).join('')}
+        </div>
+      </div>`;
+
+    // Type-specific extra fields
+    let extra = '';
+    if (typeId === 'code') {
+      extra = `
+        <div class="field">
+          <div class="field-label">
+            <span>اللغة</span>
+            <span class="en">Language</span>
+          </div>
+          <select id="ed-lang">
+            ${LANGS.map((l) =>
+              `<option value="${l}" ${(item && item.lang) === l ? 'selected' : ''}>${esc(l)}</option>`
+            ).join('')}
+          </select>
+        </div>`;
+    } else if (typeId === 'prompt') {
+      extra = `
+        <div class="field">
+          <div class="field-label">
+            <span>الـAI المستهدف</span>
+            <span class="en">Target AI</span>
+          </div>
+          <select id="ed-target">
+            ${TARGET_AIS.map((a) =>
+              `<option value="${esc(a)}" ${(item && item.targetAi) === a ? 'selected' : ''}>${esc(a)}</option>`
+            ).join('')}
+          </select>
+        </div>
+        <div style="font-size:11px; color:var(--muted); padding: 0 2px;">
+          💡 استخدم <code style="background:var(--prompt-soft); color:var(--prompt); padding:2px 6px; border-radius:4px; font-family:var(--mono);">{{name}}</code> للمتغيّرات — بتقدر تعبّيها عند الاستخدام.
+        </div>`;
+    } else if (typeId === 'info') {
+      extra = `
+        <div class="field-row">
+          <div class="field">
+            <div class="field-label"><span>المصدر</span><span class="en">Source</span></div>
+            <input type="text" id="ed-source" placeholder="ChatGPT، Claude، كتاب..." value="${esc(item && item.source || '')}">
+          </div>
+          <div class="field">
+            <div class="field-label"><span>رابط (اختياري)</span><span class="en">URL</span></div>
+            <input type="url" id="ed-url" placeholder="https://..." value="${esc(item && item.sourceUrl || '')}">
+          </div>
+        </div>`;
+    } else if (typeId === 'idea') {
+      extra = `
+        <div class="field-row">
+          <div class="field">
+            <div class="field-label"><span>الحالة</span><span class="en">Status</span></div>
+            <select id="ed-status">
+              ${STATUSES.map((s) =>
+                `<option value="${s.id}" ${(item && item.status || 'new') === s.id ? 'selected' : ''}>${esc(s.ar)} · ${esc(s.en)}</option>`
+              ).join('')}
+            </select>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>الأولوية</span><span class="en">Priority</span></div>
+            <select id="ed-priority">
+              ${PRIORITIES.map((p) =>
+                `<option value="${p.id}" ${(item && item.priority || 'med') === p.id ? 'selected' : ''}>${esc(p.ar)} · ${esc(p.en)}</option>`
+              ).join('')}
+            </select>
+          </div>
+        </div>`;
+    }
+
+    const bodyFieldClass = typeId === 'code' ? 'field code-field' : 'field';
+    const bodyLabelAr =
+      typeId === 'code'   ? 'الكود' :
+      typeId === 'prompt' ? 'نص البرومبت' :
+      typeId === 'info'   ? 'المحتوى' : 'الفكرة';
+    const bodyLabelEn =
+      typeId === 'code'   ? 'Code' :
+      typeId === 'prompt' ? 'Prompt text' :
+      typeId === 'info'   ? 'Content' : 'Idea';
+    const bodyPlaceholder =
+      typeId === 'code'   ? '// ألصق الكود هنا' :
+      typeId === 'prompt' ? 'اكتب البرومبت… استخدم {{placeholder}} للمتغيّرات' :
+      typeId === 'info'   ? 'اكتب ما تبي تحفظه…' : 'اشرح الفكرة بإيجاز…';
+
+    body.innerHTML = `
+      ${typePickerHTML}
+
+      <div class="field">
+        <div class="field-label">
+          <span>العنوان <span class="req">*</span></span>
+          <span class="en">Title</span>
+        </div>
+        <input type="text" id="ed-title" required maxlength="200"
+               placeholder="مثلاً: ${typeId === 'code' ? 'useMemo في React' : 'قالب إيميل العملاء'}"
+               value="${esc(item && item.title || '')}">
+      </div>
+
+      <div class="${bodyFieldClass}">
+        <div class="field-label">
+          <span>${esc(bodyLabelAr)} <span class="req">*</span></span>
+          <span class="en">${esc(bodyLabelEn)}</span>
+        </div>
+        <textarea id="ed-body" required rows="${typeId === 'code' ? 10 : 6}"
+                  placeholder="${esc(bodyPlaceholder)}">${esc(item && item.body || '')}</textarea>
+      </div>
+
+      ${extra}
+
+      <div class="field">
+        <div class="field-label"><span>وسوم (افصل بفاصلة)</span><span class="en">Tags</span></div>
+        <input type="text" id="ed-tags"
+               placeholder="react, performance"
+               value="${esc((item && item.tags || []).join(', '))}">
+      </div>
+
+      <div class="toggle-row">
+        <div class="toggle-lbl">⭐ مهم <span class="en">Important</span></div>
+        <button type="button" class="toggle ${item && item.important ? 'on' : ''}" id="ed-imp"></button>
+      </div>
+    `;
+
+    // bind type picker
+    $$('[data-pick-type]').forEach((el) => {
+      el.onclick = () => {
+        state.creatingType = el.dataset.pickType;
+        renderEditor(null, state.creatingType);
+      };
+    });
+
+    $('#ed-imp').onclick = (e) => e.currentTarget.classList.toggle('on');
+
+    // keyboard shortcut: Cmd/Ctrl+Enter to submit
+    $('#ed-body').addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        submitEditor();
+      }
+    });
+
+    // Submit button label
+    $('#editor-submit').textContent = isEdit ? '💾 حفظ التعديلات' : '＋ إضافة';
+  }
+
+  function submitEditor(e) {
+    if (e) e.preventDefault();
+    const isEdit = !!state.editing;
+    const type = isEdit
+      ? state.items.find((x) => x.id === state.editing).type
+      : state.creatingType;
+
+    const title = $('#ed-title').value.trim();
+    const body  = $('#ed-body').value.trim();
+    if (!title || !body) { toast('العنوان والمحتوى مطلوبان', 'error'); return; }
+
+    const tags = ($('#ed-tags').value || '')
+      .split(',').map((x) => x.trim()).filter(Boolean);
+    const important = $('#ed-imp').classList.contains('on');
+
+    const base = { title, body, tags, important, type };
+    if (type === 'code') base.lang = $('#ed-lang').value;
+    else if (type === 'prompt') {
+      base.targetAi = $('#ed-target').value;
+      base.usedCount = isEdit ? state.items.find((x) => x.id === state.editing).usedCount || 0 : 0;
+    }
+    else if (type === 'info') {
+      base.source = $('#ed-source').value.trim();
+      base.sourceUrl = $('#ed-url').value.trim();
+    }
+    else if (type === 'idea') {
+      base.status = $('#ed-status').value;
+      base.priority = $('#ed-priority').value;
+    }
+
+    if (isEdit) {
+      const idx = state.items.findIndex((x) => x.id === state.editing);
+      state.items[idx] = { ...state.items[idx], ...base, updatedAt: Date.now() };
+      persist();
+      toast('تم التحديث ✓', 'success');
+      const id = state.editing;
+      closeEditor();
+      openDetail(id);
+    } else {
+      const newItem = { id: uid(), ...base, createdAt: Date.now() };
+      state.items.unshift(newItem);
+      persist();
+      toast('تمت الإضافة ✓', 'success');
+      closeEditor();
+      state.filter.type = type;
+      render();
+      setTimeout(() => openDetail(newItem.id), 120);
+    }
+  }
+
+  /* ============ MODAL: DETAIL (VIEW) ============ */
+  function openDetail(id) {
+    const it = state.items.find((x) => x.id === id);
+    if (!it) return;
+    const t = getType(it.type);
+    const modal = $('#detail-modal .modal');
+    modal.setAttribute('data-type', it.type);
+    $('#detail-title-tag').textContent = t.en.toUpperCase();
+
+    const badges = [
+      `<span class="badge type">${t.icon} ${esc(t.ar)} · ${esc(t.en)}</span>`,
+      it.important ? '<span class="badge important">⭐ مهم</span>' : '',
+      `<span class="badge">${timeAgo(it.createdAt)}</span>`,
+    ].filter(Boolean);
+
+    // Accessory section (type-specific)
+    let accessoryBlock = '';
+    if (it.type === 'code' && it.lang) {
+      accessoryBlock = `<span class="badge" style="font-family:var(--mono); background:var(--code-bg); color:var(--code-text); border:none;">${esc(it.lang)}</span>`;
+    } else if (it.type === 'prompt' && it.targetAi) {
+      accessoryBlock = `<span class="badge">→ ${esc(it.targetAi)}</span>${it.usedCount ? `<span class="badge">استُخدم ${it.usedCount}×</span>` : ''}`;
+    } else if (it.type === 'info') {
+      if (it.source) accessoryBlock += `<span class="badge">📎 ${esc(it.source)}</span>`;
+      if (it.sourceUrl) accessoryBlock += `<a class="badge" href="${esc(it.sourceUrl)}" target="_blank" rel="noopener" style="color:var(--indigo);">↗ فتح الرابط</a>`;
+    } else if (it.type === 'idea') {
+      const st = STATUSES.find((s) => s.id === it.status);
+      const pr = PRIORITIES.find((p) => p.id === it.priority);
+      if (st) accessoryBlock += `<span class="badge">● ${esc(st.ar)}</span>`;
+      if (pr) accessoryBlock += `<span class="badge pill-prio-${pr.id}">◈ ${esc(pr.ar)}</span>`;
+    }
+
+    // Tags
+    const tags = (it.tags || []).length
+      ? `<div class="chips" style="margin-top:10px;">${it.tags.map((x) => `<span class="chip">#${esc(x)}</span>`).join('')}</div>`
+      : '';
+
+    // Variables UI (for prompts)
+    let varsBlock = '';
+    if (it.type === 'prompt') {
+      const vars = extractVars(it.body);
+      if (vars.length) {
+        varsBlock = `
+          <div class="vars-section">
+            <div class="vars-label">🧩 عبّي المتغيّرات · Fill Variables</div>
+            ${vars.map((v) => `
+              <div class="var-field">
+                <label>${esc(v)}</label>
+                <input type="text" data-var="${esc(v)}" placeholder="...">
+              </div>
+            `).join('')}
+            <div class="prompt-preview" id="prompt-preview">${highlightVars(it.body)}</div>
+            <div style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;">
+              <button class="btn btn-primary btn-sm" id="copy-filled">⧉ انسخ المُعبّأ</button>
+              <button class="btn btn-ghost btn-sm" id="copy-raw">انسخ الأصلي</button>
+            </div>
+          </div>`;
+      }
+    }
+
+    const bodyClass = it.type === 'code' ? 'mono' : '';
+
+    $('#detail-body').innerHTML = `
+      <div class="detail-badges">${badges.join('')}</div>
+      <h2 class="detail-q">${esc(it.title)}</h2>
+      ${accessoryBlock ? `<div class="detail-badges">${accessoryBlock}</div>` : ''}
+      ${tags}
+
+      <div class="detail-label">${it.type === 'code' ? 'الكود · Code' : it.type === 'prompt' ? 'البرومبت · Prompt' : 'المحتوى · Content'}</div>
+      <div class="detail-body-text ${bodyClass}">${esc(it.body)}</div>
+
+      ${varsBlock}
+    `;
+
+    // Actions
+    $('#detail-actions').innerHTML = `
+      <button class="btn btn-primary btn-sm" data-act="copy">⧉ نسخ</button>
+      <button class="btn btn-ghost btn-sm" data-act="share">↗ مشاركة</button>
+      <button class="btn btn-ghost btn-sm" data-act="star">${it.important ? '★ إلغاء النجمة' : '☆ ضع نجمة'}</button>
+      <button class="btn btn-ghost btn-sm" data-act="edit">✎ تعديل</button>
+      <button class="btn btn-danger btn-sm" data-act="delete">🗑 حذف</button>
+    `;
+
+    $$('#detail-actions [data-act]').forEach((el) => {
+      el.onclick = () => handleAction(el.dataset.act, it);
+    });
+
+    // Bind variable inputs (live preview)
+    if (it.type === 'prompt') {
+      $$('#detail-body [data-var]').forEach((inp) => {
+        inp.addEventListener('input', () => updatePromptPreview(it.body));
+      });
+      const cf = $('#copy-filled');
+      if (cf) cf.onclick = async () => {
+        const filled = fillVars(it.body);
+        await copy(filled);
+        // bump use count
+        const idx = state.items.findIndex((x) => x.id === it.id);
+        if (idx >= 0) {
+          state.items[idx].usedCount = (state.items[idx].usedCount || 0) + 1;
+          persist();
+        }
+      };
+      const cr = $('#copy-raw');
+      if (cr) cr.onclick = () => copy(it.body);
+    }
+
+    $('#detail-modal').classList.add('open');
+  }
+
+  function closeDetail() {
+    $('#detail-modal').classList.remove('open');
+  }
+
+  /* ============ PROMPT VARIABLES ============ */
+  function extractVars(text) {
+    const re = /\{\{([^}]+)\}\}/g;
+    const found = new Set();
+    let m;
+    while ((m = re.exec(text || '')) !== null) {
+      found.add(m[1].trim());
+    }
+    return Array.from(found);
+  }
+
+  function highlightVars(text) {
+    return esc(text).replace(/\{\{([^}]+)\}\}/g, '<mark>{{$1}}</mark>');
+  }
+
+  function fillVars(text) {
+    return (text || '').replace(/\{\{([^}]+)\}\}/g, (full, name) => {
+      const inp = document.querySelector(`#detail-body [data-var="${CSS.escape(name.trim())}"]`);
+      const val = inp ? inp.value.trim() : '';
+      return val || full;
+    });
+  }
+
+  function updatePromptPreview(rawBody) {
+    const pv = $('#prompt-preview');
+    if (!pv) return;
+    const filled = fillVars(rawBody);
+    pv.innerHTML = highlightVars(filled);
+  }
+
+  /* ============ ACTIONS ============ */
+  async function handleAction(act, it) {
+    if (act === 'copy') {
+      await copy(it.body);
+    } else if (act === 'share') {
+      const t = getType(it.type);
+      const txt = `${t.icon} ${it.title}\n\n${it.body}\n\n— ذاكِرة / Zakerah`;
+      if (navigator.share) {
+        try { await navigator.share({ title: it.title, text: txt }); }
+        catch {}
+      } else {
+        await copy(txt);
+        toast('نُسخ للمشاركة ✓', 'success');
+      }
+    } else if (act === 'star') {
+      it.important = !it.important;
+      persist();
+      openDetail(it.id);
+      renderList();
+    } else if (act === 'edit') {
+      closeDetail();
+      setTimeout(() => openEdit(it.id), 120);
+    } else if (act === 'delete') {
+      if (!confirm('حذف هذا العنصر نهائياً؟')) return;
+      state.items = state.items.filter((x) => x.id !== it.id);
+      persist();
+      toast('تم الحذف', 'success');
+      closeDetail();
+      render();
+    }
+  }
+
+  async function copy(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast('تم النسخ ✓', 'success');
+    } catch {
+      toast('تعذّر النسخ', 'error');
+    }
+  }
+
+  /* ============ SEARCH MODAL ============ */
+  function openSearch() {
+    $('#search-modal').classList.add('open');
+    setTimeout(() => $('#search-input').focus(), 50);
+  }
+  function closeSearch() {
+    $('#search-modal').classList.remove('open');
+  }
+
+  /* ============ EXPORT ALL ============ */
+  function exportAll() {
+    const data = {
+      app: 'Zakerah', version: 1,
+      exportedAt: new Date().toISOString(),
+      items: state.items,
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'zakerah-export-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    toast('تم التصدير ✓', 'success');
+  }
+
+  /* ============ BOOTSTRAP ============ */
+  function bindGlobal() {
+    // top buttons
+    $('#brand-home')?.addEventListener('click', () => {
+      state.filter = { type: 'all', q: '' };
+      render();
+    });
+    $('#btn-new')?.addEventListener('click', () => openCreate('code'));
+    $('#btn-search')?.addEventListener('click', openSearch);
+    $('#btn-export')?.addEventListener('click', exportAll);
+    $('#fab')?.addEventListener('click', () => openCreate('prompt'));
+
+    // editor modal
+    $('#editor-close')?.addEventListener('click', closeEditor);
+    $('#editor-modal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'editor-modal') closeEditor();
+    });
+    $('#editor-form')?.addEventListener('submit', submitEditor);
+
+    // detail modal
+    $('#detail-close')?.addEventListener('click', closeDetail);
+    $('#detail-modal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'detail-modal') closeDetail();
+    });
+
+    // search modal
+    $('#search-close')?.addEventListener('click', closeSearch);
+    $('#search-modal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'search-modal') closeSearch();
+    });
+    $('#search-input')?.addEventListener('input', (e) => {
+      state.filter.q = e.target.value;
+      renderList();
+    });
+    $('#search-input')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeSearch();
+    });
+
+    // global shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeEditor(); closeDetail(); closeSearch();
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        openSearch();
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        openCreate('code');
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    load();
+    bindGlobal();
+    render();
+  });
+
+  // Expose what HTML/onclick handlers need
+  Object.assign(window.Z, {
+    openCreate, openEdit, openDetail,
+    closeEditor, closeDetail, closeSearch,
+    openSearch, exportAll,
+  });
 
 })();
