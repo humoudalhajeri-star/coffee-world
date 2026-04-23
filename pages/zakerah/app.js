@@ -1367,12 +1367,16 @@
     if (!confirm('متأكد 100%؟ آخر فرصة قبل المسح.')) return;
     state.items = [];
     state.collections = [];
+    state.customTypes = [];
     state.recent = [];
     persist();
+    // Full reset also forgets the welcome so the user lands like a brand-new visitor.
+    localStorage.removeItem(WELCOMED_KEY);
     toast('تم مسح كل شي', 'success');
     closeSettings();
     state.filter = { type: 'all', q: '' };
     render();
+    openWelcome();
   }
 
   function handleImportFile(file) {
