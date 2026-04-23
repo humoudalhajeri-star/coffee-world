@@ -37,7 +37,7 @@
         <span class="kbd">⌘K</span>
       </button>
       <button class="icon-btn" id="btn-collections" title="الباقات · Collections">📁</button>
-      <button class="icon-btn" id="btn-export" title="تصدير JSON · Export">⬇</button>
+      <button class="icon-btn" id="btn-settings" title="الإعدادات · Settings">⚙</button>
       <button class="btn btn-primary" id="btn-new" aria-label="جديد">
         ＋ جديد
       </button>
@@ -130,6 +130,24 @@
     </div>
   </div>
 </div>
+
+<!-- ========== SETTINGS MODAL ========== -->
+<div class="modal-backdrop" id="settings-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>
+        <span>الإعدادات</span>
+        <span class="tag">SETTINGS</span>
+      </h3>
+      <button type="button" class="modal-close" id="settings-close">×</button>
+    </div>
+
+    <div class="modal-body" id="settings-body"></div>
+  </div>
+</div>
+
+<!-- hidden file input used by the settings import flow -->
+<input type="file" id="import-file" accept="application/json,.json" style="display:none;">
 
 <!-- ========== COLLECTIONS MODAL (list + create) ========== -->
 <div class="modal-backdrop" id="coll-modal">

@@ -101,6 +101,7 @@
   let state = {
     items: [],
     collections: [],
+    recent: [], // recently viewed item ids (newest first, capped at 10)
     filter: { type: 'all', q: '' },
     editing: null, // item being edited in modal
     creatingType: 'code',
@@ -115,6 +116,7 @@
         const d = JSON.parse(raw);
         state.items = Array.isArray(d.items) ? d.items : [];
         state.collections = Array.isArray(d.collections) ? d.collections : [];
+        state.recent = Array.isArray(d.recent) ? d.recent : [];
         // migrate legacy type 'info' → 'note'
         state.items.forEach((it) => { if (it.type === 'info') it.type = 'note'; });
       }
@@ -127,7 +129,14 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       items: state.items,
       collections: state.collections,
+      recent: state.recent,
     }));
+  }
+
+  function trackRecent(id) {
+    if (!id) return;
+    state.recent = [id, ...state.recent.filter((x) => x !== id)].slice(0, 10);
+    persist();
   }
 
   function seedCollections() {
@@ -268,10 +277,15 @@
   /* ============ TABS ============ */
   function renderTabs() {
     const wrap = $('#tabs');
+    const favCount = state.items.filter((x) => x.important).length;
     wrap.innerHTML = `
       <button class="tab ${state.filter.type === 'all' ? 'active' : ''}" data-tab="all">
         الكل · All
         <span class="tab-count">${state.items.length}</span>
+      </button>
+      <button class="tab ${state.filter.type === 'fav' ? 'active' : ''}" data-tab="fav" style="color: ${state.filter.type === 'fav' ? '#C89B3C' : ''}; border-bottom-color: ${state.filter.type === 'fav' ? '#C89B3C' : ''};">
+        ⭐ المفضلة · Favorites
+        <span class="tab-count" style="${state.filter.type === 'fav' ? 'background:#C89B3C; color:#fff;' : ''}">${favCount}</span>
       </button>
       ${TYPES.map((t) => `
         <button class="tab ${state.filter.type === t.id ? 'active' : ''}" data-tab="${t.id}" data-type="${t.id}">
@@ -297,12 +311,44 @@
 
   function filteredItems() {
     const q = (state.filter.q || '').trim().toLowerCase();
+    const f = state.filter.type;
     return state.items.filter((it) => {
-      if (state.filter.type !== 'all' && it.type !== state.filter.type) return false;
+      if (f === 'fav' && !it.important) return false;
+      if (f !== 'all' && f !== 'fav' && it.type !== f) return false;
       if (!q) return true;
       const hay = (it.title + ' ' + it.body + ' ' + (it.tags || []).join(' ')).toLowerCase();
       return hay.includes(q);
     }).sort((a, b) => b.createdAt - a.createdAt);
+  }
+
+  function renderRecentStrip() {
+    // only on the "All" tab with no active search
+    if (state.filter.type !== 'all' || state.filter.q) return '';
+    const recent = state.recent
+      .map((id) => state.items.find((x) => x.id === id))
+      .filter(Boolean)
+      .slice(0, 8);
+    if (recent.length === 0) return '';
+    return `
+      <div class="recent-strip">
+        <div class="recent-strip-head">
+          <h4>
+            ⏱ الأحدث تصفّحاً
+            <span class="en">RECENTLY VIEWED</span>
+          </h4>
+          <button id="recent-clear">مسح</button>
+        </div>
+        <div class="recent-chips">
+          ${recent.map((it) => {
+            const t = getType(it.type);
+            return `
+              <button class="recent-chip" data-item="${it.id}" title="${esc(it.title)}">
+                <span class="recent-chip-icon">${t.icon}</span>
+                ${esc(it.title)}
+              </button>`;
+          }).join('')}
+        </div>
+      </div>`;
   }
 
   function renderList() {
@@ -312,21 +358,35 @@
 
     countEl.textContent = items.length + (items.length === 1 ? ' عنصر · 1 item' : ' عناصر · ' + items.length + ' items');
 
+    const recentStripHTML = renderRecentStrip();
+
     if (items.length === 0) {
-      listWrap.innerHTML = `
+      listWrap.innerHTML = recentStripHTML + `
         <div class="empty">
-          <div class="empty-emoji">🧠</div>
-          <h3>${state.filter.q ? 'لا نتائج' : 'ذاكرتك فارغة'}</h3>
-          <p>${state.filter.q ? 'جرّب كلمة أخرى' : 'ابدأ بإضافة أول معلومة من الـAI'}</p>
-          ${!state.filter.q ? '<button class="btn btn-indigo" onclick="window.Z.openCreate()">＋ أضف أول شي</button>' : ''}
+          <div class="empty-emoji">${state.filter.type === 'fav' ? '⭐' : '🧠'}</div>
+          <h3>${
+            state.filter.q ? 'لا نتائج' :
+            state.filter.type === 'fav' ? 'لا توجد مفضلات بعد' :
+            'ذاكرتك فارغة'
+          }</h3>
+          <p>${
+            state.filter.q ? 'جرّب كلمة أخرى' :
+            state.filter.type === 'fav' ? 'علّم أي عنصر بنجمة ⭐ ليظهر هنا' :
+            'ابدأ بإضافة أول معلومة من الـAI'
+          }</p>
+          ${!state.filter.q && state.filter.type !== 'fav'
+            ? '<button class="btn btn-indigo" onclick="window.Z.openCreate()">＋ أضف أول شي</button>'
+            : ''}
         </div>`;
-      return;
+    } else {
+      listWrap.innerHTML = recentStripHTML + items.map(entryHTML).join('');
     }
 
-    listWrap.innerHTML = items.map(entryHTML).join('');
     $$('[data-item]').forEach((el) => {
       el.onclick = () => window.Z.openDetail(el.dataset.item);
     });
+    const clear = $('#recent-clear');
+    if (clear) clear.onclick = () => { state.recent = []; persist(); render(); };
   }
 
   function highlight(text, q) {
@@ -641,6 +701,7 @@
   function openDetail(id) {
     const it = state.items.find((x) => x.id === id);
     if (!it) return;
+    trackRecent(id);
     const t = getType(it.type);
     const modal = $('#detail-modal .modal');
     modal.setAttribute('data-type', it.type);
@@ -869,6 +930,123 @@
     document.body.appendChild(a); a.click(); a.remove();
     URL.revokeObjectURL(url);
     toast('تم التصدير ✓', 'success');
+  }
+
+  /* ============ SETTINGS ============ */
+  function openSettings() {
+    renderSettings();
+    $('#settings-modal').classList.add('open');
+  }
+  function closeSettings() {
+    $('#settings-modal').classList.remove('open');
+  }
+
+  function renderSettings() {
+    const totalItems = state.items.length;
+    const totalColls = state.collections.length;
+    const favs = state.items.filter((x) => x.important).length;
+    const sizeKb = Math.round(
+      (JSON.stringify({ items: state.items, collections: state.collections }).length / 1024) * 10
+    ) / 10;
+
+    $('#settings-body').innerHTML = `
+      <div class="settings-section">
+        <h4>البيانات · Data</h4>
+        <div class="settings-row">
+          <div class="settings-row-body">
+            <p class="settings-row-title">⬇ تصدير كل شي</p>
+            <p class="settings-row-desc">ملف JSON يحتوي جميع العناصر والباقات — نسخة احتياطية أو نقل بين أجهزة.</p>
+          </div>
+          <button class="btn btn-indigo btn-sm" id="set-export">تصدير</button>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-body">
+            <p class="settings-row-title">⬆ استيراد ملف</p>
+            <p class="settings-row-desc">ادمج بيانات من ملف JSON سابق التصدير. لن يُحذف أي شي — فقط تُضاف العناصر الجديدة.</p>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="set-import">اختر ملف</button>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-body">
+            <p class="settings-row-title" style="color: var(--danger);">🗑 مسح كل شي</p>
+            <p class="settings-row-desc">يحذف جميع العناصر والباقات والتاريخ المحفوظ في هذا الجهاز. لا يمكن التراجع.</p>
+          </div>
+          <button class="btn btn-danger btn-sm" id="set-clear">مسح كامل</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h4>إحصائيات · Stats</h4>
+        <div class="about-box">
+          <div class="about-kv"><span>عناصر · Items</span><span>${totalItems}</span></div>
+          <div class="about-kv"><span>باقات · Collections</span><span>${totalColls}</span></div>
+          <div class="about-kv"><span>مفضلة ⭐ · Favorites</span><span>${favs}</span></div>
+          <div class="about-kv"><span>حجم البيانات · Storage</span><span>${sizeKb} KB</span></div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h4>عن التطبيق · About</h4>
+        <div class="about-box">
+          <strong>ذاكرة الذكاء الاصطناعي</strong> · <span style="color:var(--muted);">AI Memory v1.0</span>
+          <p style="font-size:12px; color:var(--muted); margin:10px 0 0; line-height:1.7;">
+            دماغك الثاني لمحادثات الـAI. كل ما تحفظه يبقى محلياً على جهازك — بدون سحابة، بدون تتبّع.
+          </p>
+          <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
+            <a href="landing.html" class="btn btn-ghost btn-sm">📖 الصفحة التعريفية</a>
+            <a href="/" class="btn btn-ghost btn-sm">🏠 CoffeZ</a>
+          </div>
+        </div>
+      </div>
+    `;
+
+    $('#set-export').onclick = exportAll;
+    $('#set-import').onclick = () => $('#import-file').click();
+    $('#set-clear').onclick = handleClearAll;
+  }
+
+  function handleClearAll() {
+    if (!confirm('حذف جميع العناصر والباقات والتاريخ نهائياً؟ لا يمكن التراجع.')) return;
+    if (!confirm('متأكد 100%؟ آخر فرصة قبل المسح.')) return;
+    state.items = [];
+    state.collections = [];
+    state.recent = [];
+    persist();
+    toast('تم مسح كل شي', 'success');
+    closeSettings();
+    state.filter = { type: 'all', q: '' };
+    render();
+  }
+
+  function handleImportFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        const incomingItems = Array.isArray(data.items) ? data.items : [];
+        const incomingColls = Array.isArray(data.collections) ? data.collections : [];
+
+        const existingIds = new Set(state.items.map((x) => x.id));
+        const newItems = incomingItems.filter((x) => x && x.id && !existingIds.has(x.id));
+        const existingCollIds = new Set(state.collections.map((x) => x.id));
+        const newColls = incomingColls.filter((x) => x && x.id && !existingCollIds.has(x.id));
+
+        state.items = [...newItems, ...state.items];
+        state.collections = [...newColls, ...state.collections];
+        persist();
+        toast(`تم استيراد ${newItems.length} عنصر و ${newColls.length} باقة ✓`, 'success');
+        render();
+        renderSettings();
+      } catch (err) {
+        console.error(err);
+        toast('ملف غير صالح', 'error');
+      }
+    };
+    reader.onerror = () => toast('تعذّر قراءة الملف', 'error');
+    reader.readAsText(file);
   }
 
   /* ============ COLLECTIONS ============ */
@@ -1148,8 +1326,16 @@
     });
     $('#btn-new')?.addEventListener('click', () => openCreate('prompt'));
     $('#btn-search')?.addEventListener('click', openSearch);
-    $('#btn-export')?.addEventListener('click', exportAll);
     $('#btn-collections')?.addEventListener('click', openCollections);
+    $('#btn-settings')?.addEventListener('click', openSettings);
+    $('#settings-close')?.addEventListener('click', closeSettings);
+    $('#settings-modal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'settings-modal') closeSettings();
+    });
+    $('#import-file')?.addEventListener('change', (e) => {
+      handleImportFile(e.target.files[0]);
+      e.target.value = ''; // allow re-picking the same file
+    });
     $('#coll-close')?.addEventListener('click', closeCollections);
     $('#coll-modal')?.addEventListener('click', (e) => {
       if (e.target.id === 'coll-modal') closeCollections();
@@ -1185,7 +1371,7 @@
     // global shortcuts
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        closeEditor(); closeDetail(); closeSearch(); closeCollections();
+        closeEditor(); closeDetail(); closeSearch(); closeCollections(); closeSettings();
       }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
