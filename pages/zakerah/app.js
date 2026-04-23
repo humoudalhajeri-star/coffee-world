@@ -796,6 +796,7 @@
     $('#detail-actions').innerHTML = `
       <button class="btn btn-primary btn-sm" data-act="copy">⧉ نسخ</button>
       <button class="btn btn-ghost btn-sm" data-act="share">↗ مشاركة</button>
+      <button class="btn btn-ghost btn-sm" data-act="share-link">🔗 نسخ رابط</button>
       <button class="btn btn-ghost btn-sm" data-act="star">${it.important ? '★ إلغاء النجمة' : '☆ ضع نجمة'}</button>
       <button class="btn btn-ghost btn-sm" data-act="edit">✎ تعديل</button>
       <button class="btn btn-danger btn-sm" data-act="delete">🗑 حذف</button>
@@ -867,19 +868,42 @@
   }
 
   /* ============ ACTIONS ============ */
+  function buildShareUrl(it) {
+    const payload = {
+      type: it.type,
+      title: it.title,
+      body: it.body,
+      source: it.source,
+      tags: it.tags || [],
+    };
+    if (it.type === 'code' && it.lang) payload.lang = it.lang;
+    if (it.type === 'prompt' && it.targetAi) payload.targetAi = it.targetAi;
+
+    const json = JSON.stringify(payload);
+    // unicode-safe base64, URL-safe
+    const b64 = btoa(unescape(encodeURIComponent(json)))
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    const base = location.origin + location.pathname.replace(/[^/]*$/, '');
+    return base + 'share.html?d=' + b64;
+  }
+
   async function handleAction(act, it) {
     if (act === 'copy') {
       await copy(it.body);
     } else if (act === 'share') {
       const t = getType(it.type);
-      const txt = `${t.icon} ${it.title}\n\n${it.body}\n\n— ذاكِرة / Zakerah`;
+      const shareUrl = buildShareUrl(it);
+      const txt = `${t.icon} ${it.title}\n\n${it.body}\n\n— ذاكرة الذكاء الاصطناعي\n${shareUrl}`;
       if (navigator.share) {
-        try { await navigator.share({ title: it.title, text: txt }); }
+        try { await navigator.share({ title: it.title, text: txt, url: shareUrl }); return; }
         catch {}
-      } else {
-        await copy(txt);
-        toast('نُسخ للمشاركة ✓', 'success');
       }
+      await copy(txt);
+      toast('نُسخ للمشاركة ✓', 'success');
+    } else if (act === 'share-link') {
+      const url = buildShareUrl(it);
+      await copy(url);
+      toast('رابط المشاركة نُسخ ✓', 'success');
     } else if (act === 'star') {
       it.important = !it.important;
       persist();
