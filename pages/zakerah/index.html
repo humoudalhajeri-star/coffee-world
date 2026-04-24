@@ -17,6 +17,9 @@
 </head>
 <body>
 
+<!-- Firebase Auth + Firestore (shared across CoffeZ pages) -->
+<script type="module" src="../../assets/js/firebase-init.js"></script>
+
 <div class="app">
 
   <!-- ========== HEADER ========== -->
@@ -137,6 +140,58 @@
   </div>
 </div>
 
+<!-- ========== AUTH MODAL (cross-device Pro) ========== -->
+<div class="modal-backdrop" id="auth-modal">
+  <div class="modal" style="max-width: 440px; border-top-color: var(--teal);">
+    <div class="modal-head">
+      <h3>
+        <span id="auth-heading">تسجيل الدخول</span>
+        <span class="tag">ACCOUNT</span>
+      </h3>
+      <button type="button" class="modal-close" id="auth-close">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab active" data-auth-tab="signin">تسجيل الدخول</button>
+        <button type="button" class="auth-tab" data-auth-tab="signup">إنشاء حساب</button>
+      </div>
+
+      <form id="auth-form" autocomplete="on">
+        <div class="field">
+          <div class="field-label">
+            <span>الإيميل</span>
+            <span class="en">Email</span>
+          </div>
+          <input type="email" id="auth-email" required autocomplete="email" inputmode="email">
+        </div>
+        <div class="field">
+          <div class="field-label">
+            <span>كلمة السر <span class="req">*</span></span>
+            <span class="en">Password (6+ chars)</span>
+          </div>
+          <input type="password" id="auth-password" required minlength="6" autocomplete="current-password">
+        </div>
+
+        <div class="auth-terms">
+          <strong>ملاحظة مهمة — اقرأها قبل التسجيل:</strong>
+          <ul>
+            <li>✨ <strong>ميزة Pro</strong> تنتقل مع حسابك لأي جهاز تسجل الدخول فيه.</li>
+            <li>💾 <strong>محفوظاتك</strong> (العناصر + الباقات + الأنواع المخصصة) تبقى في الجهاز الحالي فقط — لا تُرفع للسحابة.</li>
+            <li>📤 لنقل محفوظاتك لجهاز آخر: ⚙ الإعدادات → تصدير JSON → استيراد في الجهاز الثاني.</li>
+          </ul>
+        </div>
+
+        <button type="submit" class="btn btn-teal btn-lg" id="auth-submit" style="width:100%;">
+          تسجيل الدخول
+        </button>
+      </form>
+
+      <p id="auth-msg" style="font-size:12px; margin-top:10px; min-height:16px; text-align:center;"></p>
+    </div>
+  </div>
+</div>
+
 <!-- ========== PAYWALL MODAL ========== -->
 <div class="modal-backdrop" id="paywall-modal">
   <div class="modal" style="max-width: 480px; border-top-color: var(--gold);">
@@ -149,6 +204,14 @@
     </div>
 
     <div class="modal-body paywall">
+      <div style="background: var(--teal-soft); border: 1px solid #b8e4dd; border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; font-size: 12px; line-height: 1.6; text-align:start;">
+        <strong style="color: var(--teal-2);">🔑 سبق واشتريت Pro؟</strong>
+        <div style="margin-top: 4px;">
+          <button type="button" id="paywall-signin" style="background:none; border:none; color:var(--teal); font-weight:700; text-decoration:underline; cursor:pointer; padding:0; font-family:inherit; font-size:12px;">سجّل الدخول بحسابك</button>
+          ليُستعاد Pro تلقائياً على هذا الجهاز.
+        </div>
+      </div>
+
       <div class="paywall-emoji">💎</div>
       <h2 id="paywall-title">وصلت الحدّ المجاني</h2>
       <p class="paywall-sub" id="paywall-sub">

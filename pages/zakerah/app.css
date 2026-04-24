@@ -967,6 +967,101 @@ mark {
 }
 
 /* ==========================================================
+   AUTH (cross-device account)
+   ========================================================== */
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  background: var(--paper-2);
+  padding: 4px;
+  border-radius: 10px;
+  margin-bottom: 18px;
+}
+.auth-tab {
+  padding: 10px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 13px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--dur);
+}
+.auth-tab.active {
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: var(--shadow-sm);
+}
+
+.auth-terms {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin: 14px 0;
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.8;
+}
+.auth-terms strong {
+  display: block;
+  color: var(--ink);
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+.auth-terms ul {
+  padding-inline-start: 6px;
+  margin: 0;
+  list-style: none;
+}
+.auth-terms li {
+  padding: 3px 0;
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.account-card {
+  background: var(--teal-soft);
+  border: 1px solid #b8e4dd;
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.account-avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: var(--teal);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.account-info { flex: 1; min-width: 0; }
+.account-email {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.account-status {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ==========================================================
    PAYWALL (freemium upgrade prompt)
    ========================================================== */
 .paywall {
