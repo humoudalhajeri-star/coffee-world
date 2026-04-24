@@ -1723,6 +1723,24 @@
       </div>
 
       <div class="settings-section">
+        <h4>الخصوصية · Privacy</h4>
+        <div class="privacy-notice" style="margin:0;">
+          <div class="privacy-notice-head">
+            <span class="ico">🔒</span>
+            <span>بياناتك — في جهازك فقط</span>
+          </div>
+          <ul>
+            <li><strong>كل ما تحفظه يبقى في جهازك.</strong> لا نحن ولا أي طرف ثالث نطّلع عليه.</li>
+            <li>البيانات محفوظة في <strong>localStorage</strong> الخاص بمتصفحك.</li>
+            <li>لو مسحت بيانات المتصفح → كل المحفوظات تختفي.</li>
+            <li>لو غيّرت الجهاز → البيانات لا تنتقل تلقائياً.</li>
+            <li>لنقل بياناتك: <strong>تصدير JSON</strong> ← استيراد في الجهاز الثاني.</li>
+            <li>الحساب (اختياري) لنقل Pro فقط — المحفوظات تبقى محلية.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="settings-section">
         <h4>عن التطبيق · About</h4>
         <div class="about-box">
           <strong>ذاكرة الذكاء الاصطناعي</strong> · <span style="color:var(--muted);">AI Memory v1.0</span>
