@@ -186,101 +186,89 @@
 
   function seedCollections() {
     const now = Date.now();
+    const en = currentLang === 'en';
     state.collections = [
       {
         id: uid(),
-        name: 'أفضل البرومبتس',
-        description: 'البرومبتس اللي تشتغل في ChatGPT و Claude بشكل ممتاز.',
-        icon: '✨',
-        color: '#7C3AED',
-        itemIds: [],
-        isDemo: true,
-        createdAt: now,
+        name: en ? 'Best Prompts' : 'أفضل البرومبتس',
+        description: en
+          ? 'Prompts that work brilliantly in ChatGPT and Claude.'
+          : 'البرومبتس اللي تشتغل في ChatGPT و Claude بشكل ممتاز.',
+        icon: '✨', color: '#7C3AED', itemIds: [], isDemo: true, createdAt: now,
       },
       {
         id: uid(),
-        name: 'مكتبة الكود',
-        description: 'Snippets جاهزة للنسخ — React, JS, CSS.',
-        icon: '📚',
-        color: '#0D9488',
-        itemIds: [],
-        isDemo: true,
-        createdAt: now,
+        name: en ? 'Code Library' : 'مكتبة الكود',
+        description: en
+          ? 'Ready-to-copy snippets — React, JS, CSS.'
+          : 'Snippets جاهزة للنسخ — React, JS, CSS.',
+        icon: '📚', color: '#0D9488', itemIds: [], isDemo: true, createdAt: now,
       },
     ];
     persist();
   }
 
+  function seedDemoAr(now) {
+    return [
+      { id: uid(), type: 'prompt', title: 'إيميل احترافي موجَّه',
+        body: 'اكتب إيميلاً احترافياً لـ{{recipient}} بخصوص {{topic}}. الأسلوب: {{tone}}. اجعله موجزاً (3-4 فقرات) واختم بدعوة واضحة للتواصل.',
+        source: 'ChatGPT', targetAi: 'ChatGPT', tags: ['email','writing'], usedCount: 0,
+        important: true, isDemo: true, createdAt: now - 1000 * 60 * 60 * 2 },
+      { id: uid(), type: 'code', title: 'useMemo للعمليات الثقيلة في React',
+        body: "import { useMemo } from 'react';\n\nfunction TotalBill({ items }) {\n  const total = useMemo(\n    () => items.reduce((s, i) => s + i.price, 0),\n    [items]\n  );\n  return <h3>{total} KWD</h3>;\n}",
+        source: 'Claude', lang: 'javascript', tags: ['react','performance'],
+        important: true, isDemo: true, createdAt: now - 1000 * 60 * 60 * 6 },
+      { id: uid(), type: 'note', title: 'الفرق بين useMemo و useCallback',
+        body: 'useMemo يحفظ قيمة ناتج حساب ثقيل.\nuseCallback يحفظ مرجع الدالة نفسها.\n\nالقاعدة: استخدم useMemo للقيم، و useCallback للدوال الممرّرة كـprops لمكوّنات محفوظة بـReact.memo.',
+        source: 'ChatGPT', sourceUrl: '', tags: ['react','hooks'],
+        important: false, isDemo: true, createdAt: now - 1000 * 60 * 60 * 24 },
+      { id: uid(), type: 'answer', title: 'أفضل أدوات إدارة المهام لفريق صغير',
+        body: '١) Linear — أفضل للفرق التقنية.\n٢) Notion — الأكثر مرونة لكن يحتاج إعداد.\n٣) Things 3 — للأفراد فقط.\n٤) Asana — مناسب لفرق التسويق.\n\nالتوصية: Linear + Notion معاً.',
+        source: 'Claude', tags: ['productivity','tools'],
+        important: false, isDemo: true, createdAt: now - 1000 * 60 * 60 * 24 * 2 },
+      { id: uid(), type: 'idea', title: 'تطبيق يجمع screenshots المقاهي من انستقرام',
+        body: 'فكرة: تطبيق يلتقط screenshots المقاهي من قصص انستقرام، يصنّفها حسب المدينة، ويُنبّه المستخدم عند قرب أي منها.',
+        source: 'Manual', status: 'exploring', priority: 'high', tags: ['coffee','app'],
+        important: false, isDemo: true, createdAt: now - 1000 * 60 * 60 * 24 * 5 },
+      { id: uid(), type: 'template', title: 'قالب مراجعة منتج (Product Review Outline)',
+        body: '1. ملخص بسطر واحد\n2. الجمهور المستهدف\n3. أهم 3 مزايا\n4. أهم 3 عيوب\n5. مقارنة مع منافس قريب\n6. التوصية النهائية + لمن يناسب',
+        source: 'Manual', tags: ['content','review'],
+        important: false, isDemo: true, createdAt: now - 1000 * 60 * 60 * 24 * 7 },
+    ];
+  }
+
+  function seedDemoEn(now) {
+    return [
+      { id: uid(), type: 'prompt', title: 'Professional email (variables)',
+        body: 'Write a professional email to {{recipient}} about {{topic}}. Tone: {{tone}}. Keep it concise (3-4 paragraphs) and end with a clear call to action.',
+        source: 'ChatGPT', targetAi: 'ChatGPT', tags: ['email','writing'], usedCount: 0,
+        important: true, isDemo: true, createdAt: now - 1000 * 60 * 60 * 2 },
+      { id: uid(), type: 'code', title: 'useMemo for heavy calculations in React',
+        body: "import { useMemo } from 'react';\n\nfunction TotalBill({ items }) {\n  const total = useMemo(\n    () => items.reduce((s, i) => s + i.price, 0),\n    [items]\n  );\n  return <h3>${'{total}'} USD</h3>;\n}",
+        source: 'Claude', lang: 'javascript', tags: ['react','performance'],
+        important: true, isDemo: true, createdAt: now - 1000 * 60 * 60 * 6 },
+      { id: uid(), type: 'note', title: 'useMemo vs useCallback — quick reference',
+        body: 'useMemo caches the RESULT of an expensive computation.\nuseCallback caches the FUNCTION reference itself.\n\nRule of thumb: use useMemo for values, useCallback for functions passed as props to React.memo-wrapped components.',
+        source: 'ChatGPT', sourceUrl: '', tags: ['react','hooks'],
+        important: false, isDemo: true, createdAt: now - 1000 * 60 * 60 * 24 },
+      { id: uid(), type: 'answer', title: 'Best task management tools for a small team',
+        body: '1) Linear — best for engineering teams.\n2) Notion — most flexible but needs setup.\n3) Things 3 — individuals only.\n4) Asana — great for marketing teams.\n\nMy pick: Linear + Notion together.',
+        source: 'Claude', tags: ['productivity','tools'],
+        important: false, isDemo: true, createdAt: now - 1000 * 60 * 60 * 24 * 2 },
+      { id: uid(), type: 'idea', title: 'App that collects café screenshots from Instagram',
+        body: 'Idea: an app that auto-saves café screenshots from Instagram stories, categorizes them by city, and pings the user when they\'re nearby any of them.',
+        source: 'Manual', status: 'exploring', priority: 'high', tags: ['coffee','app'],
+        important: false, isDemo: true, createdAt: now - 1000 * 60 * 60 * 24 * 5 },
+      { id: uid(), type: 'template', title: 'Product Review Outline',
+        body: '1. One-line summary\n2. Target audience\n3. Top 3 pros\n4. Top 3 cons\n5. Comparison with a close competitor\n6. Final recommendation + who it fits',
+        source: 'Manual', tags: ['content','review'],
+        important: false, isDemo: true, createdAt: now - 1000 * 60 * 60 * 24 * 7 },
+    ];
+  }
+
   function seedDemo() {
     const now = Date.now();
-    state.items = [
-      {
-        id: uid(),
-        type: 'prompt',
-        title: 'إيميل احترافي موجَّه',
-        body: 'اكتب إيميلاً احترافياً لـ{{recipient}} بخصوص {{topic}}. الأسلوب: {{tone}}. اجعله موجزاً (3-4 فقرات) واختم بدعوة واضحة للتواصل.',
-        source: 'ChatGPT',
-        targetAi: 'ChatGPT',
-        tags: ['email', 'writing'],
-        usedCount: 0,
-        important: true, isDemo: true,
-        createdAt: now - 1000 * 60 * 60 * 2,
-      },
-      {
-        id: uid(),
-        type: 'code',
-        title: 'useMemo للعمليات الثقيلة في React',
-        body: "import { useMemo } from 'react';\n\nfunction TotalBill({ items }) {\n  const total = useMemo(\n    () => items.reduce((s, i) => s + i.price, 0),\n    [items]\n  );\n  return <h3>{total} KWD</h3>;\n}",
-        source: 'Claude',
-        lang: 'javascript',
-        tags: ['react', 'performance'],
-        important: true, isDemo: true,
-        createdAt: now - 1000 * 60 * 60 * 6,
-      },
-      {
-        id: uid(),
-        type: 'note',
-        title: 'الفرق بين useMemo و useCallback',
-        body: 'useMemo يحفظ قيمة ناتج حساب ثقيل.\nuseCallback يحفظ مرجع الدالة نفسها.\n\nالقاعدة: استخدم useMemo للقيم، و useCallback للدوال الممرّرة كـprops لمكوّنات محفوظة بـReact.memo.',
-        source: 'ChatGPT',
-        sourceUrl: '',
-        tags: ['react', 'hooks'],
-        important: false, isDemo: true,
-        createdAt: now - 1000 * 60 * 60 * 24,
-      },
-      {
-        id: uid(),
-        type: 'answer',
-        title: 'أفضل أدوات إدارة المهام لفريق صغير',
-        body: '١) Linear — أفضل للفرق التقنية.\n٢) Notion — الأكثر مرونة لكن يحتاج إعداد.\n٣) Things 3 — للأفراد فقط.\n٤) Asana — مناسب لفرق التسويق.\n\nالتوصية: Linear + Notion معاً.',
-        source: 'Claude',
-        tags: ['productivity', 'tools'],
-        important: false, isDemo: true,
-        createdAt: now - 1000 * 60 * 60 * 24 * 2,
-      },
-      {
-        id: uid(),
-        type: 'idea',
-        title: 'تطبيق يجمع screenshots المقاهي من انستقرام',
-        body: 'فكرة: تطبيق يلتقط screenshots المقاهي من قصص انستقرام، يصنّفها حسب المدينة، ويُنبّه المستخدم عند قرب أي منها.',
-        source: 'Manual',
-        status: 'exploring',
-        priority: 'high',
-        tags: ['coffee', 'app'],
-        important: false, isDemo: true,
-        createdAt: now - 1000 * 60 * 60 * 24 * 5,
-      },
-      {
-        id: uid(),
-        type: 'template',
-        title: 'قالب مراجعة منتج (Product Review Outline)',
-        body: '1. ملخص بسطر واحد\n2. الجمهور المستهدف\n3. أهم 3 مزايا\n4. أهم 3 عيوب\n5. مقارنة مع منافس قريب\n6. التوصية النهائية + لمن يناسب',
-        source: 'Manual',
-        tags: ['content', 'review'],
-        important: false, isDemo: true,
-        createdAt: now - 1000 * 60 * 60 * 24 * 7,
-      },
-    ];
+    state.items = currentLang === 'en' ? seedDemoEn(now) : seedDemoAr(now);
     persist();
   }
 
@@ -299,11 +287,12 @@
 
   function timeAgo(ts) {
     const s = Math.floor((Date.now() - ts) / 1000);
-    if (s < 60)     return 'الآن';
-    if (s < 3600)   return Math.floor(s / 60) + 'د';
-    if (s < 86400)  return Math.floor(s / 3600) + 'س';
-    if (s < 604800) return Math.floor(s / 86400) + 'ي';
-    return new Date(ts).toLocaleDateString('ar');
+    const en = currentLang === 'en';
+    if (s < 60)     return en ? 'now' : 'الآن';
+    if (s < 3600)   return Math.floor(s / 60) + (en ? 'm' : 'د');
+    if (s < 86400)  return Math.floor(s / 3600) + (en ? 'h' : 'س');
+    if (s < 604800) return Math.floor(s / 86400) + (en ? 'd' : 'ي');
+    return new Date(ts).toLocaleDateString(en ? 'en-US' : 'ar');
   }
 
   function getType(id) {
@@ -324,17 +313,23 @@
   }
 
   /* ============ TYPE FILTER DROPDOWN (next to "+ جديد") ============ */
+  /** Display name for a type honoring current language. */
+  function typeLabel(tt) {
+    return currentLang === 'en' ? tt.en : tt.ar;
+  }
+
   function renderTypeFilter() {
     const sel = $('#type-filter');
     if (!sel) return;
     const types = allTypes();
     const favCount = state.items.filter((x) => x.important).length;
+    const typesLabel = currentLang === 'en' ? 'Types' : 'الأنواع · Types';
     sel.innerHTML = `
-      <option value="all">🗂 الكل (${state.items.length})</option>
-      <option value="fav">⭐ المفضلة (${favCount})</option>
-      <optgroup label="الأنواع · Types">
-        ${types.map((t) =>
-          `<option value="${esc(t.id)}">${t.icon} ${esc(t.ar)} (${countByType(t.id)})</option>`
+      <option value="all">${t('filterAll', state.items.length)}</option>
+      <option value="fav">${t('filterFav', favCount)}</option>
+      <optgroup label="${typesLabel}">
+        ${types.map((tt) =>
+          `<option value="${esc(tt.id)}">${tt.icon} ${esc(typeLabel(tt))} (${countByType(tt.id)})</option>`
         ).join('')}
       </optgroup>
     `;
@@ -347,20 +342,24 @@
     const favCount = state.items.filter((x) => x.important).length;
     wrap.innerHTML = `
       <button class="tab ${state.filter.type === 'all' ? 'active' : ''}" data-tab="all">
-        الكل · All
+        ${t('tabAll')}
         <span class="tab-count">${state.items.length}</span>
       </button>
       <button class="tab ${state.filter.type === 'fav' ? 'active' : ''}" data-tab="fav" style="color: ${state.filter.type === 'fav' ? '#C89B3C' : ''}; border-bottom-color: ${state.filter.type === 'fav' ? '#C89B3C' : ''};">
-        ⭐ المفضلة · Favorites
+        ${t('tabFav')}
         <span class="tab-count" style="${state.filter.type === 'fav' ? 'background:#C89B3C; color:#fff;' : ''}">${favCount}</span>
       </button>
-      ${allTypes().map((t) => `
-        <button class="tab ${state.filter.type === t.id ? 'active' : ''}" data-tab="${t.id}" data-type="${t.id}">
-          <span class="tab-dot" ${t.isCustom ? `style="background:${esc(t.color || '#0D9488')};"` : ''}></span>
-          ${t.icon} ${esc(t.ar)} · ${esc(t.en)}
-          <span class="tab-count">${countByType(t.id)}</span>
-        </button>
-      `).join('')}
+      ${allTypes().map((tt) => {
+        const label = currentLang === 'en'
+          ? `${tt.icon} ${esc(tt.en)}`
+          : `${tt.icon} ${esc(tt.ar)} · ${esc(tt.en)}`;
+        return `
+          <button class="tab ${state.filter.type === tt.id ? 'active' : ''}" data-tab="${tt.id}" data-type="${tt.id}">
+            <span class="tab-dot" ${tt.isCustom ? `style="background:${esc(tt.color || '#0D9488')};"` : ''}></span>
+            ${label}
+            <span class="tab-count">${countByType(tt.id)}</span>
+          </button>`;
+      }).join('')}
     `;
     $$('[data-tab]').forEach((el) => {
       el.onclick = () => {
@@ -401,17 +400,17 @@
       <div class="recent-strip">
         <div class="recent-strip-head">
           <h4>
-            ⏱ الأحدث تصفّحاً
+            ${t('recentTitle')}
             <span class="en">RECENTLY VIEWED</span>
           </h4>
-          <button id="recent-clear">مسح</button>
+          <button id="recent-clear">${t('recentClear')}</button>
         </div>
         <div class="recent-chips">
           ${recent.map((it) => {
-            const t = getType(it.type);
+            const tt = getType(it.type);
             return `
               <button class="recent-chip" data-item="${it.id}" title="${esc(it.title)}">
-                <span class="recent-chip-icon">${t.icon}</span>
+                <span class="recent-chip-icon">${tt.icon}</span>
                 ${esc(it.title)}
               </button>`;
           }).join('')}
@@ -426,11 +425,8 @@
     if (n === 0) return '';
     return `
       <div class="demo-banner">
-        <div>
-          📘 في ذاكرتك <strong>${n} عنصر أمثلة</strong> جهّزناها لك.
-          احذفها متى شئت لتبقى محفوظاتك الشخصية فقط.
-        </div>
-        <button class="btn btn-ghost btn-sm" id="clear-demos">🗑 احذف الأمثلة</button>
+        <div>${t('demoBanner', n)}</div>
+        <button class="btn btn-ghost btn-sm" id="clear-demos">${t('demoClear')}</button>
       </div>`;
   }
 
@@ -439,7 +435,7 @@
     const listWrap = $('#list');
     const countEl = $('#count');
 
-    countEl.textContent = items.length + (items.length === 1 ? ' عنصر · 1 item' : ' عناصر · ' + items.length + ' items');
+    countEl.textContent = items.length === 1 ? t('countOne', 1) : t('countMany', items.length);
 
     const recentStripHTML = renderRecentStrip();
     const demoBannerHTML = renderDemoBanner();
@@ -449,17 +445,17 @@
         <div class="empty">
           <div class="empty-emoji">${state.filter.type === 'fav' ? '⭐' : '🧠'}</div>
           <h3>${
-            state.filter.q ? 'لا نتائج' :
-            state.filter.type === 'fav' ? 'لا توجد مفضلات بعد' :
-            'ذاكرتك فارغة'
+            state.filter.q ? t('emptySearch') :
+            state.filter.type === 'fav' ? t('emptyFavs') :
+            t('emptyVault')
           }</h3>
           <p>${
-            state.filter.q ? 'جرّب كلمة أخرى' :
-            state.filter.type === 'fav' ? 'علّم أي عنصر بنجمة ⭐ ليظهر هنا' :
-            'ابدأ بإضافة أول معلومة من الـAI'
+            state.filter.q ? t('emptySearchP') :
+            state.filter.type === 'fav' ? t('emptyFavsP') :
+            t('emptyVaultP')
           }</p>
           ${!state.filter.q && state.filter.type !== 'fav'
-            ? '<button class="btn btn-indigo" onclick="window.Z.openCreate()">＋ أضف أول شي</button>'
+            ? `<button class="btn btn-indigo" onclick="window.Z.openCreate()">${t('emptyFirst')}</button>`
             : ''}
         </div>`;
     } else {
@@ -483,7 +479,7 @@
   }
 
   function entryHTML(it) {
-    const t = getType(it.type);
+    const tt = getType(it.type);
     const q = state.filter.q.toLowerCase();
 
     let previewClass = '';
@@ -503,15 +499,21 @@
     if (it.type === 'idea') {
       const st = STATUSES.find((s) => s.id === it.status);
       const pr = PRIORITIES.find((p) => p.id === it.priority);
+      const stLabel = st ? (currentLang === 'en' ? st.en : st.ar) : '';
+      const prLabel = pr ? (currentLang === 'en' ? pr.en : pr.ar) : '';
       accessory =
-        (st ? `<span class="entry-tag">● ${esc(st.ar)}</span>` : '') +
-        (pr ? `<span class="entry-tag pill-prio-${pr.id}">◈ ${esc(pr.ar)}</span>` : '');
+        (st ? `<span class="entry-tag">● ${esc(stLabel)}</span>` : '') +
+        (pr ? `<span class="entry-tag pill-prio-${pr.id}">◈ ${esc(prLabel)}</span>` : '');
     }
+
+    const typeHeader = currentLang === 'en'
+      ? `${tt.icon} ${esc(tt.en)}`
+      : `${tt.icon} ${esc(tt.ar)} · ${esc(tt.en)}`;
 
     return `
       <button class="entry" data-type="${it.type}" data-item="${it.id}">
         <div class="entry-head">
-          <span class="entry-type">${t.icon} ${esc(t.ar)} · ${esc(t.en)}</span>${it.isDemo ? '<span class="entry-demo">مثال</span>' : ''}
+          <span class="entry-type">${typeHeader}</span>${it.isDemo ? `<span class="entry-demo">${t('demoBadge')}</span>` : ''}
           <div class="entry-meta-side">
             <span>${timeAgo(it.createdAt)}</span>
             <span class="entry-star ${it.important ? 'on' : ''}">${it.important ? '★' : '☆'}</span>
@@ -614,6 +616,27 @@
       welcomeBlankT: 'ابدأ فارغاً',
       welcomeBlankS: 'خزنة نظيفة من صفر',
       welcomeFoot: '💾 كل بياناتك تبقى في جهازك. لا سحابة، لا تتبّع.',
+      // Dynamic / JS-rendered
+      fabText: 'احفظ الحين',
+      fabSub: 'QUICK SAVE',
+      filterAll: (n) => `🗂 الكل (${n})`,
+      filterFav: (n) => `⭐ المفضلة (${n})`,
+      tabAll: 'الكل · All',
+      tabFav: '⭐ المفضلة · Favorites',
+      countOne: (n) => `${n} عنصر · ${n} item`,
+      countMany: (n) => `${n} عناصر · ${n} items`,
+      emptyVault: 'ذاكرتك فارغة',
+      emptyVaultP: 'ابدأ بإضافة أول معلومة من الـAI',
+      emptyFirst: '＋ أضف أول شي',
+      emptyFavs: 'لا توجد مفضلات بعد',
+      emptyFavsP: 'علّم أي عنصر بنجمة ⭐ ليظهر هنا',
+      emptySearch: 'لا نتائج',
+      emptySearchP: 'جرّب كلمة أخرى',
+      recentTitle: '⏱ الأحدث تصفّحاً',
+      recentClear: 'مسح',
+      demoBanner: (n) => `📘 في ذاكرتك <strong>${n} عناصر أمثلة</strong> جهّزناها لك. احذفها متى شئت لتبقى محفوظاتك الشخصية فقط.`,
+      demoClear: '🗑 احذف الأمثلة',
+      demoBadge: 'مثال',
     },
     en: {
       tagline: "AI doesn't remember your chats — <strong>but you can</strong>. Save your best <strong>prompts</strong>, code, notes, answers, ideas and templates in one organized place — searchable, shareable, reusable.",
@@ -647,8 +670,38 @@
       welcomeBlankT: 'Start empty',
       welcomeBlankS: 'Clean slate, your rules',
       welcomeFoot: '💾 Your data stays on your device. No cloud, no tracking.',
+      // Dynamic / JS-rendered
+      fabText: 'Save now',
+      fabSub: 'QUICK SAVE',
+      filterAll: (n) => `🗂 All (${n})`,
+      filterFav: (n) => `⭐ Favorites (${n})`,
+      tabAll: 'All',
+      tabFav: '⭐ Favorites',
+      countOne: (n) => `${n} item`,
+      countMany: (n) => `${n} items`,
+      emptyVault: 'Your memory is empty',
+      emptyVaultP: 'Start by saving your first AI insight',
+      emptyFirst: '＋ Add your first',
+      emptyFavs: 'No favorites yet',
+      emptyFavsP: 'Star any item ⭐ and it appears here',
+      emptySearch: 'No results',
+      emptySearchP: 'Try a different keyword',
+      recentTitle: '⏱ Recently viewed',
+      recentClear: 'Clear',
+      demoBanner: (n) => `📘 Your memory has <strong>${n} sample items</strong> we set up for you. Clear them any time so only your own saves remain.`,
+      demoClear: '🗑 Clear samples',
+      demoBadge: 'Sample',
     },
   };
+
+  /** i18n lookup — returns string (or function-applied string) with Arabic fallback. */
+  function t(key, ...args) {
+    const dict = I18N[currentLang] || I18N.ar;
+    const fallback = I18N.ar[key];
+    const val = dict[key] !== undefined ? dict[key] : fallback;
+    if (typeof val === 'function') return val(...args);
+    return val != null ? val : key;
+  }
 
   function detectLang() {
     // URL param wins (coming from a specific landing)
@@ -685,6 +738,18 @@
     // Language toggle button label
     const label = $('#lang-toggle-label');
     if (label) label.textContent = lang === 'en' ? 'EN' : 'AR';
+    // Update FAB text dynamically
+    const fab = document.querySelector('.fab > span:not(.fab-ico)');
+    if (fab) {
+      fab.innerHTML = `
+        ${t('fabText')}
+        <span style="display:block; font-size:9px; opacity:.75; letter-spacing:1px; margin-top:1px;">${t('fabSub')}</span>
+      `;
+    }
+    // Re-render list if the app is already initialized (so dynamic strings flip)
+    if (typeof window.Z?.render === 'function' && document.readyState === 'complete') {
+      try { render(); } catch {}
+    }
   }
 
   function toggleLang() {
