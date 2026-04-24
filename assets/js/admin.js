@@ -363,6 +363,7 @@
     recipe:      { icon: "☕", label: "ابتكر وصفتك" },
     marketplace: { icon: "🛒", label: "السوق" },
     baristas:    { icon: "👥", label: "البريستا" },
+    zakerah:     { icon: "🧠", label: "ذاكرة الذكاء الاصطناعي" },
     other:       { icon: "📄", label: "أخرى" },
   };
 
