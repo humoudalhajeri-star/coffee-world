@@ -552,7 +552,7 @@
     markWelcomed();
     closeWelcome();
     render();
-    toast('أهلاً! جهّزنا لك ٥ أمثلة', 'success');
+    toast(currentLang === 'en' ? '👋 5 samples ready for you' : 'أهلاً! جهّزنا لك ٥ أمثلة', 'success');
   }
 
   function startBlank() {
@@ -560,7 +560,7 @@
     persist();
     closeWelcome();
     render();
-    toast('ذاكرة فارغة — ابدأ الحين ✨', 'success');
+    toast(currentLang === 'en' ? 'Empty memory — start fresh ✨' : 'ذاكرة فارغة — ابدأ الحين ✨', 'success');
   }
 
   function clearDemoItems() {
@@ -577,7 +577,7 @@
     });
     state.recent = state.recent.filter((id) => state.items.find((x) => x.id === id));
     persist();
-    toast('اختفت الأمثلة ✓', 'success');
+    toast(t('tDemosGone'), 'success');
     render();
   }
 
@@ -929,7 +929,17 @@
     // Persisted preference
     const saved = localStorage.getItem(LANG_KEY);
     if (saved === 'en' || saved === 'ar') return saved;
-    // Default: Arabic (primary audience)
+    // First visit — pick from navigator.language(s)
+    const candidates = [
+      navigator.language,
+      ...(Array.isArray(navigator.languages) ? navigator.languages : []),
+    ].filter(Boolean);
+    for (const code of candidates) {
+      const lower = code.toLowerCase();
+      if (lower.startsWith('ar')) return 'ar';
+      if (lower.startsWith('en')) return 'en';
+    }
+    // Fallback
     return 'ar';
   }
 
@@ -1092,13 +1102,13 @@
   }
 
   async function signOut() {
-    if (!confirm('تسجيل الخروج؟ محفوظاتك المحلية لن تُمسّ، لكن ميزة Pro ستُزال من هذا الجهاز.')) return;
+    if (!confirm(t('cfSignOut'))) return;
     try {
       await window.CW_FB?.auth?.signOut?.();
     } catch {}
     // Clear local Pro so shared devices don't inherit it.
     clearPro();
-    toast('تم تسجيل الخروج', 'success');
+    toast(t('tSignedOut'), 'success');
     render();
     renderAuthUI();
     // Re-render settings if it's open
@@ -1152,7 +1162,7 @@
       const doc = await window.CW_FB.getDocById('users', u.user.id);
       if (doc?.zakerahPro) {
         setPro(doc.zakerahLicense || 'account');
-        toast('🎉 مرحباً بعودتك — Pro مفعّل', 'success');
+        toast(t('tProRestored'), 'success');
       }
     } catch (err) {
       console.warn('syncProFromAccount failed', err);
@@ -1231,16 +1241,18 @@
     if (isSignedIn()) {
       syncProToAccount(keyShown);
       showPaywallMsg('✓ تم التفعيل! محفوظ في حسابك', 'success');
-      toast('🎉 Pro مفتوح — محفوظ في حسابك', 'success');
+      toast(t('tProActivated'), 'success');
       setTimeout(() => { closePaywall(); render(); }, 900);
     } else {
       showPaywallMsg('✓ تم التفعيل! استمتع بـPro', 'success');
-      toast('🎉 Pro مفتوح', 'success');
+      toast(t('tProActivatedLocal'), 'success');
       // Offer to tie it to an account so it survives clearing data
       setTimeout(() => {
         closePaywall();
         render();
-        if (confirm('💡 نصيحة: سجّل حساباً لحفظ Pro ليشتغل على كل أجهزتك.\n\nتسجيل الحساب الآن؟')) {
+        if (confirm(currentLang === 'en'
+          ? '💡 Tip: create an account so Pro works on all your devices.\n\nSign up now?'
+          : '💡 نصيحة: سجّل حساباً لحفظ Pro ليشتغل على كل أجهزتك.\n\nتسجيل الحساب الآن؟')) {
           openAuth('signup');
         }
       }, 900);
@@ -1309,7 +1321,7 @@
     const en = ($('#new-type-en')?.value || '').trim() || ar;
     const icon = ($('#new-type-icon')?.value || '').trim() || '🌟';
     const color = ($('#new-type-colors .swatch.active')?.dataset.newColor) || '#0D9488';
-    if (!ar) { toast('اسم النوع مطلوب', 'error'); return; }
+    if (!ar) { toast(t('edTypeNameReq'), 'error'); return; }
 
     // derive an id from AR name + random suffix for uniqueness
     const base = ar.toLowerCase().replace(/\s+/g, '-') || 'custom';
@@ -1325,7 +1337,7 @@
     state.newTypeOpen = false;
     state.creatingType = id;
     persist();
-    toast('أُضيف النوع "' + ar + '" ✓', 'success');
+    toast(t('tTypeAdded', currentLang === 'en' ? en : ar), 'success');
     renderEditor(null, id);
   }
 
@@ -1340,7 +1352,7 @@
     // reassign items to 'note' so they don't disappear
     state.items.forEach((it) => { if (it.type === id) it.type = 'note'; });
     persist();
-    toast('تم الحذف', 'success');
+    toast(t('tDeleted'), 'success');
     render();
     renderSettings();
   }
@@ -1371,67 +1383,69 @@
   function renderEditor(item, typeId) {
     const modal = $('#editor-modal .modal');
     const isEdit = !!item;
-    const t = getType(typeId);
+    const typ = getType(typeId);
     const body = $('#editor-body');
     modal.setAttribute('data-type', typeId);
 
-    $('#editor-title').textContent = isEdit ? 'تعديل' : t.verb;
-    $('#editor-title-tag').textContent = isEdit ? 'EDIT · ' + t.en : t.verbEn;
+    // Verb shown in header — i18n-aware (falls back to type-defined verb in AR).
+    const verbAr = typ.verb || ('إضافة ' + typ.ar);
+    const verbEn = typ.verbEn || ('NEW ' + (typ.en || '').toUpperCase());
+    $('#editor-title').textContent = isEdit ? t('edEdit') : (currentLang === 'en' ? verbEn.replace(/^NEW\s+/, 'New ').toLowerCase().replace(/^./, (c) => c.toUpperCase()) : verbAr);
+    $('#editor-title-tag').textContent = isEdit ? 'EDIT · ' + typ.en : verbEn;
 
     // Type picker (only when creating)
     const typePickerHTML = isEdit ? '' : `
       <div>
         <div class="field-label" style="margin-bottom:8px;">
-          <span>النوع <span class="req">*</span></span>
-          <span class="en">Type</span>
+          <span>${t('edType')} <span class="req">*</span></span>
         </div>
         <div class="type-picker">
           ${allTypes().map((tt) => {
             const locked = !isTypeAllowed(tt.id);
             const lockStyle = locked ? 'opacity:0.55; position:relative;' : '';
             const customStyle = tt.isCustom ? `--pick-accent: ${esc(tt.color || '#0D9488')};` : '';
+            const displayName = currentLang === 'en' ? tt.en : tt.ar;
             return `
               <button type="button" class="type-pick ${tt.id === typeId && !locked ? 'active' : ''}"
                       data-pick="${tt.isCustom ? 'custom' : tt.id}" data-pick-type="${tt.id}"
-                      ${locked ? `data-locked="1" data-locked-ar="${esc(tt.ar)}"` : ''}
+                      ${locked ? `data-locked="1" data-locked-ar="${esc(displayName)}"` : ''}
                       style="${lockStyle}${customStyle}">
                 <span class="type-pick-icon">${tt.icon}</span>
-                ${esc(tt.ar)}${locked ? ' 🔒' : ''}
-                ${tt.arHint ? `<div style="font-size:10px; color:var(--muted); margin-top:2px; line-height:1.3;">${esc(tt.arHint)}</div>` : ''}
-                <div style="font-size:9px; opacity:.7; margin-top:2px;">${esc(tt.en)}</div>
+                ${esc(displayName)}${locked ? ' 🔒' : ''}
+                ${tt.arHint && currentLang === 'ar' ? `<div style="font-size:10px; color:var(--muted); margin-top:2px; line-height:1.3;">${esc(tt.arHint)}</div>` : ''}
+                ${currentLang === 'ar' ? `<div style="font-size:9px; opacity:.7; margin-top:2px;">${esc(tt.en)}</div>` : ''}
               </button>`;
           }).join('')}
           <button type="button" class="type-pick" id="type-pick-add"
                   style="border-style: dashed; color: var(--muted);">
             <span class="type-pick-icon">＋</span>
-            إضافة
-            <div style="font-size:9px; opacity:.7; margin-top:2px;">ADD TYPE</div>
+            ${t('edAddType')}
+            <div style="font-size:9px; opacity:.7; margin-top:2px;">${t('edAddTypeSub')}</div>
           </button>
         </div>
 
         ${state.newTypeOpen ? `
           <div style="background: var(--paper-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; margin-top: 10px;">
             <div class="field-label" style="margin-bottom:10px;">
-              <span>نوع مخصص جديد</span>
-              <span class="en">NEW CUSTOM TYPE</span>
+              <span>${t('edNewType')}</span>
             </div>
             <div class="field-row">
               <div class="field">
-                <div class="field-label"><span>الاسم العربي <span class="req">*</span></span><span class="en">AR</span></div>
-                <input type="text" id="new-type-ar" maxlength="30" placeholder="مثلاً: فوائد" required>
+                <div class="field-label"><span>${t('edArName')} <span class="req">*</span></span><span class="en">AR</span></div>
+                <input type="text" id="new-type-ar" maxlength="30" placeholder="${currentLang === 'en' ? 'e.g. Travel' : 'مثلاً: فوائد'}" required>
               </div>
               <div class="field">
-                <div class="field-label"><span>الاسم الإنجليزي</span><span class="en">EN</span></div>
-                <input type="text" id="new-type-en" maxlength="30" placeholder="Benefits">
+                <div class="field-label"><span>${t('edEnName')}</span><span class="en">EN</span></div>
+                <input type="text" id="new-type-en" maxlength="30" placeholder="Travel">
               </div>
             </div>
             <div class="field-row" style="margin-top:10px;">
               <div class="field">
-                <div class="field-label"><span>أيقونة (إيموجي)</span><span class="en">ICON</span></div>
+                <div class="field-label"><span>${t('edIcon')}</span><span class="en">ICON</span></div>
                 <input type="text" id="new-type-icon" maxlength="4" placeholder="🌟" value="🌟">
               </div>
               <div class="field">
-                <div class="field-label"><span>اللون</span><span class="en">COLOR</span></div>
+                <div class="field-label"><span>${t('edColor')}</span><span class="en">COLOR</span></div>
                 <div class="picker-row" id="new-type-colors">
                   ${COLL_COLORS.map((c, i) =>
                     `<button type="button" class="swatch ${i === 0 ? 'active' : ''}"
@@ -1443,8 +1457,8 @@
               </div>
             </div>
             <div style="display:flex; gap:8px; margin-top:12px;">
-              <button type="button" class="btn btn-indigo btn-sm" id="new-type-save">💾 احفظ النوع</button>
-              <button type="button" class="btn btn-ghost btn-sm" id="new-type-cancel">إلغاء</button>
+              <button type="button" class="btn btn-indigo btn-sm" id="new-type-save">${t('edSaveType')}</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="new-type-cancel">${t('edCancel')}</button>
             </div>
           </div>
         ` : ''}
@@ -1456,8 +1470,7 @@
       extra = `
         <div class="field">
           <div class="field-label">
-            <span>اللغة</span>
-            <span class="en">Language</span>
+            <span>${t('edLanguage')}</span>
           </div>
           <select id="ed-lang">
             ${LANGS.map((l) =>
@@ -1469,8 +1482,7 @@
       extra = `
         <div class="field">
           <div class="field-label">
-            <span>الـAI المستهدف</span>
-            <span class="en">Target AI</span>
+            <span>${t('edTargetAi')}</span>
           </div>
           <select id="ed-target">
             ${TARGET_AIS.map((a) =>
@@ -1479,52 +1491,50 @@
           </select>
         </div>
         <div style="font-size:11px; color:var(--muted); padding: 0 2px;">
-          💡 استخدم <code style="background:var(--prompt-soft); color:var(--prompt); padding:2px 6px; border-radius:4px; font-family:var(--mono);">{{name}}</code> للمتغيّرات — بتقدر تعبّيها عند الاستخدام.
+          ${t('edPromptHint').replace('{{name}}', '<code style="background:var(--prompt-soft); color:var(--prompt); padding:2px 6px; border-radius:4px; font-family:var(--mono);">{{name}}</code>')}
         </div>`;
     } else if (typeId === 'note' || typeId === 'answer') {
       extra = `
         <div class="field">
-          <div class="field-label"><span>رابط (اختياري)</span><span class="en">Reference URL</span></div>
-          <input type="url" id="ed-url" placeholder="https://..." value="${esc(item && item.sourceUrl || '')}">
+          <div class="field-label"><span>${t('edRefUrl')}</span></div>
+          <input type="url" id="ed-url" placeholder="${t('edPhSourceUrl')}" value="${esc(item && item.sourceUrl || '')}">
         </div>`;
     } else if (typeId === 'idea') {
       extra = `
         <div class="field-row">
           <div class="field">
-            <div class="field-label"><span>الحالة</span><span class="en">Status</span></div>
+            <div class="field-label"><span>${t('edStatus')}</span></div>
             <select id="ed-status">
-              ${STATUSES.map((s) =>
-                `<option value="${s.id}" ${(item && item.status || 'new') === s.id ? 'selected' : ''}>${esc(s.ar)} · ${esc(s.en)}</option>`
-              ).join('')}
+              ${STATUSES.map((s) => {
+                const label = currentLang === 'en' ? s.en : `${s.ar} · ${s.en}`;
+                return `<option value="${s.id}" ${(item && item.status || 'new') === s.id ? 'selected' : ''}>${esc(label)}</option>`;
+              }).join('')}
             </select>
           </div>
           <div class="field">
-            <div class="field-label"><span>الأولوية</span><span class="en">Priority</span></div>
+            <div class="field-label"><span>${t('edPriority')}</span></div>
             <select id="ed-priority">
-              ${PRIORITIES.map((p) =>
-                `<option value="${p.id}" ${(item && item.priority || 'med') === p.id ? 'selected' : ''}>${esc(p.ar)} · ${esc(p.en)}</option>`
-              ).join('')}
+              ${PRIORITIES.map((p) => {
+                const label = currentLang === 'en' ? p.en : `${p.ar} · ${p.en}`;
+                return `<option value="${p.id}" ${(item && item.priority || 'med') === p.id ? 'selected' : ''}>${esc(label)}</option>`;
+              }).join('')}
             </select>
           </div>
         </div>`;
     }
 
     const bodyFieldClass = typeId === 'code' ? 'field code-field' : 'field';
-    const bodyLabelAr = {
-      code: 'الكود', prompt: 'نص البرومبت', note: 'المحتوى',
-      answer: 'الإجابة', idea: 'الفكرة', template: 'القالب',
-    }[typeId] || 'المحتوى';
-    const bodyLabelEn = {
-      code: 'Code', prompt: 'Prompt text', note: 'Content',
-      answer: 'Answer', idea: 'Idea', template: 'Template',
-    }[typeId] || 'Content';
+    const bodyLabel = {
+      code: t('edCode'), prompt: t('edPromptText'), note: t('edContent'),
+      answer: t('edAnswer'), idea: t('edIdea'), template: t('edTemplate'),
+    }[typeId] || t('edContent');
     const bodyPlaceholder = {
-      code:     '// ألصق الكود هنا',
-      prompt:   'اكتب البرومبت… استخدم {{placeholder}} للمتغيّرات',
-      note:     'اكتب ما تبي تحفظه…',
-      answer:   'ألصق إجابة الـAI…',
-      idea:     'اشرح الفكرة بإيجاز…',
-      template: 'اكتب القالب (خطوات أو هيكل قابل لإعادة الاستخدام)…',
+      code:     t('edPhCode'),
+      prompt:   t('edPhPrompt'),
+      note:     t('edPhNote'),
+      answer:   t('edPhAnswer'),
+      idea:     t('edPhIdea'),
+      template: t('edPhTemplate'),
     }[typeId] || '';
 
     body.innerHTML = `
@@ -1532,18 +1542,16 @@
 
       <div class="field">
         <div class="field-label">
-          <span>العنوان <span class="req">*</span></span>
-          <span class="en">Title</span>
+          <span>${t('edTitle')} <span class="req">*</span></span>
         </div>
         <input type="text" id="ed-title" required maxlength="200"
-               placeholder="مثلاً: ${typeId === 'code' ? 'useMemo في React' : 'قالب إيميل العملاء'}"
+               placeholder="${typeId === 'code' ? t('edPhTitleCode') : t('edPhTitleDefault')}"
                value="${esc(item && item.title || '')}">
       </div>
 
       <div class="${bodyFieldClass}">
         <div class="field-label">
-          <span>${esc(bodyLabelAr)} <span class="req">*</span></span>
-          <span class="en">${esc(bodyLabelEn)}</span>
+          <span>${esc(bodyLabel)} <span class="req">*</span></span>
         </div>
         <textarea id="ed-body" required rows="${typeId === 'code' ? 10 : 6}"
                   placeholder="${esc(bodyPlaceholder)}">${esc(item && item.body || '')}</textarea>
@@ -1552,7 +1560,7 @@
       ${extra}
 
       <div class="field">
-        <div class="field-label"><span>المصدر</span><span class="en">Source</span></div>
+        <div class="field-label"><span>${t('edSource')}</span></div>
         <select id="ed-source">
           ${SOURCES.map((s) =>
             `<option value="${esc(s)}" ${(item && item.source || 'ChatGPT') === s ? 'selected' : ''}>${esc(s)}</option>`
@@ -1561,14 +1569,14 @@
       </div>
 
       <div class="field">
-        <div class="field-label"><span>وسوم (افصل بفاصلة)</span><span class="en">Tags</span></div>
+        <div class="field-label"><span>${t('edTags')}</span></div>
         <input type="text" id="ed-tags"
                placeholder="react, performance"
                value="${esc((item && item.tags || []).join(', '))}">
       </div>
 
       <div class="toggle-row">
-        <div class="toggle-lbl">⭐ مهم <span class="en">Important</span></div>
+        <div class="toggle-lbl">${t('edImportant')}</div>
         <button type="button" class="toggle ${item && item.important ? 'on' : ''}" id="ed-imp"></button>
       </div>
     `;
@@ -1625,7 +1633,7 @@
     });
 
     // Submit button label
-    $('#editor-submit').textContent = isEdit ? '💾 حفظ التعديلات' : '＋ إضافة';
+    $('#editor-submit').textContent = isEdit ? t('edSaveChanges') : t('edAdd');
   }
 
   function submitEditor(e) {
@@ -1645,7 +1653,7 @@
 
     const title = $('#ed-title').value.trim();
     const body  = $('#ed-body').value.trim();
-    if (!title || !body) { toast('العنوان والمحتوى مطلوبان', 'error'); return; }
+    if (!title || !body) { toast(t('edReqFields'), 'error'); return; }
 
     const tags = ($('#ed-tags').value || '')
       .split(',').map((x) => x.trim()).filter(Boolean);
@@ -1672,7 +1680,7 @@
       const idx = state.items.findIndex((x) => x.id === state.editing);
       state.items[idx] = { ...state.items[idx], ...base, updatedAt: Date.now() };
       persist();
-      toast('تم التحديث ✓', 'success');
+      toast(t('tUpdated'), 'success');
       const id = state.editing;
       closeEditor();
       openDetail(id);
@@ -1680,7 +1688,7 @@
       const newItem = { id: uid(), ...base, createdAt: Date.now() };
       state.items.unshift(newItem);
       persist();
-      toast('تمت الإضافة ✓', 'success');
+      toast(t('tAdded'), 'success');
       closeEditor();
       state.filter.type = type;
       render();
@@ -1890,11 +1898,11 @@
         catch {}
       }
       await copy(txt);
-      toast('نُسخ للمشاركة ✓', 'success');
+      toast(t('tShareCopied'), 'success');
     } else if (act === 'share-link') {
       const url = buildShareUrl(it);
       await copy(url);
-      toast('رابط المشاركة نُسخ ✓', 'success');
+      toast(t('tLinkCopied'), 'success');
     } else if (act === 'star') {
       it.important = !it.important;
       persist();
@@ -1904,10 +1912,10 @@
       closeDetail();
       setTimeout(() => openEdit(it.id), 120);
     } else if (act === 'delete') {
-      if (!confirm('حذف هذا العنصر نهائياً؟')) return;
+      if (!confirm(t('cfDeleteItem'))) return;
       state.items = state.items.filter((x) => x.id !== it.id);
       persist();
-      toast('تم الحذف', 'success');
+      toast(t('tDeleted'), 'success');
       closeDetail();
       render();
     }
@@ -1916,9 +1924,9 @@
   async function copy(text) {
     try {
       await navigator.clipboard.writeText(text);
-      toast('تم النسخ ✓', 'success');
+      toast(t('tCopied'), 'success');
     } catch {
-      toast('تعذّر النسخ', 'error');
+      toast(t('tCopyFail'), 'error');
     }
   }
 
@@ -1944,7 +1952,7 @@
     a.href = url; a.download = 'zakerah-export-' + new Date().toISOString().slice(0, 10) + '.json';
     document.body.appendChild(a); a.click(); a.remove();
     URL.revokeObjectURL(url);
-    toast('تم التصدير ✓', 'success');
+    toast(t('tExported'), 'success');
   }
 
   /* ============ MONETIZE ============ */
@@ -2037,7 +2045,7 @@
     if (!c) return;
     c.monetize = { ...(c.monetize || { status: 'draft', visibility: 'private', price: 'مجاني' }), ...patch };
     persist();
-    toast('تم الحفظ ✓', 'success');
+    toast(t('tSaved'), 'success');
     renderMonetize();
   }
 
@@ -2234,8 +2242,8 @@
   }
 
   function handleClearAll() {
-    if (!confirm('حذف جميع العناصر والباقات والتاريخ نهائياً؟ لا يمكن التراجع.')) return;
-    if (!confirm('متأكد 100%؟ آخر فرصة قبل المسح.')) return;
+    if (!confirm(t('cfClearAll1'))) return;
+    if (!confirm(t('cfClearAll2'))) return;
     state.items = [];
     state.collections = [];
     state.customTypes = [];
@@ -2243,7 +2251,7 @@
     persist();
     // Full reset also forgets the welcome so the user lands like a brand-new visitor.
     localStorage.removeItem(WELCOMED_KEY);
-    toast('تم مسح كل شي', 'success');
+    toast(t('tClearedAll'), 'success');
     closeSettings();
     state.filter = { type: 'all', q: '' };
     render();
@@ -2267,15 +2275,15 @@
         state.items = [...newItems, ...state.items];
         state.collections = [...newColls, ...state.collections];
         persist();
-        toast(`تم استيراد ${newItems.length} عنصر و ${newColls.length} باقة ✓`, 'success');
+        toast(t('tImported', newItems.length, newColls.length), 'success');
         render();
         renderSettings();
       } catch (err) {
         console.error(err);
-        toast('ملف غير صالح', 'error');
+        toast(t('tImportInvalid'), 'error');
       }
     };
-    reader.onerror = () => toast('تعذّر قراءة الملف', 'error');
+    reader.onerror = () => toast(t('tImportFail'), 'error');
     reader.readAsText(file);
   }
 
@@ -2416,7 +2424,7 @@
     const delBtn = $('#coll-delete');
     if (delBtn && existing) {
       delBtn.onclick = () => {
-        if (!confirm('حذف هذه الباقة نهائياً؟ (العناصر تبقى محفوظة في ذاكرتك.)')) return;
+        if (!confirm(t('cfDeleteCollection'))) return;
         state.collections = state.collections.filter((x) => x.id !== existing.id);
         persist();
         toast('تم حذف الباقة', 'success');
@@ -2442,7 +2450,7 @@
         state.collections[idx] = { ...state.collections[idx], ...payload, updatedAt: Date.now() };
       }
       persist();
-      toast('تم التحديث ✓', 'success');
+      toast(t('tUpdated'), 'success');
     } else {
       state.collections.unshift({
         id: uid(),
