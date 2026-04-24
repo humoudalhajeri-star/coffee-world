@@ -591,8 +591,10 @@
   }
   // Live Gumroad product URL — Zakerah Pro, $2 one-time unlock.
   const GUMROAD_PRO_URL = 'https://1628954350904.gumroad.com/l/ecvxdq';
-  // Static unlock codes accepted by the app. Add/rotate as needed.
-  // For per-purchase keys, swap this for a Gumroad license-key API call.
+  // Product permalink used by the Gumroad license-verify API.
+  const GUMROAD_PRODUCT_PERMALINK = 'ecvxdq';
+  // Static unlock codes accepted by the app (legacy / marketing / founder keys).
+  // Real Gumroad purchases receive unique license keys that are verified live.
   const VALID_UNLOCK_CODES = new Set([
     'ZAKERAH-PRO-2026',
     'ZAKERAH-PRO-LIFETIME',
@@ -628,20 +630,69 @@
   }
   function closePaywall() { $('#paywall-modal')?.classList.remove('open'); }
 
-  function activateLicense() {
-    const code = ($('#paywall-license')?.value || '').trim().toUpperCase();
+  function showPaywallMsg(text, kind) {
     const msg = $('#paywall-msg');
-    if (!code) {
-      if (msg) { msg.textContent = '⚠ ادخل رمز تفعيل'; msg.style.color = 'var(--danger)'; }
+    if (!msg) return;
+    msg.textContent = text;
+    msg.style.color = kind === 'success' ? 'var(--success)'
+                    : kind === 'danger'  ? 'var(--danger)'
+                    : 'var(--muted)';
+  }
+
+  function finalizeActivation(keyShown) {
+    setPro(keyShown);
+    showPaywallMsg('✓ تم التفعيل! استمتع بـPro', 'success');
+    toast('🎉 أُفعّل Pro — مفتوح كل شي', 'success');
+    setTimeout(() => { closePaywall(); render(); }, 900);
+  }
+
+  async function verifyGumroadLicense(code) {
+    const res = await fetch('https://api.gumroad.com/v2/licenses/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        product_permalink: GUMROAD_PRODUCT_PERMALINK,
+        product_id: GUMROAD_PRODUCT_PERMALINK,
+        license_key: code,
+        increment_uses_count: 'false',
+      }),
+    });
+    const data = await res.json().catch(() => ({ success: false }));
+    return data;
+  }
+
+  async function activateLicense() {
+    const raw = ($('#paywall-license')?.value || '').trim();
+    if (!raw) {
+      showPaywallMsg('⚠ ادخل رمز تفعيل', 'danger');
       return;
     }
-    if (VALID_UNLOCK_CODES.has(code)) {
-      setPro(code);
-      if (msg) { msg.textContent = '✓ تم التفعيل! استمتع بـPro'; msg.style.color = 'var(--success)'; }
-      toast('🎉 أُفعّل Pro — أنواع غير محدودة', 'success');
-      setTimeout(() => { closePaywall(); render(); }, 900);
-    } else {
-      if (msg) { msg.textContent = '⚠ رمز غير صالح. تأكد من النسخ.'; msg.style.color = 'var(--danger)'; }
+
+    // 1) Static unlock codes (case-insensitive)
+    const upper = raw.toUpperCase();
+    if (VALID_UNLOCK_CODES.has(upper)) {
+      finalizeActivation(upper);
+      return;
+    }
+
+    // 2) Live Gumroad license verification
+    const btn = $('#paywall-activate');
+    const originalLabel = btn ? btn.textContent : 'فعّل';
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ تحقّق...'; }
+    showPaywallMsg('⏳ جارٍ التحقّق من Gumroad...', '');
+
+    try {
+      const data = await verifyGumroadLicense(raw);
+      if (data && data.success) {
+        finalizeActivation(raw);
+        return;
+      }
+      showPaywallMsg('⚠ رمز غير صالح. تأكد من النسخ الصحيح.', 'danger');
+    } catch (err) {
+      console.error('License verification failed', err);
+      showPaywallMsg('⚠ تعذّر الاتصال بـGumroad. تحقق من الإنترنت وأعد المحاولة.', 'danger');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = originalLabel; }
     }
   }
 
