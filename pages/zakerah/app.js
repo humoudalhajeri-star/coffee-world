@@ -589,9 +589,8 @@
     if (isPro()) return true;
     return typeId === FREE_BUILTIN_TYPE;
   }
-  // Update this Gumroad product URL once you publish it. Until then, the
-  // button explains the next step instead of opening a 404.
-  const GUMROAD_PRO_URL = 'https://coffez.gumroad.com/l/zakerah-pro';
+  // Live Gumroad product URL — Zakerah Pro, $2 one-time unlock.
+  const GUMROAD_PRO_URL = 'https://1628954350904.gumroad.com/l/ecvxdq';
   // Static unlock codes accepted by the app. Add/rotate as needed.
   // For per-purchase keys, swap this for a Gumroad license-key API call.
   const VALID_UNLOCK_CODES = new Set([
