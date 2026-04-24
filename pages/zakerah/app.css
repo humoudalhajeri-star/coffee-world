@@ -1021,40 +1021,6 @@ mark {
 .privacy-notice strong { color: var(--ink); font-weight: 800; }
 
 /* ==========================================================
-   LANGUAGE TOGGLE (header)
-   ========================================================== */
-.lang-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  height: 38px;
-  padding: 0 12px;
-  border-radius: 10px;
-  border: 1.5px solid var(--teal);
-  background: var(--teal-soft);
-  color: var(--teal-2);
-  font-family: inherit;
-  font-weight: 900;
-  font-size: 13px;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  transition: all var(--dur) var(--ease);
-  white-space: nowrap;
-}
-.lang-toggle:hover {
-  background: var(--teal);
-  color: #fff;
-  transform: translateY(-1px);
-}
-.lang-toggle > span:first-child { font-size: 14px; }
-
-/* On smaller screens allow the header actions to wrap so no
-   button gets pushed off-screen. */
-@media (max-width: 640px) {
-  .head-actions { flex-wrap: wrap; justify-content: flex-end; }
-}
-
-/* ==========================================================
    AUTH STRIP (homepage banner for signed-out users)
    ========================================================== */
 .auth-strip {

@@ -40,18 +40,14 @@
       <button class="icon-btn" id="btn-monet" title="للبيع · Monetize">💰</button>
       <button class="icon-btn" id="btn-settings" title="الإعدادات · Settings">⚙</button>
       <button class="icon-btn" id="btn-account" title="الحساب · Account" aria-label="الحساب">👤</button>
-      <button class="lang-toggle" id="btn-lang" title="اللغة · Language" aria-label="Toggle language">
-        <span aria-hidden="true">🌐</span>
-        <span id="lang-toggle-label">AR</span>
-      </button>
-      <button class="btn btn-primary" id="btn-new" aria-label="جديد" data-i18n="btnNew">
+      <button class="btn btn-primary" id="btn-new" aria-label="جديد">
         ＋ جديد
       </button>
       <select class="type-select" id="type-filter" aria-label="فلتر النوع"></select>
     </div>
   </header>
 
-  <p class="tagline" data-i18n="tagline">
+  <p class="tagline">
     الذكاء الاصطناعي لا يتذكّر محادثاتك — <strong>لكنّك تستطيع</strong>.
     احفظ أفضل <strong>البرومبتس (أوامر الذكاء الاصطناعي)</strong>، الأكواد، الملاحظات، الإجابات، الأفكار والقوالب في مكان واحد منظّم — قابل للبحث والمشاركة وإعادة الاستخدام.
   </p>
@@ -60,13 +56,13 @@
   <div id="auth-strip" class="auth-strip" hidden>
     <div class="auth-strip-body">
       <span class="auth-strip-icon">🔑</span>
-      <span data-i18n="stripCopy">
+      <span>
         <strong>سجّل دخولك</strong> لحفظ ميزة Pro على جميع أجهزتك.
       </span>
     </div>
     <div class="auth-strip-actions">
-      <button class="btn btn-teal btn-sm" id="strip-signin" data-i18n="stripSignin">تسجيل دخول</button>
-      <button class="btn btn-ghost btn-sm" id="strip-signup" data-i18n="stripSignup">إنشاء حساب</button>
+      <button class="btn btn-teal btn-sm" id="strip-signin">تسجيل دخول</button>
+      <button class="btn btn-ghost btn-sm" id="strip-signup">إنشاء حساب</button>
     </div>
   </div>
 
@@ -74,7 +70,7 @@
   <div class="toolbar">
     <div class="search-field" id="search-wrap">
       <span class="search-field-icon">⌕</span>
-      <input type="search" id="search-inline" placeholder="ابحث بالكلمة... / Search…" autocomplete="off" data-i18n-placeholder="searchPlaceholder">
+      <input type="search" id="search-inline" placeholder="ابحث بالكلمة... / Search…" autocomplete="off">
       <button type="button" class="search-field-clear" id="search-clear" aria-label="مسح">×</button>
     </div>
   </div>
@@ -304,40 +300,40 @@
   <div class="modal" style="max-width: 520px; border-top-color: var(--teal);">
     <div class="modal-body welcome-body">
       <div class="welcome-emoji">🧠</div>
-      <h2 class="welcome-title" data-i18n="welcomeTitle">أهلاً بك في ذاكرة الذكاء الاصطناعي</h2>
-      <p class="welcome-sub" data-i18n="welcomeSub">
+      <h2 class="welcome-title">أهلاً بك في ذاكرة الذكاء الاصطناعي</h2>
+      <p class="welcome-sub">
         المكان الذي يحفظ بدلاً عنك كل ما يستحق التذكّر من محادثاتك مع ChatGPT و Claude وغيرها.
       </p>
 
       <div class="welcome-cards">
         <div class="welcome-card">
           <span class="welcome-card-icon">✨</span>
-          <strong data-i18n="wcSave">احفظ</strong>
-          <p data-i18n="wcSaveD">برومبتس (أوامر الذكاء الاصطناعي)، أكواد، إجابات، أفكار، قوالب وملاحظات</p>
+          <strong>احفظ</strong>
+          <p>برومبتس (أوامر الذكاء الاصطناعي)، أكواد، إجابات، أفكار، قوالب وملاحظات</p>
         </div>
         <div class="welcome-card">
           <span class="welcome-card-icon">🔍</span>
-          <strong data-i18n="wcFind">ابحث</strong>
-          <p data-i18n="wcFindD">بالكلمة أو النوع — نتائج فورية</p>
+          <strong>ابحث</strong>
+          <p>بالكلمة أو النوع — نتائج فورية</p>
         </div>
         <div class="welcome-card">
           <span class="welcome-card-icon">📁</span>
-          <strong data-i18n="wcOrg">نظّم</strong>
-          <p data-i18n="wcOrgD">باقات + وسوم + مفضلة</p>
+          <strong>نظّم</strong>
+          <p>باقات + وسوم + مفضلة</p>
         </div>
         <div class="welcome-card">
           <span class="welcome-card-icon">🔗</span>
-          <strong data-i18n="wcShare">شارك</strong>
-          <p data-i18n="wcShareD">رابط مختصر أو تصدير JSON</p>
+          <strong>شارك</strong>
+          <p>رابط مختصر أو تصدير JSON</p>
         </div>
       </div>
 
       <div class="privacy-notice">
         <div class="privacy-notice-head">
           <span class="ico">🔒</span>
-          <span data-i18n="privTitle">الخصوصية — اقرأ قبل البدء</span>
+          <span>الخصوصية — اقرأ قبل البدء</span>
         </div>
-        <ul data-i18n="privList">
+        <ul>
           <li><strong>كل ما تحفظه يبقى في جهازك فقط.</strong> لا نحن ولا أي طرف ثالث نطّلع عليه.</li>
           <li>البيانات تُحفظ في <strong>localStorage</strong> الخاص بمتصفحك.</li>
           <li>لو مسحت بيانات المتصفح / التطبيق → <strong>كل المحفوظات تختفي</strong>.</li>
@@ -347,20 +343,20 @@
         </ul>
       </div>
 
-      <p class="welcome-choose" data-i18n="welcomeChoose">كيف تبي تبدأ؟</p>
+      <p class="welcome-choose">كيف تبي تبدأ؟</p>
 
       <div class="welcome-actions">
         <button class="welcome-btn primary" id="welcome-demo">
-          <strong data-i18n="welcomeDemoT">ابدأ بأمثلة 🎁</strong>
-          <small data-i18n="welcomeDemoS">5 عناصر جاهزة لتستكشف</small>
+          <strong>ابدأ بأمثلة 🎁</strong>
+          <small>5 عناصر جاهزة لتستكشف</small>
         </button>
         <button class="welcome-btn" id="welcome-blank">
-          <strong data-i18n="welcomeBlankT">ابدأ فارغاً</strong>
-          <small data-i18n="welcomeBlankS">خزنة نظيفة من صفر</small>
+          <strong>ابدأ فارغاً</strong>
+          <small>خزنة نظيفة من صفر</small>
         </button>
       </div>
 
-      <p style="font-size:11px; color:var(--muted-2); margin:16px 0 0; line-height:1.6;" data-i18n="welcomeFoot">
+      <p style="font-size:11px; color:var(--muted-2); margin:16px 0 0; line-height:1.6;">
         💾 كل بياناتك تبقى في جهازك. لا سحابة، لا تتبّع.
       </p>
     </div>
