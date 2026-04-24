@@ -36,6 +36,7 @@
   let allRecipes = [];
   let allVisits = [];
   let allShopRequests = [];
+  let allEvents = [];
 
   function isAdmin(user) {
     const email = (user?.user?.email || "").toLowerCase();
@@ -61,13 +62,14 @@
   }
 
   async function loadAllData() {
-    [allUsers, allListings, allBaristas, allRecipes, allVisits, allShopRequests] = await Promise.all([
+    [allUsers, allListings, allBaristas, allRecipes, allVisits, allShopRequests, allEvents] = await Promise.all([
       safeList("users"),
       safeList("listings"),
       safeList("baristas"),
       safeList("recipes"),
       safeList("visits"),
       safeList("shopRequests"),
+      safeList("events"),
     ]);
     renderStats();
     renderActivity();
@@ -654,9 +656,66 @@
         <div class="section-breakdown">${sectionRows}</div>
       </section>
 
+      ${renderZakerahFunnel()}
+
       <section class="admin-section">
         <div class="section-head"><h3>🕒 آخر الزيارات (20)</h3></div>
         <div class="activity-list">${recent}</div>
+      </section>
+    `;
+  }
+
+  /** Zakerah conversion funnel — visits → gumroad click → Pro activations → signups. */
+  function renderZakerahFunnel() {
+    const zVisits = allVisits.filter((v) => v.section === 'zakerah').length;
+    const zEvents = (allEvents || []).filter((e) => e.app === 'zakerah');
+    const count = (name) => zEvents.filter((e) => e.name === name).length;
+
+    const gumroadClicks   = count('zakerah_gumroad_click');
+    const proActivations  = count('zakerah_activate_pro');
+    const signups         = count('zakerah_signup');
+    const signins         = count('zakerah_signin');
+
+    const pct = (n, base) => base > 0 ? Math.round((n / base) * 100) : 0;
+
+    const steps = [
+      { icon: '👁️',  label: 'زوار Zakerah',      value: zVisits,       base: null,     hint: 'فتح أي صفحة من Zakerah' },
+      { icon: '🛒',  label: 'ضغطوا "ادفع على Gumroad"', value: gumroadClicks, base: zVisits,  hint: 'نية الشراء' },
+      { icon: '💎',  label: 'فعّلوا Pro',        value: proActivations, base: zVisits, hint: 'رمز صالح قُبل' },
+      { icon: '👤',  label: 'أنشأوا حساب',       value: signups,       base: zVisits,  hint: 'حساب جديد' },
+      { icon: '🔐',  label: 'سجّلوا دخول',        value: signins,       base: zVisits,  hint: 'جهاز موجود' },
+    ];
+
+    const rows = steps.map((s) => {
+      const percent = s.base !== null ? pct(s.value, s.base) : 100;
+      return `
+        <div class="section-row">
+          <span class="section-icon">${s.icon}</span>
+          <div class="section-body">
+            <div class="section-label">${escapeHTML(s.label)} <span style="color:#a3a3a3; font-size:11px;">· ${escapeHTML(s.hint)}</span></div>
+            <div class="section-bar">
+              <div class="section-bar-fill" style="width:${percent}%"></div>
+            </div>
+          </div>
+          <span class="section-count">
+            ${s.value.toLocaleString('ar-SA')}
+            ${s.base !== null && s.base > 0 ? `<span style="font-size:10px; color:#a3a3a3; display:block;">${percent}%</span>` : ''}
+          </span>
+        </div>`;
+    }).join('');
+
+    return `
+      <section class="admin-section">
+        <div class="section-head">
+          <h3>🧠 قُمع Zakerah — Conversion Funnel</h3>
+        </div>
+        <div class="section-breakdown">${rows}</div>
+        ${zVisits === 0
+          ? '<p class="tbl-muted" style="margin-top:12px;">لا توجد زيارات لـZakerah بعد.</p>'
+          : `<p class="tbl-muted" style="margin-top:12px; font-size:12px;">
+              💡 معدّل التحويل الحالي: ${pct(proActivations, zVisits)}% (${proActivations} من ${zVisits})
+              · ${pct(signups, zVisits)}% أنشأوا حساب
+            </p>`}
       </section>
     `;
   }
