@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>AI Memory — Your Second Brain for ChatGPT &amp; Claude</title>
+<meta name="description" content="A personal memory system for AI users — save, organize, search and reuse your best prompts, code snippets, notes, answers, ideas and templates in one place." />
+
+<link rel="icon" type="image/svg+xml" href="/assets/img/coffez-icon.svg">
+<link rel="apple-touch-icon" href="/assets/img/coffez-icon.svg">
+<meta name="theme-color" content="#0B1F3A">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+
+<!-- Force English for this page before any app code runs. -->
+<script>localStorage.setItem('zakerah.lang', 'en');</script>
+
+<style>
+  /* Use Inter for English users */
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+</style>
+</head>
+<body>
+
+<!-- Firebase Auth + Firestore (shared across CoffeZ pages) -->
+<script type="module" src="../../assets/js/firebase-init.js"></script>
+<!-- Visit tracking for the admin analytics dashboard (silent on failure) -->
+<script src="../../assets/js/analytics.js" defer></script>
+
+<div class="app">
+
+  <!-- ========== HEADER ========== -->
+  <header class="header">
+    <button class="brand" id="brand-home" aria-label="Home">
+      <div class="brand-mark">Z</div>
+      <div class="brand-name">
+        AI Memory
+        <span class="en">ZAKERAH</span>
+      </div>
+    </button>
+
+    <div class="head-actions">
+      <a class="icon-btn" href="landing-en.html" title="About" style="text-decoration:none;">ℹ</a>
+      <button class="icon-btn" id="btn-collections" title="Collections">📁</button>
+      <button class="icon-btn" id="btn-monet" title="Monetize">💰</button>
+      <button class="icon-btn" id="btn-settings" title="Settings">⚙</button>
+      <button class="icon-btn" id="btn-account" title="Account" aria-label="Account">👤</button>
+      <button class="lang-toggle" id="btn-lang" title="Language" aria-label="Toggle language">
+        <span aria-hidden="true">🌐</span>
+        <span id="lang-toggle-label">EN</span>
+      </button>
+      <button class="btn btn-primary" id="btn-new" aria-label="New" data-i18n="btnNew">
+        ＋ New
+      </button>
+      <select class="type-select" id="type-filter" aria-label="Type filter"></select>
+    </div>
+  </header>
+
+  <p class="tagline" data-i18n="tagline">
+    AI doesn't remember your chats — <strong>but you can</strong>. Save your best <strong>prompts</strong>, code, notes, answers, ideas and templates in one organized place — searchable, shareable, reusable.
+  </p>
+
+  <!-- ========== AUTH STRIP (shown only when signed out) ========== -->
+  <div id="auth-strip" class="auth-strip" hidden>
+    <div class="auth-strip-body">
+      <span class="auth-strip-icon">🔑</span>
+      <span data-i18n="stripCopy">
+        <strong>Sign in</strong> to keep your Pro access on every device.
+      </span>
+    </div>
+    <div class="auth-strip-actions">
+      <button class="btn btn-teal btn-sm" id="strip-signin" data-i18n="stripSignin">Sign in</button>
+      <button class="btn btn-ghost btn-sm" id="strip-signup" data-i18n="stripSignup">Create account</button>
+    </div>
+  </div>
+
+  <!-- ========== TOOLBAR (keyword search) ========== -->
+  <div class="toolbar">
+    <div class="search-field" id="search-wrap">
+      <span class="search-field-icon">⌕</span>
+      <input type="search" id="search-inline" placeholder="Search..." autocomplete="off" data-i18n-placeholder="searchPlaceholder">
+      <button type="button" class="search-field-clear" id="search-clear" aria-label="Clear">×</button>
+    </div>
+  </div>
+
+  <!-- ========== TABS (filled by JS) ========== -->
+  <nav id="tabs" class="tabs" aria-label="Categories"></nav>
+
+  <!-- ========== LIST HEADER ========== -->
+  <div class="list-head">
+    <div class="count" id="count">0 items</div>
+  </div>
+
+  <!-- ========== LIST (filled by JS) ========== -->
+  <div id="list" class="entries"></div>
+
+</div>
+
+<!-- ========== FAB (quick save) ========== -->
+<button class="fab" id="fab" aria-label="Quick save">
+  <span class="fab-ico">＋</span>
+  <span>
+    Save now
+    <span style="display:block; font-size:9px; opacity:.75; letter-spacing:1px; margin-top:1px;">QUICK SAVE</span>
+  </span>
+</button>
+
+<!-- ========== EDITOR MODAL (create / edit) ========== -->
+<div class="modal-backdrop" id="editor-modal">
+  <form class="modal" id="editor-form">
+    <div class="modal-head">
+      <h3>
+        <span id="editor-title">New entry</span>
+        <span class="tag" id="editor-title-tag">NEW</span>
+      </h3>
+      <button type="button" class="modal-close" id="editor-close">×</button>
+    </div>
+
+    <div class="modal-body" id="editor-body"></div>
+
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost" onclick="document.getElementById('editor-close').click()">Cancel</button>
+      <button type="submit" class="btn btn-indigo" id="editor-submit">＋ Add</button>
+    </div>
+  </form>
+</div>
+
+<!-- ========== DETAIL MODAL (view item) ========== -->
+<div class="modal-backdrop" id="detail-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>
+        <span>Details</span>
+        <span class="tag" id="detail-title-tag">ITEM</span>
+      </h3>
+      <button type="button" class="modal-close" id="detail-close">×</button>
+    </div>
+
+    <div class="modal-body" id="detail-body"></div>
+
+    <div class="modal-foot" id="detail-actions"></div>
+  </div>
+</div>
+
+<!-- ========== SEARCH MODAL ========== -->
+<div class="modal-backdrop" id="search-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>
+        <span>Search your memory</span>
+        <span class="tag">SEARCH</span>
+      </h3>
+      <button type="button" class="modal-close" id="search-close">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="search-box">
+        <span style="font-size:18px; color:var(--muted);">⌕</span>
+        <input type="search" id="search-input" placeholder="Search titles, content, tags...">
+      </div>
+      <p style="font-size:12px; color:var(--muted); margin:0;">
+        Start typing — results appear instantly in the list behind.
+        Press <kbd style="background:var(--paper-2); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:11px;">Esc</kbd> to close.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ========== AUTH MODAL (cross-device Pro) ========== -->
+<div class="modal-backdrop" id="auth-modal">
+  <div class="modal" style="max-width: 440px; border-top-color: var(--teal);">
+    <div class="modal-head">
+      <h3>
+        <span id="auth-heading">Sign in</span>
+        <span class="tag">ACCOUNT</span>
+      </h3>
+      <button type="button" class="modal-close" id="auth-close">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab active" data-auth-tab="signin">Sign in</button>
+        <button type="button" class="auth-tab" data-auth-tab="signup">Create account</button>
+      </div>
+
+      <form id="auth-form" autocomplete="on">
+        <div class="field">
+          <div class="field-label">
+            <span>Email</span>
+          </div>
+          <input type="email" id="auth-email" required autocomplete="email" inputmode="email">
+        </div>
+        <div class="field">
+          <div class="field-label">
+            <span>Password <span class="req">*</span></span>
+            <span class="en">6+ characters</span>
+          </div>
+          <input type="password" id="auth-password" required minlength="6" autocomplete="current-password">
+        </div>
+
+        <div class="auth-terms">
+          <strong>Important — read before signing up:</strong>
+          <ul>
+            <li>✨ <strong>Pro access</strong> travels with your account to every device you sign into.</li>
+            <li>💾 <strong>Your saves</strong> (items, collections, custom types) stay on the current device only — never uploaded to the cloud.</li>
+            <li>📤 To move your saves to another device: ⚙ Settings → Export JSON → Import on the other device.</li>
+          </ul>
+        </div>
+
+        <button type="submit" class="btn btn-teal btn-lg" id="auth-submit" style="width:100%;">
+          Sign in
+        </button>
+      </form>
+
+      <p id="auth-msg" style="font-size:12px; margin-top:10px; min-height:16px; text-align:center;"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ========== PAYWALL MODAL ========== -->
+<div class="modal-backdrop" id="paywall-modal">
+  <div class="modal" style="max-width: 480px; border-top-color: var(--gold);">
+    <div class="modal-head">
+      <h3>
+        <span>Upgrade to Pro</span>
+        <span class="tag" style="color: var(--gold); border-color: var(--gold);">UPGRADE</span>
+      </h3>
+      <button type="button" class="modal-close" id="paywall-close">×</button>
+    </div>
+
+    <div class="modal-body paywall">
+      <div style="background: var(--teal-soft); border: 1px solid #b8e4dd; border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; font-size: 12px; line-height: 1.6; text-align:start;">
+        <strong style="color: var(--teal-2);">🔑 Already bought Pro?</strong>
+        <div style="margin-top: 4px;">
+          <button type="button" id="paywall-signin" style="background:none; border:none; color:var(--teal); font-weight:700; text-decoration:underline; cursor:pointer; padding:0; font-family:inherit; font-size:12px;">Sign in to your account</button>
+          to auto-restore Pro on this device.
+        </div>
+      </div>
+
+      <div class="paywall-emoji">💎</div>
+      <h2 id="paywall-title">Free limit reached</h2>
+      <p class="paywall-sub" id="paywall-sub">
+        The free tier gives you <strong>one type: ✨ Prompt</strong>.
+        Upgrade to Pro for $2 (one-time) to unlock everything.
+      </p>
+
+      <div class="paywall-perks">
+        <h4>What Pro unlocks</h4>
+        <ul>
+          <li><strong>Unlimited</strong> saved items (free = 5)</li>
+          <li><strong>Unlimited</strong> custom types (free = 1)</li>
+          <li>Unlimited collections</li>
+          <li>Support the app's development</li>
+          <li>Lifetime unlock — one-time payment</li>
+        </ul>
+      </div>
+
+      <div class="paywall-price">
+        <span class="paywall-price-currency">$</span>
+        <span class="paywall-price-num">2</span>
+        <span class="paywall-price-once">one-time</span>
+      </div>
+
+      <button class="paywall-cta" id="paywall-buy">
+        🛒 Pay $2 on Gumroad
+      </button>
+
+      <p id="paywall-steps" style="font-size:11px; color:var(--muted); margin:10px 0 0; line-height:1.7; text-align:center; display:none;">
+        1. Complete checkout on Gumroad<br>
+        2. Gumroad gives you a <strong>license key</strong> instantly<br>
+        3. Come back here and paste the key below<br>
+        4. Click "Activate" → everything unlocks ✨
+      </p>
+
+      <div class="paywall-divider">OR</div>
+
+      <p style="font-size:12px; color:var(--muted); margin:0 0 8px;">
+        Paste your license key:
+      </p>
+      <div class="paywall-license-row">
+        <input type="text" id="paywall-license" placeholder="XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX" maxlength="60" autocomplete="off" autocapitalize="characters">
+        <button class="btn btn-primary btn-sm" id="paywall-activate">Activate</button>
+      </div>
+      <p id="paywall-msg" style="font-size:11px; margin-top:8px; min-height:14px;"></p>
+
+      <details style="margin-top:10px; text-align:start;">
+        <summary style="color:var(--muted); cursor:pointer; font-size:12px; padding:6px 0;">
+          ❓ Forgot your key? Click here
+        </summary>
+        <div style="background:var(--paper-2); border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin-top:6px; font-size:12px; line-height:1.9; color:var(--text);">
+          <strong style="color:var(--ink);">Your key is saved in 3 places:</strong>
+          <div style="margin-top:8px;">
+            <div>📧 <strong>Gumroad email</strong> — search your inbox for "Gumroad" after your purchase</div>
+            <div>🌐 <a href="https://gumroad.com/library" target="_blank" rel="noopener" style="color:var(--teal); font-weight:700;">gumroad.com/library</a> — sign in with the email you used to buy</div>
+            <div>✉️ <strong>Contact us</strong>: <a href="mailto:Founder@coffez.net" style="color:var(--teal);">Founder@coffez.net</a></div>
+          </div>
+          <div style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); color:var(--muted);">
+            💡 The same key works on <strong style="color:var(--ink);">all your devices</strong> — no need to pay twice.
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- ========== WELCOME MODAL (first visit) ========== -->
+<div class="modal-backdrop" id="welcome-modal">
+  <div class="modal" style="max-width: 520px; border-top-color: var(--teal);">
+    <div class="modal-body welcome-body">
+      <div class="welcome-emoji">🧠</div>
+      <h2 class="welcome-title" data-i18n="welcomeTitle">Welcome to AI Memory</h2>
+      <p class="welcome-sub" data-i18n="welcomeSub">
+        Your second brain for ChatGPT, Claude and other AI tools. Save the gold — skip the scrollback.
+      </p>
+
+      <div class="welcome-cards">
+        <div class="welcome-card">
+          <span class="welcome-card-icon">✨</span>
+          <strong data-i18n="wcSave">Save</strong>
+          <p data-i18n="wcSaveD">Prompts, code, answers, ideas, templates and notes</p>
+        </div>
+        <div class="welcome-card">
+          <span class="welcome-card-icon">🔍</span>
+          <strong data-i18n="wcFind">Search</strong>
+          <p data-i18n="wcFindD">By keyword or type — instant results</p>
+        </div>
+        <div class="welcome-card">
+          <span class="welcome-card-icon">📁</span>
+          <strong data-i18n="wcOrg">Organize</strong>
+          <p data-i18n="wcOrgD">Collections + tags + favorites</p>
+        </div>
+        <div class="welcome-card">
+          <span class="welcome-card-icon">🔗</span>
+          <strong data-i18n="wcShare">Share</strong>
+          <p data-i18n="wcShareD">One-tap link or JSON export</p>
+        </div>
+      </div>
+
+      <div class="privacy-notice">
+        <div class="privacy-notice-head">
+          <span class="ico">🔒</span>
+          <span data-i18n="privTitle">Privacy — read this first</span>
+        </div>
+        <ul data-i18n="privList">
+          <li><strong>Everything you save stays on your device.</strong> Not us, not any third party, ever reads it.</li>
+          <li>Data lives in your browser's <strong>localStorage</strong>.</li>
+          <li>If you clear browser / app data → <strong>your saves disappear</strong>.</li>
+          <li>If you switch phones → saves <strong>don't transfer automatically</strong>.</li>
+          <li>To move your data: use <strong>Export JSON</strong> → Import on the new device.</li>
+          <li>An optional account syncs <em>Pro status only</em> — your data stays local.</li>
+        </ul>
+      </div>
+
+      <p class="welcome-choose" data-i18n="welcomeChoose">How would you like to start?</p>
+
+      <div class="welcome-actions">
+        <button class="welcome-btn primary" id="welcome-demo">
+          <strong data-i18n="welcomeDemoT">Start with examples 🎁</strong>
+          <small data-i18n="welcomeDemoS">5 sample entries to explore</small>
+        </button>
+        <button class="welcome-btn" id="welcome-blank">
+          <strong data-i18n="welcomeBlankT">Start empty</strong>
+          <small data-i18n="welcomeBlankS">Clean slate, your rules</small>
+        </button>
+      </div>
+
+      <p style="font-size:11px; color:var(--muted-2); margin:16px 0 0; line-height:1.6;" data-i18n="welcomeFoot">
+        💾 Your data stays on your device. No cloud, no tracking.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MONETIZE MODAL ========== -->
+<div class="modal-backdrop" id="monet-modal">
+  <div class="modal" style="max-width: 720px;">
+    <div class="modal-head">
+      <h3>
+        <span>Monetize</span>
+        <span class="tag">MONETIZE</span>
+      </h3>
+      <button type="button" class="modal-close" id="monet-close">×</button>
+    </div>
+
+    <div class="modal-body" id="monet-body"></div>
+  </div>
+</div>
+
+<!-- ========== SETTINGS MODAL ========== -->
+<div class="modal-backdrop" id="settings-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>
+        <span>Settings</span>
+        <span class="tag">SETTINGS</span>
+      </h3>
+      <button type="button" class="modal-close" id="settings-close">×</button>
+    </div>
+
+    <div class="modal-body" id="settings-body"></div>
+  </div>
+</div>
+
+<!-- hidden file input used by the settings import flow -->
+<input type="file" id="import-file" accept="application/json,.json" style="display:none;">
+
+<!-- ========== COLLECTIONS MODAL (list + create) ========== -->
+<div class="modal-backdrop" id="coll-modal">
+  <div class="modal" style="max-width: 720px;">
+    <div class="modal-head">
+      <h3>
+        <span id="coll-modal-title">Collections</span>
+        <span class="tag">COLLECTIONS</span>
+      </h3>
+      <button type="button" class="modal-close" id="coll-close">×</button>
+    </div>
+
+    <div class="modal-body" id="coll-body"></div>
+  </div>
+</div>
+
+<!-- ========== TOAST ========== -->
+<div id="toast" class="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
