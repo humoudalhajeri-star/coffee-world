@@ -967,6 +967,60 @@ mark {
 }
 
 /* ==========================================================
+   PRIVACY NOTICE (welcome + settings)
+   ========================================================== */
+.privacy-notice {
+  background: var(--teal-soft);
+  border: 1.5px solid #b8e4dd;
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  margin: 18px 0;
+  text-align: start;
+  line-height: 1.8;
+}
+.privacy-notice-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  color: var(--teal-2);
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+.privacy-notice-head .ico {
+  width: 26px; height: 26px;
+  background: var(--teal);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.privacy-notice ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.privacy-notice li {
+  font-size: 12px;
+  color: var(--text);
+  padding: 4px 0;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+.privacy-notice li::before {
+  content: '✓';
+  color: var(--teal);
+  font-weight: 900;
+  flex-shrink: 0;
+  font-size: 13px;
+}
+.privacy-notice strong { color: var(--ink); font-weight: 800; }
+
+/* ==========================================================
    AUTH (cross-device account)
    ========================================================== */
 .auth-tabs {
