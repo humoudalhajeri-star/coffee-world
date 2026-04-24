@@ -579,6 +579,32 @@
     render();
   }
 
+  /* ============ EVENT TRACKING (silent, silent on failure) ============ */
+  const EVENT_DEDUPE_KEY = 'zakerah.events.once';
+  async function logEvent(name, meta = {}) {
+    try {
+      if (!window.CW_FB) return;
+      try { await window.CW_FB.ready; } catch {}
+      if (typeof window.CW_FB.createDoc !== 'function') return;
+      await window.CW_FB.createDoc('events', {
+        name,
+        app: 'zakerah',
+        device: /Mobile|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '') ? 'mobile' : 'desktop',
+        ...meta,
+      });
+    } catch { /* never break UX on analytics failure */ }
+  }
+  function logEventOnce(name, meta) {
+    try {
+      let seen = [];
+      try { seen = JSON.parse(localStorage.getItem(EVENT_DEDUPE_KEY) || '[]'); } catch {}
+      if (seen.includes(name)) return;
+      seen.push(name);
+      localStorage.setItem(EVENT_DEDUPE_KEY, JSON.stringify(seen));
+      logEvent(name, meta);
+    } catch {}
+  }
+
   /* ============ AUTH / CROSS-DEVICE PRO ============ */
   let authMode = 'signin'; // or 'signup'
 
@@ -642,6 +668,7 @@
       if (authMode === 'signup') {
         await window.CW_FB.auth.signUp({ email, password });
         setAuthMsg('✓ تم إنشاء الحساب', 'success');
+        logEvent('zakerah_signup', { proAtSignup: isPro() });
         // If Pro is already active locally (user activated before signing up),
         // mirror it into the account so any future device inherits it.
         if (isPro()) {
@@ -650,6 +677,7 @@
       } else {
         await window.CW_FB.auth.signIn({ email, password });
         setAuthMsg('✓ تم تسجيل الدخول', 'success');
+        logEvent('zakerah_signin');
         // Pull Pro status from the account and apply locally.
         await syncProFromAccount();
       }
@@ -800,6 +828,11 @@
 
   function finalizeActivation(keyShown) {
     setPro(keyShown);
+    // Telemetry — figure out how many activations we're getting.
+    logEventOnce('zakerah_activate_pro', {
+      source: VALID_UNLOCK_CODES.has((keyShown || '').toUpperCase()) ? 'static' : 'gumroad',
+      signedIn: isSignedIn(),
+    });
     // If the user is signed in, also record Pro on their account so any
     // future device they sign into inherits it automatically.
     if (isSignedIn()) {
@@ -2550,6 +2583,7 @@
       if (e.target.id === 'paywall-modal') closePaywall();
     });
     $('#paywall-buy')?.addEventListener('click', () => {
+      logEvent('zakerah_gumroad_click', { signedIn: isSignedIn() });
       window.open(GUMROAD_PRO_URL, '_blank', 'noopener');
       const steps = $('#paywall-steps');
       if (steps) steps.style.display = 'block';
