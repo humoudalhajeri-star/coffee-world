@@ -37,6 +37,7 @@
       <button class="icon-btn" id="btn-collections" title="الباقات · Collections">📁</button>
       <button class="icon-btn" id="btn-monet" title="للبيع · Monetize">💰</button>
       <button class="icon-btn" id="btn-settings" title="الإعدادات · Settings">⚙</button>
+      <button class="icon-btn" id="btn-account" title="الحساب · Account" aria-label="الحساب">👤</button>
       <button class="btn btn-primary" id="btn-new" aria-label="جديد">
         ＋ جديد
       </button>
@@ -48,6 +49,20 @@
     الذكاء الاصطناعي لا يتذكّر محادثاتك — <strong>لكنّك تستطيع</strong>.
     احفظ أفضل <strong>البرومبتس (أوامر الذكاء الاصطناعي)</strong>، الأكواد، الملاحظات، الإجابات، الأفكار والقوالب في مكان واحد منظّم — قابل للبحث والمشاركة وإعادة الاستخدام.
   </p>
+
+  <!-- ========== AUTH STRIP (shown only when signed out) ========== -->
+  <div id="auth-strip" class="auth-strip" hidden>
+    <div class="auth-strip-body">
+      <span class="auth-strip-icon">🔑</span>
+      <span>
+        <strong>سجّل دخولك</strong> لحفظ ميزة Pro على جميع أجهزتك.
+      </span>
+    </div>
+    <div class="auth-strip-actions">
+      <button class="btn btn-teal btn-sm" id="strip-signin">تسجيل دخول</button>
+      <button class="btn btn-ghost btn-sm" id="strip-signup">إنشاء حساب</button>
+    </div>
+  </div>
 
   <!-- ========== TOOLBAR (keyword search) ========== -->
   <div class="toolbar">

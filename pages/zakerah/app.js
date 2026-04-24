@@ -679,6 +679,7 @@
     clearPro();
     toast('تم تسجيل الخروج', 'success');
     render();
+    renderAuthUI();
     // Re-render settings if it's open
     if ($('#settings-modal')?.classList.contains('open')) renderSettings();
   }
@@ -695,6 +696,31 @@
       });
     } catch (err) {
       console.warn('syncProToAccount failed', err);
+    }
+  }
+
+  /** Keep the homepage banner + header button in sync with auth state. */
+  function renderAuthUI() {
+    const u = currentUser();
+    const strip = $('#auth-strip');
+    const btn   = $('#btn-account');
+
+    if (u) {
+      // Signed in: hide strip, show avatar letter
+      if (strip) strip.hidden = true;
+      if (btn) {
+        btn.textContent = (u.user.email || '?').charAt(0).toUpperCase();
+        btn.classList.add('signed-in');
+        btn.setAttribute('title', u.user.email + (isPro() ? ' · Pro 💎' : ''));
+      }
+    } else {
+      // Signed out: show strip, show plain 👤 icon
+      if (strip) strip.hidden = false;
+      if (btn) {
+        btn.textContent = '👤';
+        btn.classList.remove('signed-in');
+        btn.setAttribute('title', 'تسجيل الدخول · Sign in');
+      }
     }
   }
 
@@ -2477,6 +2503,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     load();
     bindGlobal();
+    renderAuthUI();
     // wire welcome CTAs (exist in DOM from first load)
     $('#welcome-demo')?.addEventListener('click', startWithDemos);
     $('#welcome-blank')?.addEventListener('click', startBlank);
@@ -2500,10 +2527,22 @@
     // (returning user on same browser), make sure Pro is synced from
     // the account even if localStorage was wiped.
     window.addEventListener('cw-auth-changed', () => {
+      renderAuthUI();
       if (isSignedIn() && !isPro()) {
         syncProFromAccount();
       }
     });
+
+    // Prominent header + strip sign-in entry points
+    $('#btn-account')?.addEventListener('click', () => {
+      if (isSignedIn()) {
+        openSettings();
+      } else {
+        openAuth('signin');
+      }
+    });
+    $('#strip-signin')?.addEventListener('click', () => openAuth('signin'));
+    $('#strip-signup')?.addEventListener('click', () => openAuth('signup'));
 
     // wire paywall CTAs
     $('#paywall-close')?.addEventListener('click', closePaywall);
