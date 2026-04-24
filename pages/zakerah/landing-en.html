@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>AI Memory — Your Second Brain for ChatGPT &amp; Claude</title>
+<meta name="description" content="A personal memory system for AI users — save, organize, search and reuse your best prompts, code snippets, notes, answers, ideas and templates in one place." />
+
+<link rel="icon" type="image/svg+xml" href="/assets/img/coffez-icon.svg">
+<link rel="apple-touch-icon" href="/assets/img/coffez-icon.svg">
+<meta name="theme-color" content="#0B1F3A">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="landing.css">
+
+<!-- Firebase + visit tracking (silent on failure) -->
+<script type="module" src="../../assets/js/firebase-init.js"></script>
+<script src="../../assets/js/analytics.js" defer></script>
+
+<style>
+  /* Override font for English while keeping landing styles */
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav class="nav">
+  <div class="wrap nav-inner">
+    <a href="landing-en.html" class="brand">
+      <div class="brand-mark">Z</div>
+      <div class="brand-name">
+        AI Memory
+        <span class="en" style="color: var(--teal); letter-spacing: 3px; font-size: 9px; margin-top: 4px; display: block;">ZAKERAH</span>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="#problem">Problem</a>
+      <a href="#features">Features</a>
+      <a href="#usecases">Use cases</a>
+      <a href="landing.html" style="font-size:13px;">🌐 العربية</a>
+      <a href="index.html" class="btn btn-teal">Launch App →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="hero-eyebrow">
+        <span class="hero-eyebrow-dot"></span>
+        Your Second Brain for AI
+      </span>
+
+      <h1>
+        AI gives you gold.<br>
+        <span class="hl">Then you forget where you put it.</span>
+      </h1>
+
+      <p class="hero-sub">
+        Every clever prompt, useful answer, code snippet, and idea from your ChatGPT and Claude chats —
+        save it here, organize it, search it, and reuse it any time.
+      </p>
+
+      <div class="hero-cta">
+        <a href="index.html" class="btn btn-teal btn-lg">
+          Start saving free
+          <span class="btn-arrow">→</span>
+        </a>
+        <a href="#features" class="btn btn-ghost btn-lg">See how it works</a>
+      </div>
+
+      <div class="hero-trust">
+        <div class="hero-trust-item">
+          <span class="hero-trust-dot">●</span>
+          100% local · No cloud
+        </div>
+        <div class="hero-trust-item">
+          <span class="hero-trust-dot">●</span>
+          Free to use
+        </div>
+        <div class="hero-trust-item">
+          <span class="hero-trust-dot">●</span>
+          Works in any browser
+        </div>
+      </div>
+    </div>
+
+    <!-- hero mockup -->
+    <div class="hero-mockup" aria-hidden="true">
+      <div class="mockup-head">
+        <strong>My Memory</strong>
+        <span class="mockup-head-badge">✨ 6 types</span>
+      </div>
+
+      <div class="mockup-card" data-type="prompt">
+        <div class="mockup-card-head">
+          <span class="mockup-type">✨ Prompt</span>
+          <span class="mockup-time">now</span>
+        </div>
+        <div class="mockup-title">Professional email template</div>
+        <div class="mockup-preview">Write a professional email to {{recipient}} about {{topic}}...</div>
+      </div>
+
+      <div class="mockup-card" data-type="code">
+        <div class="mockup-card-head">
+          <span class="mockup-type">{ } Code</span>
+          <span class="mockup-time">6h</span>
+        </div>
+        <div class="mockup-title">useMemo in React</div>
+        <div class="mockup-preview mono">const total = useMemo(...);</div>
+      </div>
+
+      <div class="mockup-card" data-type="idea">
+        <div class="mockup-card-head">
+          <span class="mockup-type">💡 Idea</span>
+          <span class="mockup-time">5d</span>
+        </div>
+        <div class="mockup-title">App that collects café screenshots</div>
+        <div class="mockup-preview">Auto-saves screenshots from Instagram stories, categorizes by city...</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROBLEM ============ -->
+<section class="section section-alt" id="problem">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="tag">The Problem</div>
+      <h2>AI produces a lot… and you lose a lot.</h2>
+      <p>
+        Every day you ask ChatGPT or Claude dozens of questions. You get smart answers, working code,
+        clever ideas — then you forget where you said them, and ask the same thing again a week later.
+        The problem isn't the AI. It's its memory.
+      </p>
+    </div>
+
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="problem-icon">🌀</div>
+        <h3>Endless conversations</h3>
+        <p>Thousands of messages across dozens of threads. No index, no reliable search, no way back.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">🗑️</div>
+        <h3>Lost prompts</h3>
+        <p>You crafted a perfect prompt, then closed the tab. Now you're fumbling with worse wordings for days instead of minutes.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">🔁</div>
+        <h3>Costly repetition</h3>
+        <p>You re-ask the AI the same question 10 times because you forgot you asked it before. Time and money wasted.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">📦</div>
+        <h3>Scattered knowledge</h3>
+        <p>Code in one chat, an idea in another, a note in a third. Nothing connected.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SOLUTION ============ -->
+<section class="section" id="solution">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="tag">The Solution</div>
+      <h2>One place that remembers for you.</h2>
+      <p>
+        AI Memory isn't just another notes app — it's a structured system built for AI output specifically,
+        with six types, each with its own identity and purpose.
+      </p>
+    </div>
+
+    <div class="solution-grid">
+      <div class="solution-list">
+        <div class="solution-item">
+          <div class="solution-num">1</div>
+          <div class="solution-item-body">
+            <h3>Save in one tap</h3>
+            <p>Paste from ChatGPT, Claude or Gemini. Open your memory, pick a type, save. Two seconds.</p>
+          </div>
+        </div>
+        <div class="solution-item">
+          <div class="solution-num">2</div>
+          <div class="solution-item-body">
+            <h3>Organize smartly</h3>
+            <p>Every entry has a type (prompt, code, note, answer, idea, template) + source + tags + an optional star.</p>
+          </div>
+        </div>
+        <div class="solution-item">
+          <div class="solution-num">3</div>
+          <div class="solution-item-body">
+            <h3>Search instantly</h3>
+            <p>⌘K from anywhere. Full-text search across titles, content and tags with instant highlighting.</p>
+          </div>
+        </div>
+        <div class="solution-item">
+          <div class="solution-num">4</div>
+          <div class="solution-item-body">
+            <h3>Reuse cleverly</h3>
+            <p>Prompts support <code>{{variables}}</code> — fill them in and copy the ready-to-paste result. A counter shows how often you've used each.</p>
+          </div>
+        </div>
+        <div class="solution-item">
+          <div class="solution-num">5</div>
+          <div class="solution-item-body">
+            <h3>Share or sell</h3>
+            <p>Copy, share via any app, or export as JSON / Markdown / PDF. Coming soon: sell collections with pricing you define.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="solution-visual">
+        <h3>Built for serious AI users</h3>
+        <p>
+          Not another notes app. A purpose-built structure for AI content types specifically,
+          with type-specific accessories (syntax highlighting for code, variables for prompts,
+          status and priority for ideas).
+        </p>
+        <div class="solution-stats">
+          <div class="solution-stat">
+            <strong>6</strong>
+            <small>Types</small>
+          </div>
+          <div class="solution-stat">
+            <strong>⌘K</strong>
+            <small>Instant search</small>
+          </div>
+          <div class="solution-stat">
+            <strong>100%</strong>
+            <small>Local</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section class="section section-alt" id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="tag">Features</div>
+      <h2>Everything you need — nothing you don't.</h2>
+      <p>A productivity app designed for speed and clarity. Every feature solves a real problem.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">💾</div>
+        <h3>Smart save</h3>
+        <p>6 content types, each with its own fields. Code gets syntax highlighting, prompts get variables.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <h3>Instant search</h3>
+        <p>⌘K opens search from anywhere. Live results with match highlighting.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🏷</div>
+        <h3>Flexible tags</h3>
+        <p>Add your own tags freely. Classify your way — no forced structure.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⭐</div>
+        <h3>Star what matters</h3>
+        <p>Mark your gold with a star and jump back to it with one click from any page.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔗</div>
+        <h3>Share</h3>
+        <p>Share any entry via WhatsApp, email, or system apps. Or copy as formatted text.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💰</div>
+        <h3>Sellable packs</h3>
+        <p>Coming soon: bundle your best prompts or templates and sell them. Monetize your accumulated expertise.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ USE CASES ============ -->
+<section class="section" id="usecases">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="tag">Use Cases</div>
+      <h2>Built for anyone serious about AI.</h2>
+    </div>
+
+    <div class="usecase-grid">
+      <div class="usecase">
+        <div class="usecase-role">For Developers</div>
+        <h3>Your personal code library</h3>
+        <p>Every snippet the AI produced, every fix for a weird problem, every complex config — in one place with search.</p>
+        <ul class="usecase-list">
+          <li>Syntax highlighting</li>
+          <li>Language badge</li>
+          <li>Tags for libraries and frameworks</li>
+        </ul>
+      </div>
+
+      <div class="usecase">
+        <div class="usecase-role">For Founders</div>
+        <h3>Strategies and ideas organized</h3>
+        <p>Business models, competitor analyses, marketing plans — save them with status and priority for each idea.</p>
+        <ul class="usecase-list">
+          <li>Idea status (new / exploring / shipped)</li>
+          <li>Priority (low / medium / high)</li>
+          <li>Source of inspiration</li>
+        </ul>
+      </div>
+
+      <div class="usecase">
+        <div class="usecase-role">For Creators</div>
+        <h3>Prompts and templates ready-to-use</h3>
+        <p>Every prompt that made a beautiful image, every content template, every hook that worked — ready to copy-paste.</p>
+        <ul class="usecase-list">
+          <li>Fillable variables</li>
+          <li>Target AI (Midjourney, DALL-E…)</li>
+          <li>Usage counter</li>
+        </ul>
+      </div>
+
+      <div class="usecase">
+        <div class="usecase-role">For AI Power Users</div>
+        <h3>Your real second brain</h3>
+        <p>If you use AI 3+ hours a day, you generate more knowledge than you can remember. This is your solution.</p>
+        <ul class="usecase-list">
+          <li>JSON export for backup</li>
+          <li>Keyboard shortcuts</li>
+          <li>Fast sharing</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="section">
+  <div class="wrap">
+    <div class="cta-block">
+      <h2>Start building your smart memory today.</h2>
+      <p>Free, no sign-up, no cloud. Your data stays on your device — and your memory grows with you.</p>
+      <a href="index.html" class="btn btn-teal btn-lg">
+        Open the app now
+        <span class="btn-arrow">→</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="wrap">
+    <div>© <span id="year"></span> AI Memory · Part of the CoffeZ platform</div>
+    <div class="footer-links">
+      <a href="index.html">App</a>
+      <a href="landing.html">🌐 العربية</a>
+      <a href="/">Home</a>
+    </div>
+  </div>
+</footer>
+
+<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+
+</body>
+</html>
