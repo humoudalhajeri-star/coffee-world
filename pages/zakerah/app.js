@@ -579,6 +579,139 @@
     render();
   }
 
+  /* ============ AUTH / CROSS-DEVICE PRO ============ */
+  let authMode = 'signin'; // or 'signup'
+
+  function currentUser() {
+    return window.CW_FB?.auth?.current?.();
+  }
+
+  function isSignedIn() {
+    return !!currentUser();
+  }
+
+  async function fbReady() {
+    if (!window.CW_FB) return false;
+    try { await window.CW_FB.ready; } catch {}
+    return true;
+  }
+
+  function openAuth(mode = 'signin') {
+    setAuthMode(mode);
+    $('#auth-email').value = '';
+    $('#auth-password').value = '';
+    const msg = $('#auth-msg'); if (msg) msg.textContent = '';
+    $('#auth-modal')?.classList.add('open');
+    setTimeout(() => $('#auth-email')?.focus(), 60);
+  }
+  function closeAuth() { $('#auth-modal')?.classList.remove('open'); }
+
+  function setAuthMode(mode) {
+    authMode = mode;
+    $$('[data-auth-tab]').forEach((el) => {
+      el.classList.toggle('active', el.dataset.authTab === mode);
+    });
+    $('#auth-heading').textContent = mode === 'signup' ? 'إنشاء حساب' : 'تسجيل الدخول';
+    $('#auth-submit').textContent  = mode === 'signup' ? 'إنشاء الحساب' : 'تسجيل الدخول';
+    const pw = $('#auth-password');
+    if (pw) pw.setAttribute('autocomplete', mode === 'signup' ? 'new-password' : 'current-password');
+  }
+
+  function setAuthMsg(text, kind) {
+    const m = $('#auth-msg');
+    if (!m) return;
+    m.textContent = text;
+    m.style.color = kind === 'danger' ? 'var(--danger)'
+                  : kind === 'success' ? 'var(--success)'
+                  : 'var(--muted)';
+  }
+
+  async function submitAuth(e) {
+    e.preventDefault();
+    const email = $('#auth-email').value.trim().toLowerCase();
+    const password = $('#auth-password').value;
+    if (!email || !password) { setAuthMsg('⚠ عبّي الحقلين', 'danger'); return; }
+    if (!await fbReady()) { setAuthMsg('⚠ تعذّر الاتصال بالخدمة', 'danger'); return; }
+
+    const btn = $('#auth-submit');
+    const original = btn.textContent;
+    btn.disabled = true; btn.textContent = '⏳ ...';
+    setAuthMsg('⏳ جارٍ التحقق...', '');
+
+    try {
+      if (authMode === 'signup') {
+        await window.CW_FB.auth.signUp({ email, password });
+        setAuthMsg('✓ تم إنشاء الحساب', 'success');
+        // If Pro is already active locally (user activated before signing up),
+        // mirror it into the account so any future device inherits it.
+        if (isPro()) {
+          await syncProToAccount(localStorage.getItem(PRO_KEY) || '1');
+        }
+      } else {
+        await window.CW_FB.auth.signIn({ email, password });
+        setAuthMsg('✓ تم تسجيل الدخول', 'success');
+        // Pull Pro status from the account and apply locally.
+        await syncProFromAccount();
+      }
+      setTimeout(() => { closeAuth(); render(); }, 700);
+    } catch (err) {
+      console.error('auth failed', err);
+      let friendly = err?.message || 'فشل';
+      if (/invalid-email/i.test(friendly))          friendly = '⚠ الإيميل غير صالح';
+      else if (/email-already-in-use/i.test(friendly)) friendly = '⚠ الإيميل مستخدم مسبقاً — سجّل دخول';
+      else if (/weak-password/i.test(friendly))     friendly = '⚠ كلمة السر قصيرة — 6 أحرف على الأقل';
+      else if (/wrong-password|invalid-credential/i.test(friendly)) friendly = '⚠ الإيميل أو كلمة السر غير صحيحة';
+      else if (/user-not-found/i.test(friendly))    friendly = '⚠ لا يوجد حساب بهذا الإيميل';
+      else if (/network/i.test(friendly))           friendly = '⚠ تحقق من اتصال الإنترنت';
+      else friendly = '⚠ ' + friendly;
+      setAuthMsg(friendly, 'danger');
+    } finally {
+      btn.disabled = false; btn.textContent = original;
+    }
+  }
+
+  async function signOut() {
+    if (!confirm('تسجيل الخروج؟ محفوظاتك المحلية لن تُمسّ، لكن ميزة Pro ستُزال من هذا الجهاز.')) return;
+    try {
+      await window.CW_FB?.auth?.signOut?.();
+    } catch {}
+    // Clear local Pro so shared devices don't inherit it.
+    clearPro();
+    toast('تم تسجيل الخروج', 'success');
+    render();
+    // Re-render settings if it's open
+    if ($('#settings-modal')?.classList.contains('open')) renderSettings();
+  }
+
+  // Writes { zakerahPro, zakerahLicense } onto the user's Firestore doc.
+  async function syncProToAccount(licenseKey) {
+    const u = currentUser();
+    if (!u) return;
+    try {
+      await window.CW_FB.updateDoc('users', u.user.id, {
+        zakerahPro: true,
+        zakerahLicense: licenseKey || '1',
+        zakerahProAt: new Date().toISOString(),
+      });
+    } catch (err) {
+      console.warn('syncProToAccount failed', err);
+    }
+  }
+
+  async function syncProFromAccount() {
+    const u = currentUser();
+    if (!u) return;
+    try {
+      const doc = await window.CW_FB.getDocById('users', u.user.id);
+      if (doc?.zakerahPro) {
+        setPro(doc.zakerahLicense || 'account');
+        toast('🎉 مرحباً بعودتك — Pro مفعّل', 'success');
+      }
+    } catch (err) {
+      console.warn('syncProFromAccount failed', err);
+    }
+  }
+
   /* ============ PRO / PAYWALL ============ */
   const PRO_KEY = 'zakerah.pro';
   const FREE_BUILTIN_TYPE = 'prompt'; // only this built-in is free
@@ -641,9 +774,25 @@
 
   function finalizeActivation(keyShown) {
     setPro(keyShown);
-    showPaywallMsg('✓ تم التفعيل! استمتع بـPro', 'success');
-    toast('🎉 أُفعّل Pro — مفتوح كل شي', 'success');
-    setTimeout(() => { closePaywall(); render(); }, 900);
+    // If the user is signed in, also record Pro on their account so any
+    // future device they sign into inherits it automatically.
+    if (isSignedIn()) {
+      syncProToAccount(keyShown);
+      showPaywallMsg('✓ تم التفعيل! محفوظ في حسابك', 'success');
+      toast('🎉 Pro مفتوح — محفوظ في حسابك', 'success');
+      setTimeout(() => { closePaywall(); render(); }, 900);
+    } else {
+      showPaywallMsg('✓ تم التفعيل! استمتع بـPro', 'success');
+      toast('🎉 Pro مفتوح', 'success');
+      // Offer to tie it to an account so it survives clearing data
+      setTimeout(() => {
+        closePaywall();
+        render();
+        if (confirm('💡 نصيحة: سجّل حساباً لحفظ Pro ليشتغل على كل أجهزتك.\n\nتسجيل الحساب الآن؟')) {
+          openAuth('signup');
+        }
+      }, 900);
+    }
   }
 
   async function verifyGumroadLicense(code) {
@@ -1459,6 +1608,40 @@
 
     $('#settings-body').innerHTML = `
       <div class="settings-section">
+        <h4>الحساب · Account ${isPro() ? '<span class="pro-badge">💎 PRO</span>' : ''}</h4>
+        ${(() => {
+          const u = currentUser();
+          if (u) {
+            const initial = (u.user.email || '?').charAt(0).toUpperCase();
+            return `
+              <div class="account-card">
+                <div class="account-avatar">${esc(initial)}</div>
+                <div class="account-info">
+                  <div class="account-email">${esc(u.user.email)}</div>
+                  <div class="account-status">
+                    ${isPro() ? '💎 Pro مفعّل ومربوط بالحساب' : '🆓 حساب مجاني'}
+                  </div>
+                </div>
+                <button class="btn btn-ghost btn-sm" id="set-signout">خروج</button>
+              </div>
+              <p style="font-size:11px; color:var(--muted); margin:6px 0 0;">
+                💡 ميزة Pro تنتقل مع حسابك لأي جهاز تسجل الدخول فيه. المحفوظات تبقى محلية.
+              </p>
+            `;
+          }
+          return `
+            <p style="font-size:12px; color:var(--muted); margin:0 0 10px; line-height:1.7;">
+              سجّل حساباً لحفظ Pro وتفعيله على كل أجهزتك بنقرة. المحفوظات تبقى محلية.
+            </p>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn btn-teal btn-sm" id="set-signup">إنشاء حساب</button>
+              <button class="btn btn-ghost btn-sm" id="set-signin">تسجيل الدخول</button>
+            </div>
+          `;
+        })()}
+      </div>
+
+      <div class="settings-section">
         <h4>البيانات · Data</h4>
         <div class="settings-row">
           <div class="settings-row-body">
@@ -1566,6 +1749,15 @@
       closeSettings();
       setTimeout(() => openPaywall('types'), 160);
     });
+    $('#set-signin')?.addEventListener('click', () => {
+      closeSettings();
+      setTimeout(() => openAuth('signin'), 160);
+    });
+    $('#set-signup')?.addEventListener('click', () => {
+      closeSettings();
+      setTimeout(() => openAuth('signup'), 160);
+    });
+    $('#set-signout')?.addEventListener('click', signOut);
     $$('[data-del-type]').forEach((el) => {
       el.onclick = () => deleteCustomType(el.dataset.delType);
     });
@@ -2249,7 +2441,7 @@
       if (e.key === 'Escape') {
         closeEditor(); closeDetail(); closeSearch();
         closeCollections(); closeSettings(); closeMonetize();
-        closePaywall();
+        closePaywall(); closeAuth();
       }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
@@ -2270,6 +2462,31 @@
     // wire welcome CTAs (exist in DOM from first load)
     $('#welcome-demo')?.addEventListener('click', startWithDemos);
     $('#welcome-blank')?.addEventListener('click', startBlank);
+    // auth modal
+    $('#auth-close')?.addEventListener('click', closeAuth);
+    $('#auth-modal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'auth-modal') closeAuth();
+    });
+    $('#auth-form')?.addEventListener('submit', submitAuth);
+    $$('[data-auth-tab]').forEach((el) => {
+      el.onclick = () => setAuthMode(el.dataset.authTab);
+    });
+
+    // paywall shortcut to sign-in for returning customers
+    $('#paywall-signin')?.addEventListener('click', () => {
+      closePaywall();
+      setTimeout(() => openAuth('signin'), 160);
+    });
+
+    // If Firebase is already in a signed-in state when the app loads
+    // (returning user on same browser), make sure Pro is synced from
+    // the account even if localStorage was wiped.
+    window.addEventListener('cw-auth-changed', () => {
+      if (isSignedIn() && !isPro()) {
+        syncProFromAccount();
+      }
+    });
+
     // wire paywall CTAs
     $('#paywall-close')?.addEventListener('click', closePaywall);
     $('#paywall-modal')?.addEventListener('click', (e) => {
