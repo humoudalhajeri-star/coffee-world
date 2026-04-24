@@ -12,6 +12,7 @@
     {
       id: 'prompt',
       ar: 'برومبت',
+      arHint: 'أوامر الذكاء الاصطناعي',
       en: 'Prompt',
       icon: '✨',
       verb: 'برومبت جديد',
@@ -616,9 +617,9 @@
       if (reason === 'items') {
         sub.innerHTML = `النسخة المجانية تسمح بحفظ <strong>${FREE_ITEM_LIMIT} عناصر</strong> فقط. رقِّ إلى Pro بـ$2 (مرة واحدة) لفتح كل شي.`;
       } else if (reason === 'locked-type') {
-        sub.innerHTML = `النوع المجاني الوحيد هو <strong>✨ برومبت</strong>. لاستخدام "${esc(lockedTypeAr)}" وبقية الأنواع، رقِّ إلى Pro بـ$2 (مرة واحدة).`;
+        sub.innerHTML = `النوع المجاني الوحيد هو <strong>✨ برومبت</strong> (أوامر الذكاء الاصطناعي). لاستخدام "${esc(lockedTypeAr)}" وبقية الأنواع، رقِّ إلى Pro بـ$2 (مرة واحدة).`;
       } else {
-        sub.innerHTML = `النسخة المجانية تعطيك نوع واحد: <strong>✨ برومبت</strong>. رقِّ إلى Pro بـ$2 (مرة واحدة) لفتح كل الأنواع + الأنواع المخصصة + حفظ غير محدود.`;
+        sub.innerHTML = `النسخة المجانية تعطيك نوع واحد: <strong>✨ برومبت</strong> (أوامر الذكاء الاصطناعي). رقِّ إلى Pro بـ$2 (مرة واحدة) لفتح كل الأنواع + الأنواع المخصصة + حفظ غير محدود.`;
       }
     }
     $('#paywall-license').value = '';
@@ -745,6 +746,7 @@
                       style="${lockStyle}${customStyle}">
                 <span class="type-pick-icon">${tt.icon}</span>
                 ${esc(tt.ar)}${locked ? ' 🔒' : ''}
+                ${tt.arHint ? `<div style="font-size:10px; color:var(--muted); margin-top:2px; line-height:1.3;">${esc(tt.arHint)}</div>` : ''}
                 <div style="font-size:9px; opacity:.7; margin-top:2px;">${esc(tt.en)}</div>
               </button>`;
           }).join('')}
