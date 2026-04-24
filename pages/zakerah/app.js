@@ -567,7 +567,7 @@
     const demoCount = countDemoItems();
     const demoCollCount = state.collections.filter((c) => c.isDemo).length;
     if (demoCount === 0 && demoCollCount === 0) return;
-    const msg = `حذف جميع الأمثلة (${demoCount} عنصر + ${demoCollCount} باقة)؟\nمحفوظاتك الشخصية لن تُمسّ.`;
+    const msg = t('cfClearDemos', demoCount, demoCollCount);
     if (!confirm(msg)) return;
     state.items = state.items.filter((it) => !it.isDemo);
     state.collections = state.collections.filter((c) => !c.isDemo);
@@ -745,7 +745,151 @@
       cfClearDemos: (items, colls) => `حذف جميع الأمثلة (${items} عنصر + ${colls} باقة)؟\nمحفوظاتك الشخصية لن تُمسّ.`,
       cfSignOut: 'تسجيل الخروج؟ محفوظاتك المحلية لن تُمسّ، لكن ميزة Pro ستُزال من هذا الجهاز.',
       demoBadge2: 'مثال',
-    },
+      // Settings
+      stAccount: 'الحساب · Account',
+      stAccountProBadge: '💎 PRO',
+      stSignedOut: 'سجّل حساباً لحفظ Pro وتفعيله على كل أجهزتك بنقرة. المحفوظات تبقى محلية.',
+      stSignUp: 'إنشاء حساب',
+      stSignIn: 'تسجيل الدخول',
+      stSignOut: 'خروج',
+      stProLinked: '💎 Pro مفعّل ومربوط بالحساب',
+      stFreeAcc: '🆓 حساب مجاني',
+      stAccountHint: '💡 ميزة Pro تنتقل مع حسابك لأي جهاز تسجل الدخول فيه. المحفوظات تبقى محلية.',
+      stLimitsTitle: 'الحدود المجانية · Free Limits',
+      stLimitItems: (a, b) => `العناصر: ${a} / ${b}`,
+      stLimitTypes: (a, b) => `أنواع مخصصة: ${a} / ${b}`,
+      stUpgradeBtn: '💎 ترقية إلى Pro — $2',
+      stProUpgradeHint: 'رقِّ إلى Pro بـ$2 (مرة واحدة) لإزالة كل الحدود.',
+      stDataTitle: 'البيانات · Data',
+      stExportTitle: '⬇ تصدير كل شي',
+      stExportDesc: 'ملف JSON يحتوي جميع العناصر والباقات — نسخة احتياطية أو نقل بين أجهزة.',
+      stExportBtn: 'تصدير',
+      stImportTitle: '⬆ استيراد ملف',
+      stImportDesc: 'ادمج بيانات من ملف JSON سابق التصدير. لن يُحذف أي شي — فقط تُضاف العناصر الجديدة.',
+      stImportBtn: 'اختر ملف',
+      stClearTitle: '🗑 مسح كل شي',
+      stClearDesc: 'يحذف جميع العناصر والباقات والتاريخ المحفوظ في هذا الجهاز. لا يمكن التراجع.',
+      stClearBtn: 'مسح كامل',
+      stCustomTypesTitle: 'الأنواع المخصصة · Custom Types',
+      stCustomTypesEmpty: 'لا توجد أنواع مخصصة بعد. عند إضافة عنصر جديد، استخدم زر "+ إضافة" في شريط اختيار النوع لإنشاء نوع خاص بك.',
+      stCustomTypeUses: (n) => `${n} عنصر يستخدم هذا النوع`,
+      stDelTypeBtn: '🗑 حذف',
+      stStatsTitle: 'إحصائيات · Stats',
+      stItems: 'عناصر · Items',
+      stCollections: 'باقات · Collections',
+      stFavorites: 'مفضلة ⭐ · Favorites',
+      stStorage: 'حجم البيانات · Storage',
+      stPrivacyTitle: 'الخصوصية · Privacy',
+      stPrivacyHead: 'بياناتك — في جهازك فقط',
+      stPrivacy1: '<strong>كل ما تحفظه يبقى في جهازك.</strong> لا نحن ولا أي طرف ثالث نطّلع عليه.',
+      stPrivacy2: 'البيانات محفوظة في <strong>localStorage</strong> الخاص بمتصفحك.',
+      stPrivacy3: 'لو مسحت بيانات المتصفح → كل المحفوظات تختفي.',
+      stPrivacy4: 'لو غيّرت الجهاز → البيانات لا تنتقل تلقائياً.',
+      stPrivacy5: 'لنقل بياناتك: <strong>تصدير JSON</strong> ← استيراد في الجهاز الثاني.',
+      stPrivacy6: 'الحساب (اختياري) لنقل Pro فقط — المحفوظات تبقى محلية.',
+      stAboutTitle: 'عن التطبيق · About',
+      stAboutIntro: 'دماغك الثاني لمحادثات الـAI. كل ما تحفظه يبقى محلياً على جهازك — بدون سحابة، بدون تتبّع.',
+      stAboutLanding: '📖 الصفحة التعريفية',
+      stAboutWelcome: '👋 إعادة الترحيب',
+      stAboutCoffez: '🏠 CoffeZ',
+      // Paywall
+      pwTitle1: 'وصلت حد الحفظ المجاني',
+      pwTitle2Start: 'النوع "',
+      pwTitle2End: '" مُقفَل',
+      pwTitle3: 'هذا النوع مُقفَل',
+      pwSub1: (n) => `النسخة المجانية تسمح بحفظ <strong>${n} عناصر</strong> فقط. رقِّ إلى Pro بـ$2 (مرة واحدة) لفتح كل شي.`,
+      pwSub2: (typ) => `النوع المجاني الوحيد هو <strong>✨ برومبت</strong> (أوامر الذكاء الاصطناعي). لاستخدام "${typ}" وبقية الأنواع، رقِّ إلى Pro بـ$2 (مرة واحدة).`,
+      pwSub3: 'النسخة المجانية تعطيك نوع واحد: <strong>✨ برومبت</strong> (أوامر الذكاء الاصطناعي). رقِّ إلى Pro بـ$2 (مرة واحدة) لفتح كل الأنواع + الأنواع المخصصة + حفظ غير محدود.',
+      pwEnterCode: 'ادخل رمز تفعيل',
+      pwActivated: '✓ تم التفعيل! استمتع بـPro',
+      pwInvalidCode: '⚠ رمز غير صالح. تأكد من النسخ الصحيح.',
+      pwNetFail: '⚠ تعذّر الاتصال بـGumroad. تحقق من الإنترنت وأعد المحاولة.',
+      pwVerifying: '⏳ جارٍ التحقّق من Gumroad...',
+      pwActivateBtnLoading: '⏳ تحقّق...',
+      // Auth
+      auSignIn: 'تسجيل الدخول',
+      auSignUp: 'إنشاء حساب',
+      auEmail: 'الإيميل',
+      auPassword: 'كلمة السر',
+      auPasswordHint: 'Password (6+ chars)',
+      auFillBoth: '⚠ عبّي الحقلين',
+      auNoFb: '⚠ تعذّر الاتصال بالخدمة',
+      auCheckingBtn: '⏳ ...',
+      auInvalidEmail: '⚠ الإيميل غير صالح',
+      auEmailInUse: '⚠ الإيميل مستخدم مسبقاً — سجّل دخول',
+      auWeakPw: '⚠ كلمة السر قصيرة — 6 أحرف على الأقل',
+      auBadCreds: '⚠ الإيميل أو كلمة السر غير صحيحة',
+      auNoUser: '⚠ لا يوجد حساب بهذا الإيميل',
+      auNoNet: '⚠ تحقق من اتصال الإنترنت',
+      auSignUpBtn: 'إنشاء الحساب',
+      auTermsTitle: 'ملاحظة مهمة — اقرأها قبل التسجيل:',
+      auTerm1: '✨ <strong>ميزة Pro</strong> تنتقل مع حسابك لأي جهاز تسجل الدخول فيه.',
+      auTerm2: '💾 <strong>محفوظاتك</strong> (العناصر + الباقات + الأنواع المخصصة) تبقى في الجهاز الحالي فقط — لا تُرفع للسحابة.',
+      auTerm3: '📤 لنقل محفوظاتك لجهاز آخر: ⚙ الإعدادات → تصدير JSON → استيراد في الجهاز الثاني.',
+      // Collections
+      clHeader: 'الباقات',
+      clModalTitleNew: 'باقة جديدة',
+      clModalTitleEdit: 'تعديل الباقة',
+      clModalTitleAddItems: 'إضافة عناصر',
+      clEmpty: 'نظّم محفوظاتك في باقات مسمّاة — مثل "أفضل البرومبتس" أو "مكتبة الكود".',
+      clNewTile: 'باقة جديدة · New Collection',
+      clItemsCount: (n) => n === 1 ? '١ عنصر' : n + ' عناصر',
+      clBackList: '← كل الباقات',
+      clNameLbl: 'اسم الباقة',
+      clNameHint: 'Name',
+      clDescLbl: 'وصف قصير (اختياري)',
+      clDescHint: 'Description',
+      clIconLbl: 'الأيقونة',
+      clColorLbl: 'اللون',
+      clCreateBtn: '＋ إنشاء الباقة',
+      clDelBtn: '🗑 حذف',
+      clPhName: 'مثلاً: برومبتس التسويق',
+      clPhDesc: 'ما الذي يميّز هذه الباقة؟',
+      clNoDesc: 'لا يوجد وصف',
+      clEditBtn: '✎ تعديل',
+      clExportPdf: '📄 PDF',
+      clExportMd: '📝 Markdown',
+      clExportJson: '⬇ JSON',
+      clAddItemsBtn: '＋ إضافة عناصر',
+      clBackToColl: '← رجوع للباقة',
+      clEmptyInside: 'الباقة فارغة',
+      clEmptyInsideP: 'اضغط "+ إضافة عناصر" أعلاه لاختيار ما تبي ضمّه هنا.',
+      clSelectItems: 'اختر العناصر اللي تبي تضمّها. الأخضر = داخل الباقة، الرمادي = خارجها.',
+      clSelectedNow: (n) => `<strong style="color:var(--ink);">${n}</strong> محدّد الآن`,
+      clNewItems: (n) => `<span style="color:var(--success);">+${n} جديد</span>`,
+      clWillRemove: (n) => `<span style="color:var(--danger);">-${n} سيُشال</span>`,
+      clSearchItems: 'ابحث في العناصر...',
+      clAllTypes: (n) => `🗂 كل الأنواع (${n})`,
+      clSaveBtn: '💾 حفظ التغييرات',
+      clSavedToast: (n) => `تم الحفظ ✓ (الباقة فيها ${n})`,
+      clNoItems: 'لا توجد عناصر',
+      clNoItemsP: 'جرّب كلمة ثانية أو غيّر النوع.',
+      clNameReq: 'اسم الباقة مطلوب',
+      clCreated: 'تم إنشاء الباقة ✓',
+      clCollDel: 'تم حذف الباقة',
+      clAddedTo: (name) => `أُضيف إلى "${name}"`,
+      clRemovedFrom: (name) => `أُزيل من "${name}"`,
+      clSelect: 'اختر من خزنتك · SELECT ITEMS',
+      clMyColls: 'باقاتي المحفوظة · MY PACKS',
+      clNoColls: 'لا توجد باقات بعد',
+      // Monetize
+      mzHeader: 'للبيع',
+      mzComingSoon: '🚀 قريباً · COMING SOON',
+      mzBannerHead: 'حوّل معرفتك إلى دخل.',
+      mzBannerBody: 'مبيعات الباقات قادمة قريباً. جهّز أفضل باقاتك الآن — اضبط السعر والحالة، وحالما نفتح البيع ستكون باقاتك أول الجاهزة على الرف.',
+      mzEmpty: 'لا توجد باقات بعد',
+      mzEmptyP: 'أنشئ باقة من زر الباقات 📁 ثم ارجع هنا.',
+      mzNCollections: (n) => `${n} ${n === 1 ? 'باقة' : 'باقات'} · اضبط السعر والحالة لكل باقة`,
+      mzDraft: 'مسودّة',
+      mzReady: 'جاهزة',
+      mzPaused: 'موقوفة',
+      mzItemsSuffix: (n) => `${n} ${n === 1 ? 'عنصر' : 'عناصر'}`,
+      mzDraftFull: 'مسودّة · Draft',
+      mzReadyFull: 'جاهزة · Ready',
+      mzPausedFull: 'موقوفة · Paused',
+      mzPrivate: 'خاصة · Private',
+      mzPublic: 'عامة · Public',
+      // Detail — idea accessory already uses ar/en from STATUSES/PRIORITIES
     en: {
       tagline: "AI doesn't remember your chats — <strong>but you can</strong>. Save your best <strong>prompts</strong>, code, notes, answers, ideas and templates in one organized place — searchable, shareable, reusable.",
       btnNew: '＋ New',
@@ -907,6 +1051,150 @@
       cfClearDemos: (items, colls) => `Clear all samples (${items} items + ${colls} collections)?\nYour personal saves are untouched.`,
       cfSignOut: 'Sign out? Your local saves stay — but Pro will be removed from this device.',
       demoBadge2: 'Sample',
+      // Settings
+      stAccount: 'Account',
+      stAccountProBadge: '💎 PRO',
+      stSignedOut: 'Create an account to save Pro across all your devices with one tap. Local data stays local.',
+      stSignUp: 'Create account',
+      stSignIn: 'Sign in',
+      stSignOut: 'Sign out',
+      stProLinked: '💎 Pro active · linked to your account',
+      stFreeAcc: '🆓 Free account',
+      stAccountHint: '💡 Pro travels with your account to every device you sign into. Saves stay local.',
+      stLimitsTitle: 'Free Limits',
+      stLimitItems: (a, b) => `Items: ${a} / ${b}`,
+      stLimitTypes: (a, b) => `Custom types: ${a} / ${b}`,
+      stUpgradeBtn: '💎 Upgrade to Pro — $2',
+      stProUpgradeHint: 'Upgrade to Pro for $2 (one-time) to remove all limits.',
+      stDataTitle: 'Data',
+      stExportTitle: '⬇ Export everything',
+      stExportDesc: 'JSON file with all items and collections — backup or transfer between devices.',
+      stExportBtn: 'Export',
+      stImportTitle: '⬆ Import file',
+      stImportDesc: 'Merge data from a previously exported JSON file. Nothing is deleted — only new items are added.',
+      stImportBtn: 'Choose file',
+      stClearTitle: '🗑 Clear everything',
+      stClearDesc: 'Deletes all items, collections and history saved on this device. Cannot be undone.',
+      stClearBtn: 'Clear all',
+      stCustomTypesTitle: 'Custom Types',
+      stCustomTypesEmpty: 'No custom types yet. When you add a new entry, use the "+ Add" button in the type picker to create your own.',
+      stCustomTypeUses: (n) => `${n} item${n === 1 ? '' : 's'} use this type`,
+      stDelTypeBtn: '🗑 Delete',
+      stStatsTitle: 'Stats',
+      stItems: 'Items',
+      stCollections: 'Collections',
+      stFavorites: 'Favorites ⭐',
+      stStorage: 'Storage',
+      stPrivacyTitle: 'Privacy',
+      stPrivacyHead: 'Your data — on your device only',
+      stPrivacy1: '<strong>Everything you save stays on your device.</strong> Not us, not any third party, ever reads it.',
+      stPrivacy2: 'Data lives in your browser\'s <strong>localStorage</strong>.',
+      stPrivacy3: 'If you clear browser data → your saves disappear.',
+      stPrivacy4: 'If you switch devices → saves don\'t transfer automatically.',
+      stPrivacy5: 'To move your data: <strong>Export JSON</strong> → Import on the other device.',
+      stPrivacy6: 'An optional account syncs Pro status only — saves stay local.',
+      stAboutTitle: 'About',
+      stAboutIntro: 'Your second brain for AI chats. Everything you save stays local — no cloud, no tracking.',
+      stAboutLanding: '📖 About page',
+      stAboutWelcome: '👋 Re-run welcome',
+      stAboutCoffez: '🏠 CoffeZ',
+      // Paywall
+      pwTitle1: 'Free save limit reached',
+      pwTitle2Start: 'Type "',
+      pwTitle2End: '" is locked',
+      pwTitle3: 'This type is locked',
+      pwSub1: (n) => `The free tier lets you save only <strong>${n} items</strong>. Upgrade to Pro for $2 (one-time) to unlock everything.`,
+      pwSub2: (typ) => `The only free type is <strong>✨ Prompt</strong>. To use "${typ}" and the rest, upgrade to Pro for $2 (one-time).`,
+      pwSub3: 'The free tier gives you one type: <strong>✨ Prompt</strong>. Upgrade to Pro for $2 (one-time) to unlock all types + custom types + unlimited saves.',
+      pwEnterCode: 'Enter your activation key',
+      pwActivated: '✓ Activated! Enjoy Pro',
+      pwInvalidCode: '⚠ Invalid key. Double-check you copied it correctly.',
+      pwNetFail: '⚠ Couldn\'t reach Gumroad. Check your internet and try again.',
+      pwVerifying: '⏳ Verifying with Gumroad...',
+      pwActivateBtnLoading: '⏳ Verify...',
+      // Auth
+      auSignIn: 'Sign in',
+      auSignUp: 'Create account',
+      auEmail: 'Email',
+      auPassword: 'Password',
+      auPasswordHint: '6+ characters',
+      auFillBoth: '⚠ Fill both fields',
+      auNoFb: '⚠ Couldn\'t reach the service',
+      auCheckingBtn: '⏳ ...',
+      auInvalidEmail: '⚠ Invalid email',
+      auEmailInUse: '⚠ Email already in use — sign in instead',
+      auWeakPw: '⚠ Password too short — 6 characters minimum',
+      auBadCreds: '⚠ Wrong email or password',
+      auNoUser: '⚠ No account with this email',
+      auNoNet: '⚠ Check your internet connection',
+      auSignUpBtn: 'Create account',
+      auTermsTitle: 'Important — read before signing up:',
+      auTerm1: '✨ <strong>Pro access</strong> travels with your account to every device you sign into.',
+      auTerm2: '💾 <strong>Your saves</strong> (items, collections, custom types) stay on the current device only — never uploaded to the cloud.',
+      auTerm3: '📤 To move your saves to another device: ⚙ Settings → Export JSON → Import on the other device.',
+      // Collections
+      clHeader: 'Collections',
+      clModalTitleNew: 'New collection',
+      clModalTitleEdit: 'Edit collection',
+      clModalTitleAddItems: 'Add items',
+      clEmpty: 'Organize your saves into named collections — like "Best Prompts" or "Code Library".',
+      clNewTile: 'New Collection',
+      clItemsCount: (n) => n === 1 ? '1 item' : n + ' items',
+      clBackList: '← All collections',
+      clNameLbl: 'Collection name',
+      clNameHint: 'Name',
+      clDescLbl: 'Short description (optional)',
+      clDescHint: 'Description',
+      clIconLbl: 'Icon',
+      clColorLbl: 'Color',
+      clCreateBtn: '＋ Create collection',
+      clDelBtn: '🗑 Delete',
+      clPhName: 'e.g. Marketing prompts',
+      clPhDesc: 'What makes this collection special?',
+      clNoDesc: 'No description',
+      clEditBtn: '✎ Edit',
+      clExportPdf: '📄 PDF',
+      clExportMd: '📝 Markdown',
+      clExportJson: '⬇ JSON',
+      clAddItemsBtn: '＋ Add items',
+      clBackToColl: '← Back to collection',
+      clEmptyInside: 'Collection is empty',
+      clEmptyInsideP: 'Tap "+ Add items" above to pick what to include here.',
+      clSelectItems: 'Pick items to include. Green = already in the collection, gray = not yet.',
+      clSelectedNow: (n) => `<strong style="color:var(--ink);">${n}</strong> selected now`,
+      clNewItems: (n) => `<span style="color:var(--success);">+${n} new</span>`,
+      clWillRemove: (n) => `<span style="color:var(--danger);">-${n} will be removed</span>`,
+      clSearchItems: 'Search items...',
+      clAllTypes: (n) => `🗂 All types (${n})`,
+      clSaveBtn: '💾 Save changes',
+      clSavedToast: (n) => `Saved ✓ (collection has ${n})`,
+      clNoItems: 'No items found',
+      clNoItemsP: 'Try another keyword or change the type.',
+      clNameReq: 'Collection name is required',
+      clCreated: 'Collection created ✓',
+      clCollDel: 'Collection deleted',
+      clAddedTo: (name) => `Added to "${name}"`,
+      clRemovedFrom: (name) => `Removed from "${name}"`,
+      clSelect: 'SELECT ITEMS',
+      clMyColls: 'MY COLLECTIONS',
+      clNoColls: 'No collections yet',
+      // Monetize
+      mzHeader: 'Monetize',
+      mzComingSoon: '🚀 COMING SOON',
+      mzBannerHead: 'Turn your knowledge into income.',
+      mzBannerBody: 'Collection sales are coming soon. Prep your best packs now — set pricing and status, and the moment we open sales, your packs will be first on the shelf.',
+      mzEmpty: 'No collections yet',
+      mzEmptyP: 'Create a collection from the 📁 button, then come back here.',
+      mzNCollections: (n) => `${n} ${n === 1 ? 'collection' : 'collections'} · set price and status for each`,
+      mzDraft: 'Draft',
+      mzReady: 'Ready',
+      mzPaused: 'Paused',
+      mzItemsSuffix: (n) => `${n} ${n === 1 ? 'item' : 'items'}`,
+      mzDraftFull: 'Draft',
+      mzReadyFull: 'Ready',
+      mzPausedFull: 'Paused',
+      mzPrivate: 'Private',
+      mzPublic: 'Public',
     },
   };
 
@@ -1040,8 +1328,8 @@
     $$('[data-auth-tab]').forEach((el) => {
       el.classList.toggle('active', el.dataset.authTab === mode);
     });
-    $('#auth-heading').textContent = mode === 'signup' ? 'إنشاء حساب' : 'تسجيل الدخول';
-    $('#auth-submit').textContent  = mode === 'signup' ? 'إنشاء الحساب' : 'تسجيل الدخول';
+    $('#auth-heading').textContent = mode === 'signup' ? t('auSignUp') : t('auSignIn');
+    $('#auth-submit').textContent  = mode === 'signup' ? t('auSignUpBtn') : t('auSignIn');
     const pw = $('#auth-password');
     if (pw) pw.setAttribute('autocomplete', mode === 'signup' ? 'new-password' : 'current-password');
   }
@@ -1059,18 +1347,18 @@
     e.preventDefault();
     const email = $('#auth-email').value.trim().toLowerCase();
     const password = $('#auth-password').value;
-    if (!email || !password) { setAuthMsg('⚠ عبّي الحقلين', 'danger'); return; }
-    if (!await fbReady()) { setAuthMsg('⚠ تعذّر الاتصال بالخدمة', 'danger'); return; }
+    if (!email || !password) { setAuthMsg(t('auFillBoth'), 'danger'); return; }
+    if (!await fbReady()) { setAuthMsg(t('auNoFb'), 'danger'); return; }
 
     const btn = $('#auth-submit');
     const original = btn.textContent;
-    btn.disabled = true; btn.textContent = '⏳ ...';
-    setAuthMsg('⏳ جارٍ التحقق...', '');
+    btn.disabled = true; btn.textContent = t('auCheckingBtn');
+    setAuthMsg(t('pwVerifying').replace('Gumroad', '').replace('...', '...').trim(), '');
 
     try {
       if (authMode === 'signup') {
         await window.CW_FB.auth.signUp({ email, password });
-        setAuthMsg('✓ تم إنشاء الحساب', 'success');
+        setAuthMsg(t('tAccountCreated'), 'success');
         logEvent('zakerah_signup', { proAtSignup: isPro() });
         // If Pro is already active locally (user activated before signing up),
         // mirror it into the account so any future device inherits it.
@@ -1079,7 +1367,7 @@
         }
       } else {
         await window.CW_FB.auth.signIn({ email, password });
-        setAuthMsg('✓ تم تسجيل الدخول', 'success');
+        setAuthMsg(t('tSignedIn'), 'success');
         logEvent('zakerah_signin');
         // Pull Pro status from the account and apply locally.
         await syncProFromAccount();
@@ -1087,13 +1375,13 @@
       setTimeout(() => { closeAuth(); render(); }, 700);
     } catch (err) {
       console.error('auth failed', err);
-      let friendly = err?.message || 'فشل';
-      if (/invalid-email/i.test(friendly))          friendly = '⚠ الإيميل غير صالح';
-      else if (/email-already-in-use/i.test(friendly)) friendly = '⚠ الإيميل مستخدم مسبقاً — سجّل دخول';
-      else if (/weak-password/i.test(friendly))     friendly = '⚠ كلمة السر قصيرة — 6 أحرف على الأقل';
-      else if (/wrong-password|invalid-credential/i.test(friendly)) friendly = '⚠ الإيميل أو كلمة السر غير صحيحة';
-      else if (/user-not-found/i.test(friendly))    friendly = '⚠ لا يوجد حساب بهذا الإيميل';
-      else if (/network/i.test(friendly))           friendly = '⚠ تحقق من اتصال الإنترنت';
+      let friendly = err?.message || '';
+      if (/invalid-email/i.test(friendly))          friendly = t('auInvalidEmail');
+      else if (/email-already-in-use/i.test(friendly)) friendly = t('auEmailInUse');
+      else if (/weak-password/i.test(friendly))     friendly = t('auWeakPw');
+      else if (/wrong-password|invalid-credential/i.test(friendly)) friendly = t('auBadCreds');
+      else if (/user-not-found/i.test(friendly))    friendly = t('auNoUser');
+      else if (/network/i.test(friendly))           friendly = t('auNoNet');
       else friendly = '⚠ ' + friendly;
       setAuthMsg(friendly, 'danger');
     } finally {
@@ -1150,7 +1438,7 @@
       if (btn) {
         btn.textContent = '👤';
         btn.classList.remove('signed-in');
-        btn.setAttribute('title', 'تسجيل الدخول · Sign in');
+        btn.setAttribute('title', currentLang === 'en' ? 'Sign in' : 'تسجيل الدخول · Sign in');
       }
     }
   }
@@ -1200,17 +1488,17 @@
     const titleEl = $('#paywall-title');
     if (titleEl) {
       titleEl.textContent =
-        reason === 'items'         ? 'وصلت حد الحفظ المجاني' :
-        reason === 'locked-type'   ? `النوع "${lockedTypeAr}" مُقفَل` :
-                                     'هذا النوع مُقفَل';
+        reason === 'items'         ? t('pwTitle1') :
+        reason === 'locked-type'   ? `${t('pwTitle2Start')}${lockedTypeAr}${t('pwTitle2End')}` :
+                                     t('pwTitle3');
     }
     if (sub) {
       if (reason === 'items') {
-        sub.innerHTML = `النسخة المجانية تسمح بحفظ <strong>${FREE_ITEM_LIMIT} عناصر</strong> فقط. رقِّ إلى Pro بـ$2 (مرة واحدة) لفتح كل شي.`;
+        sub.innerHTML = t('pwSub1', FREE_ITEM_LIMIT);
       } else if (reason === 'locked-type') {
-        sub.innerHTML = `النوع المجاني الوحيد هو <strong>✨ برومبت</strong> (أوامر الذكاء الاصطناعي). لاستخدام "${esc(lockedTypeAr)}" وبقية الأنواع، رقِّ إلى Pro بـ$2 (مرة واحدة).`;
+        sub.innerHTML = t('pwSub2', esc(lockedTypeAr));
       } else {
-        sub.innerHTML = `النسخة المجانية تعطيك نوع واحد: <strong>✨ برومبت</strong> (أوامر الذكاء الاصطناعي). رقِّ إلى Pro بـ$2 (مرة واحدة) لفتح كل الأنواع + الأنواع المخصصة + حفظ غير محدود.`;
+        sub.innerHTML = t('pwSub3');
       }
     }
     $('#paywall-license').value = '';
@@ -1240,11 +1528,11 @@
     // future device they sign into inherits it automatically.
     if (isSignedIn()) {
       syncProToAccount(keyShown);
-      showPaywallMsg('✓ تم التفعيل! محفوظ في حسابك', 'success');
+      showPaywallMsg(currentLang === 'en' ? '✓ Activated! Saved to your account' : '✓ تم التفعيل! محفوظ في حسابك', 'success');
       toast(t('tProActivated'), 'success');
       setTimeout(() => { closePaywall(); render(); }, 900);
     } else {
-      showPaywallMsg('✓ تم التفعيل! استمتع بـPro', 'success');
+      showPaywallMsg(t('pwActivated'), 'success');
       toast(t('tProActivatedLocal'), 'success');
       // Offer to tie it to an account so it survives clearing data
       setTimeout(() => {
@@ -1277,7 +1565,7 @@
   async function activateLicense() {
     const raw = ($('#paywall-license')?.value || '').trim();
     if (!raw) {
-      showPaywallMsg('⚠ ادخل رمز تفعيل', 'danger');
+      showPaywallMsg('⚠ ' + t('pwEnterCode'), 'danger');
       return;
     }
 
@@ -1290,9 +1578,9 @@
 
     // 2) Live Gumroad license verification
     const btn = $('#paywall-activate');
-    const originalLabel = btn ? btn.textContent : 'فعّل';
-    if (btn) { btn.disabled = true; btn.textContent = '⏳ تحقّق...'; }
-    showPaywallMsg('⏳ جارٍ التحقّق من Gumroad...', '');
+    const originalLabel = btn ? btn.textContent : 'Activate';
+    if (btn) { btn.disabled = true; btn.textContent = t('pwActivateBtnLoading'); }
+    showPaywallMsg(t('pwVerifying'), '');
 
     try {
       const data = await verifyGumroadLicense(raw);
@@ -1300,10 +1588,10 @@
         finalizeActivation(raw);
         return;
       }
-      showPaywallMsg('⚠ رمز غير صالح. تأكد من النسخ الصحيح.', 'danger');
+      showPaywallMsg(t('pwInvalidCode'), 'danger');
     } catch (err) {
       console.error('License verification failed', err);
-      showPaywallMsg('⚠ تعذّر الاتصال بـGumroad. تحقق من الإنترنت وأعد المحاولة.', 'danger');
+      showPaywallMsg(t('pwNetFail'), 'danger');
     } finally {
       if (btn) { btn.disabled = false; btn.textContent = originalLabel; }
     }
@@ -1344,8 +1632,8 @@
   function deleteCustomType(id) {
     const hasItems = state.items.some((it) => it.type === id);
     const warning = hasItems
-      ? 'بعض العناصر تستخدم هذا النوع. ستُحوّل إلى "ملاحظة". تابع؟'
-      : 'حذف هذا النوع؟';
+      ? t('cfDeleteTypeWithItems')
+      : t('cfDeleteType');
     if (!confirm(warning)) return;
 
     state.customTypes = state.customTypes.filter((t) => t.id !== id);
@@ -1701,14 +1989,15 @@
     const it = state.items.find((x) => x.id === id);
     if (!it) return;
     trackRecent(id);
-    const t = getType(it.type);
+    const typ = getType(it.type);
     const modal = $('#detail-modal .modal');
     modal.setAttribute('data-type', it.type);
-    $('#detail-title-tag').textContent = t.en.toUpperCase();
+    $('#detail-title-tag').textContent = typ.en.toUpperCase();
 
+    const typeBadgeLabel = currentLang === 'en' ? `${typ.icon} ${typ.en}` : `${typ.icon} ${typ.ar} · ${typ.en}`;
     const badges = [
-      `<span class="badge type">${t.icon} ${esc(t.ar)} · ${esc(t.en)}</span>`,
-      it.important ? '<span class="badge important">⭐ مهم</span>' : '',
+      `<span class="badge type">${esc(typeBadgeLabel)}</span>`,
+      it.important ? `<span class="badge important">${t('detailImportantBadge')}</span>` : '',
       it.source ? `<span class="badge">📎 ${esc(it.source)}</span>` : '',
       `<span class="badge">${timeAgo(it.createdAt)}</span>`,
     ].filter(Boolean);
@@ -1718,14 +2007,16 @@
     if (it.type === 'code' && it.lang) {
       accessoryBlock = `<span class="badge" style="font-family:var(--mono); background:var(--code-bg); color:var(--code-text); border:none;">${esc(it.lang)}</span>`;
     } else if (it.type === 'prompt' && it.targetAi) {
-      accessoryBlock = `<span class="badge">→ ${esc(it.targetAi)}</span>${it.usedCount ? `<span class="badge">استُخدم ${it.usedCount}×</span>` : ''}`;
+      accessoryBlock = `<span class="badge">→ ${esc(it.targetAi)}</span>${it.usedCount ? `<span class="badge">${t('usedTimes', it.usedCount)}</span>` : ''}`;
     } else if ((it.type === 'note' || it.type === 'answer') && it.sourceUrl) {
-      accessoryBlock += `<a class="badge" href="${esc(it.sourceUrl)}" target="_blank" rel="noopener" style="color:var(--teal);">↗ فتح المرجع</a>`;
+      accessoryBlock += `<a class="badge" href="${esc(it.sourceUrl)}" target="_blank" rel="noopener" style="color:var(--teal);">${t('openRef')}</a>`;
     } else if (it.type === 'idea') {
       const st = STATUSES.find((s) => s.id === it.status);
       const pr = PRIORITIES.find((p) => p.id === it.priority);
-      if (st) accessoryBlock += `<span class="badge">● ${esc(st.ar)}</span>`;
-      if (pr) accessoryBlock += `<span class="badge pill-prio-${pr.id}">◈ ${esc(pr.ar)}</span>`;
+      const stLbl = st ? (currentLang === 'en' ? st.en : st.ar) : '';
+      const prLbl = pr ? (currentLang === 'en' ? pr.en : pr.ar) : '';
+      if (st) accessoryBlock += `<span class="badge">● ${esc(stLbl)}</span>`;
+      if (pr) accessoryBlock += `<span class="badge pill-prio-${pr.id}">◈ ${esc(prLbl)}</span>`;
     }
 
     // Tags
@@ -1740,7 +2031,7 @@
       if (vars.length) {
         varsBlock = `
           <div class="vars-section">
-            <div class="vars-label">🧩 عبّي المتغيّرات · Fill Variables</div>
+            <div class="vars-label">${t('varsTitle')}</div>
             ${vars.map((v) => `
               <div class="var-field">
                 <label>${esc(v)}</label>
@@ -1749,14 +2040,18 @@
             `).join('')}
             <div class="prompt-preview" id="prompt-preview">${highlightVars(it.body)}</div>
             <div style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;">
-              <button class="btn btn-primary btn-sm" id="copy-filled">⧉ انسخ المُعبّأ</button>
-              <button class="btn btn-ghost btn-sm" id="copy-raw">انسخ الأصلي</button>
+              <button class="btn btn-primary btn-sm" id="copy-filled">${t('copyFilled')}</button>
+              <button class="btn btn-ghost btn-sm" id="copy-raw">${t('copyRaw')}</button>
             </div>
           </div>`;
       }
     }
 
     const bodyClass = it.type === 'code' ? 'mono' : '';
+    const bodyLabelKey = {
+      code: 'detailCode', prompt: 'detailPrompt', answer: 'detailAnswer',
+      template: 'detailTemplate', idea: 'detailIdea',
+    }[it.type] || 'detailContent';
 
     $('#detail-body').innerHTML = `
       <div class="detail-badges">${badges.join('')}</div>
@@ -1764,20 +2059,13 @@
       ${accessoryBlock ? `<div class="detail-badges">${accessoryBlock}</div>` : ''}
       ${tags}
 
-      <div class="detail-label">${
-        it.type === 'code'     ? 'الكود · Code' :
-        it.type === 'prompt'   ? 'البرومبت · Prompt' :
-        it.type === 'answer'   ? 'الإجابة · Answer' :
-        it.type === 'template' ? 'القالب · Template' :
-        it.type === 'idea'     ? 'الفكرة · Idea' :
-        'المحتوى · Content'
-      }</div>
+      <div class="detail-label">${t(bodyLabelKey)}</div>
       <div class="detail-body-text ${bodyClass}">${esc(it.body)}</div>
 
       ${varsBlock}
 
       ${state.collections.length ? `
-        <div class="detail-label">الباقات · Collections</div>
+        <div class="detail-label">${t('detailCollections')}</div>
         <div class="add-to-coll-list">
           ${state.collections.map((c) => {
             const on = (c.itemIds || []).includes(it.id);
@@ -1793,12 +2081,12 @@
 
     // Actions
     $('#detail-actions').innerHTML = `
-      <button class="btn btn-primary btn-sm" data-act="copy">⧉ نسخ</button>
-      <button class="btn btn-ghost btn-sm" data-act="share">↗ مشاركة</button>
-      <button class="btn btn-ghost btn-sm" data-act="share-link">🔗 نسخ رابط</button>
-      <button class="btn btn-ghost btn-sm" data-act="star">${it.important ? '★ إلغاء النجمة' : '☆ ضع نجمة'}</button>
-      <button class="btn btn-ghost btn-sm" data-act="edit">✎ تعديل</button>
-      <button class="btn btn-danger btn-sm" data-act="delete">🗑 حذف</button>
+      <button class="btn btn-primary btn-sm" data-act="copy">${t('actCopy')}</button>
+      <button class="btn btn-ghost btn-sm" data-act="share">${t('actShare')}</button>
+      <button class="btn btn-ghost btn-sm" data-act="share-link">${t('actCopyLink')}</button>
+      <button class="btn btn-ghost btn-sm" data-act="star">${it.important ? t('actUnstar') : t('actStar')}</button>
+      <button class="btn btn-ghost btn-sm" data-act="edit">${t('actEdit')}</button>
+      <button class="btn btn-danger btn-sm" data-act="delete">${t('actDelete')}</button>
     `;
 
     $$('#detail-actions [data-act]').forEach((el) => {
@@ -1890,9 +2178,10 @@
     if (act === 'copy') {
       await copy(it.body);
     } else if (act === 'share') {
-      const t = getType(it.type);
+      const typ = getType(it.type);
       const shareUrl = buildShareUrl(it);
-      const txt = `${t.icon} ${it.title}\n\n${it.body}\n\n— ذاكرة الذكاء الاصطناعي\n${shareUrl}`;
+      const appName = currentLang === 'en' ? 'AI Memory' : 'ذاكرة الذكاء الاصطناعي';
+      const txt = `${typ.icon} ${it.title}\n\n${it.body}\n\n— ${appName}\n${shareUrl}`;
       if (navigator.share) {
         try { await navigator.share({ title: it.title, text: txt, url: shareUrl }); return; }
         catch {}
@@ -1956,7 +2245,13 @@
   }
 
   /* ============ MONETIZE ============ */
-  const PRICE_OPTIONS = ['مجاني', '$4.99', '$9.99', '$19.99', '$49.99'];
+  // Price options — the "free" entry is localized on render; numeric prices are language-neutral.
+  const PAID_PRICES = ['$4.99', '$9.99', '$19.99', '$49.99'];
+  function priceOptions() {
+    return [currentLang === 'en' ? 'Free' : 'مجاني', ...PAID_PRICES];
+  }
+  // Back-compat default value used when a collection has no saved price yet.
+  function defaultPrice() { return currentLang === 'en' ? 'Free' : 'مجاني'; }
 
   function openMonetize() {
     renderMonetize();
@@ -1971,31 +2266,28 @@
 
     $('#monet-body').innerHTML = `
       <div class="monet-banner">
-        <span class="monet-banner-tag">🚀 قريباً · COMING SOON</span>
-        <strong>حوّل معرفتك إلى دخل.</strong>
-        <p>
-          مبيعات الباقات قادمة قريباً. جهّز أفضل باقاتك الآن — اضبط السعر والحالة، وحالما نفتح البيع
-          ستكون باقاتك أول الجاهزة على الرف.
-        </p>
+        <span class="monet-banner-tag">${t('mzComingSoon')}</span>
+        <strong>${t('mzBannerHead')}</strong>
+        <p>${t('mzBannerBody')}</p>
       </div>
 
       ${colls.length === 0 ? `
         <div class="empty">
           <div class="empty-emoji">📦</div>
-          <h3>لا توجد باقات بعد</h3>
-          <p>أنشئ باقة من زر الباقات 📁 ثم ارجع هنا.</p>
+          <h3>${t('mzEmpty')}</h3>
+          <p>${t('mzEmptyP')}</p>
         </div>
       ` : `
         <p style="font-size:12px; color:var(--muted); margin:0 0 14px;">
-          ${colls.length} ${colls.length === 1 ? 'باقة' : 'باقات'} · اضبط السعر والحالة لكل باقة
+          ${t('mzNCollections', colls.length)}
         </p>
         ${colls.map((c) => {
-          const m = c.monetize || { status: 'draft', visibility: 'private', price: 'مجاني' };
+          const m = c.monetize || { status: 'draft', visibility: 'private', price: defaultPrice() };
           const count = (c.itemIds || []).length;
           const statusLabel =
-            m.status === 'ready'  ? { cls: 'monet-status-ready',  ar: 'جاهزة' } :
-            m.status === 'paused' ? { cls: 'monet-status-paused', ar: 'موقوفة' } :
-                                    { cls: 'monet-status-draft',  ar: 'مسودّة' };
+            m.status === 'ready'  ? { cls: 'monet-status-ready',  label: t('mzReady') } :
+            m.status === 'paused' ? { cls: 'monet-status-paused', label: t('mzPaused') } :
+                                    { cls: 'monet-status-draft',  label: t('mzDraft') };
           return `
             <div class="monet-row" style="--coll-color: ${esc(c.color)};">
               <div class="monet-row-head">
@@ -2003,23 +2295,23 @@
                 <div style="flex:1; min-width:0;">
                   <div class="monet-row-name">${esc(c.name)}</div>
                   <div class="monet-row-meta">
-                    ${count} ${count === 1 ? 'عنصر' : 'عناصر'} ·
-                    <span class="monet-status-pill ${statusLabel.cls}">${statusLabel.ar}</span>
+                    ${t('mzItemsSuffix', count)} ·
+                    <span class="monet-status-pill ${statusLabel.cls}">${statusLabel.label}</span>
                   </div>
                 </div>
               </div>
               <div class="monet-row-controls">
                 <select class="monet-select" data-monet-status="${c.id}">
-                  <option value="draft"  ${m.status === 'draft'  ? 'selected' : ''}>مسودّة · Draft</option>
-                  <option value="ready"  ${m.status === 'ready'  ? 'selected' : ''}>جاهزة · Ready</option>
-                  <option value="paused" ${m.status === 'paused' ? 'selected' : ''}>موقوفة · Paused</option>
+                  <option value="draft"  ${m.status === 'draft'  ? 'selected' : ''}>${t('mzDraftFull')}</option>
+                  <option value="ready"  ${m.status === 'ready'  ? 'selected' : ''}>${t('mzReadyFull')}</option>
+                  <option value="paused" ${m.status === 'paused' ? 'selected' : ''}>${t('mzPausedFull')}</option>
                 </select>
                 <select class="monet-select" data-monet-vis="${c.id}">
-                  <option value="private" ${m.visibility === 'private' ? 'selected' : ''}>خاصة · Private</option>
-                  <option value="public"  ${m.visibility === 'public'  ? 'selected' : ''}>عامة · Public</option>
+                  <option value="private" ${m.visibility === 'private' ? 'selected' : ''}>${t('mzPrivate')}</option>
+                  <option value="public"  ${m.visibility === 'public'  ? 'selected' : ''}>${t('mzPublic')}</option>
                 </select>
                 <select class="monet-select" data-monet-price="${c.id}">
-                  ${PRICE_OPTIONS.map((p) =>
+                  ${priceOptions().map((p) =>
                     `<option value="${esc(p)}" ${m.price === p ? 'selected' : ''}>${esc(p)}</option>`
                   ).join('')}
                 </select>
@@ -2043,7 +2335,7 @@
   function updateMonet(collId, patch) {
     const c = state.collections.find((x) => x.id === collId);
     if (!c) return;
-    c.monetize = { ...(c.monetize || { status: 'draft', visibility: 'private', price: 'مجاني' }), ...patch };
+    c.monetize = { ...(c.monetize || { status: 'draft', visibility: 'private', price: defaultPrice() }), ...patch };
     persist();
     toast(t('tSaved'), 'success');
     renderMonetize();
@@ -2066,9 +2358,10 @@
       (JSON.stringify({ items: state.items, collections: state.collections }).length / 1024) * 10
     ) / 10;
 
+    const landingHref = currentLang === 'en' ? 'landing-en.html' : 'landing.html';
     $('#settings-body').innerHTML = `
       <div class="settings-section">
-        <h4>الحساب · Account ${isPro() ? '<span class="pro-badge">💎 PRO</span>' : ''}</h4>
+        <h4>${t('stAccount')} ${isPro() ? `<span class="pro-badge">${t('stAccountProBadge')}</span>` : ''}</h4>
         ${(() => {
           const u = currentUser();
           if (u) {
@@ -2079,138 +2372,140 @@
                 <div class="account-info">
                   <div class="account-email">${esc(u.user.email)}</div>
                   <div class="account-status">
-                    ${isPro() ? '💎 Pro مفعّل ومربوط بالحساب' : '🆓 حساب مجاني'}
+                    ${isPro() ? t('stProLinked') : t('stFreeAcc')}
                   </div>
                 </div>
-                <button class="btn btn-ghost btn-sm" id="set-signout">خروج</button>
+                <button class="btn btn-ghost btn-sm" id="set-signout">${t('stSignOut')}</button>
               </div>
               <p style="font-size:11px; color:var(--muted); margin:6px 0 0;">
-                💡 ميزة Pro تنتقل مع حسابك لأي جهاز تسجل الدخول فيه. المحفوظات تبقى محلية.
+                ${t('stAccountHint')}
               </p>
             `;
           }
           return `
             <p style="font-size:12px; color:var(--muted); margin:0 0 10px; line-height:1.7;">
-              سجّل حساباً لحفظ Pro وتفعيله على كل أجهزتك بنقرة. المحفوظات تبقى محلية.
+              ${t('stSignedOut')}
             </p>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
-              <button class="btn btn-teal btn-sm" id="set-signup">إنشاء حساب</button>
-              <button class="btn btn-ghost btn-sm" id="set-signin">تسجيل الدخول</button>
+              <button class="btn btn-teal btn-sm" id="set-signup">${t('stSignUp')}</button>
+              <button class="btn btn-ghost btn-sm" id="set-signin">${t('stSignIn')}</button>
             </div>
           `;
         })()}
       </div>
 
       <div class="settings-section">
-        <h4>البيانات · Data</h4>
+        <h4>${t('stDataTitle')}</h4>
         <div class="settings-row">
           <div class="settings-row-body">
-            <p class="settings-row-title">⬇ تصدير كل شي</p>
-            <p class="settings-row-desc">ملف JSON يحتوي جميع العناصر والباقات — نسخة احتياطية أو نقل بين أجهزة.</p>
+            <p class="settings-row-title">${t('stExportTitle')}</p>
+            <p class="settings-row-desc">${t('stExportDesc')}</p>
           </div>
-          <button class="btn btn-indigo btn-sm" id="set-export">تصدير</button>
+          <button class="btn btn-indigo btn-sm" id="set-export">${t('stExportBtn')}</button>
         </div>
 
         <div class="settings-row">
           <div class="settings-row-body">
-            <p class="settings-row-title">⬆ استيراد ملف</p>
-            <p class="settings-row-desc">ادمج بيانات من ملف JSON سابق التصدير. لن يُحذف أي شي — فقط تُضاف العناصر الجديدة.</p>
+            <p class="settings-row-title">${t('stImportTitle')}</p>
+            <p class="settings-row-desc">${t('stImportDesc')}</p>
           </div>
-          <button class="btn btn-ghost btn-sm" id="set-import">اختر ملف</button>
+          <button class="btn btn-ghost btn-sm" id="set-import">${t('stImportBtn')}</button>
         </div>
 
         <div class="settings-row">
           <div class="settings-row-body">
-            <p class="settings-row-title" style="color: var(--danger);">🗑 مسح كل شي</p>
-            <p class="settings-row-desc">يحذف جميع العناصر والباقات والتاريخ المحفوظ في هذا الجهاز. لا يمكن التراجع.</p>
+            <p class="settings-row-title" style="color: var(--danger);">${t('stClearTitle')}</p>
+            <p class="settings-row-desc">${t('stClearDesc')}</p>
           </div>
-          <button class="btn btn-danger btn-sm" id="set-clear">مسح كامل</button>
+          <button class="btn btn-danger btn-sm" id="set-clear">${t('stClearBtn')}</button>
         </div>
       </div>
 
       ${!isPro() ? `
         <div class="settings-section">
-          <h4>الحدود المجانية · Free Limits</h4>
+          <h4>${t('stLimitsTitle')}</h4>
           <div class="usage-meter">
-            <span class="usage-meter-text">العناصر: ${state.items.length} / ${FREE_ITEM_LIMIT}</span>
+            <span class="usage-meter-text">${t('stLimitItems', state.items.length, FREE_ITEM_LIMIT)}</span>
             <div class="usage-meter-bar">
               <div class="usage-meter-fill" style="width: ${Math.min(100, (state.items.length / FREE_ITEM_LIMIT) * 100)}%"></div>
             </div>
           </div>
           <div class="usage-meter">
-            <span class="usage-meter-text">أنواع مخصصة: ${state.customTypes.length} / ${FREE_TYPE_LIMIT}</span>
+            <span class="usage-meter-text">${t('stLimitTypes', state.customTypes.length, FREE_TYPE_LIMIT)}</span>
             <div class="usage-meter-bar">
               <div class="usage-meter-fill" style="width: ${Math.min(100, (state.customTypes.length / FREE_TYPE_LIMIT) * 100)}%"></div>
             </div>
           </div>
           ${(state.items.length >= FREE_ITEM_LIMIT || state.customTypes.length >= FREE_TYPE_LIMIT)
-            ? '<button class="btn btn-primary" id="set-upgrade" style="width:100%; margin-top:8px;">💎 ترقية إلى Pro — $2</button>'
-            : '<p style="font-size:12px; color:var(--muted); margin:8px 0 0;">رقِّ إلى Pro بـ$2 (مرة واحدة) لإزالة كل الحدود.</p>'}
+            ? `<button class="btn btn-primary" id="set-upgrade" style="width:100%; margin-top:8px;">${t('stUpgradeBtn')}</button>`
+            : `<p style="font-size:12px; color:var(--muted); margin:8px 0 0;">${t('stProUpgradeHint')}</p>`}
         </div>
       ` : ''}
 
       <div class="settings-section">
         <h4>
-          الأنواع المخصصة · Custom Types
-          ${isPro() ? '<span class="pro-badge">💎 PRO</span>' : ''}
+          ${t('stCustomTypesTitle')}
+          ${isPro() ? `<span class="pro-badge">${t('stAccountProBadge')}</span>` : ''}
         </h4>
         ${state.customTypes.length === 0 ? `
           <p style="font-size:12px; color:var(--muted); margin:0; line-height:1.7;">
-            لا توجد أنواع مخصصة بعد. عند إضافة عنصر جديد، استخدم زر "+ إضافة" في شريط اختيار النوع لإنشاء نوع خاص بك.
+            ${t('stCustomTypesEmpty')}
           </p>
-        ` : state.customTypes.map((t) => `
+        ` : state.customTypes.map((ct) => {
+          const label = currentLang === 'en' ? ct.en : `${ct.ar} · ${ct.en}`;
+          return `
           <div class="settings-row">
             <div class="settings-row-body" style="display:flex; align-items:center; gap:10px;">
-              <div style="width:32px; height:32px; border-radius:8px; background:${esc(t.color || '#0D9488')}; color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;">${esc(t.icon)}</div>
+              <div style="width:32px; height:32px; border-radius:8px; background:${esc(ct.color || '#0D9488')}; color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;">${esc(ct.icon)}</div>
               <div style="flex:1; min-width:0;">
-                <p class="settings-row-title">${esc(t.ar)} · ${esc(t.en)}</p>
-                <p class="settings-row-desc">${state.items.filter((it) => it.type === t.id).length} عنصر يستخدم هذا النوع</p>
+                <p class="settings-row-title">${esc(label)}</p>
+                <p class="settings-row-desc">${t('stCustomTypeUses', state.items.filter((it) => it.type === ct.id).length)}</p>
               </div>
             </div>
-            <button class="btn btn-danger btn-sm" data-del-type="${esc(t.id)}">🗑 حذف</button>
-          </div>
-        `).join('')}
+            <button class="btn btn-danger btn-sm" data-del-type="${esc(ct.id)}">${t('stDelTypeBtn')}</button>
+          </div>`;
+        }).join('')}
       </div>
 
       <div class="settings-section">
-        <h4>إحصائيات · Stats</h4>
+        <h4>${t('stStatsTitle')}</h4>
         <div class="about-box">
-          <div class="about-kv"><span>عناصر · Items</span><span>${totalItems}</span></div>
-          <div class="about-kv"><span>باقات · Collections</span><span>${totalColls}</span></div>
-          <div class="about-kv"><span>مفضلة ⭐ · Favorites</span><span>${favs}</span></div>
-          <div class="about-kv"><span>حجم البيانات · Storage</span><span>${sizeKb} KB</span></div>
+          <div class="about-kv"><span>${t('stItems')}</span><span>${totalItems}</span></div>
+          <div class="about-kv"><span>${t('stCollections')}</span><span>${totalColls}</span></div>
+          <div class="about-kv"><span>${t('stFavorites')}</span><span>${favs}</span></div>
+          <div class="about-kv"><span>${t('stStorage')}</span><span>${sizeKb} KB</span></div>
         </div>
       </div>
 
       <div class="settings-section">
-        <h4>الخصوصية · Privacy</h4>
+        <h4>${t('stPrivacyTitle')}</h4>
         <div class="privacy-notice" style="margin:0;">
           <div class="privacy-notice-head">
             <span class="ico">🔒</span>
-            <span>بياناتك — في جهازك فقط</span>
+            <span>${t('stPrivacyHead')}</span>
           </div>
           <ul>
-            <li><strong>كل ما تحفظه يبقى في جهازك.</strong> لا نحن ولا أي طرف ثالث نطّلع عليه.</li>
-            <li>البيانات محفوظة في <strong>localStorage</strong> الخاص بمتصفحك.</li>
-            <li>لو مسحت بيانات المتصفح → كل المحفوظات تختفي.</li>
-            <li>لو غيّرت الجهاز → البيانات لا تنتقل تلقائياً.</li>
-            <li>لنقل بياناتك: <strong>تصدير JSON</strong> ← استيراد في الجهاز الثاني.</li>
-            <li>الحساب (اختياري) لنقل Pro فقط — المحفوظات تبقى محلية.</li>
+            <li>${t('stPrivacy1')}</li>
+            <li>${t('stPrivacy2')}</li>
+            <li>${t('stPrivacy3')}</li>
+            <li>${t('stPrivacy4')}</li>
+            <li>${t('stPrivacy5')}</li>
+            <li>${t('stPrivacy6')}</li>
           </ul>
         </div>
       </div>
 
       <div class="settings-section">
-        <h4>عن التطبيق · About</h4>
+        <h4>${t('stAboutTitle')}</h4>
         <div class="about-box">
-          <strong>ذاكرة الذكاء الاصطناعي</strong> · <span style="color:var(--muted);">AI Memory v1.0</span>
+          <strong>${currentLang === 'en' ? 'AI Memory' : 'ذاكرة الذكاء الاصطناعي'}</strong> · <span style="color:var(--muted);">${currentLang === 'en' ? 'AI Memory' : 'AI Memory'} v1.0</span>
           <p style="font-size:12px; color:var(--muted); margin:10px 0 0; line-height:1.7;">
-            دماغك الثاني لمحادثات الـAI. كل ما تحفظه يبقى محلياً على جهازك — بدون سحابة، بدون تتبّع.
+            ${t('stAboutIntro')}
           </p>
           <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
-            <a href="landing.html" class="btn btn-ghost btn-sm">📖 الصفحة التعريفية</a>
-            <button type="button" class="btn btn-ghost btn-sm" id="set-show-welcome">👋 إعادة الترحيب</button>
-            <a href="/" class="btn btn-ghost btn-sm">🏠 CoffeZ</a>
+            <a href="${landingHref}" class="btn btn-ghost btn-sm">${t('stAboutLanding')}</a>
+            <button type="button" class="btn btn-ghost btn-sm" id="set-show-welcome">${t('stAboutWelcome')}</button>
+            <a href="/" class="btn btn-ghost btn-sm">${t('stAboutCoffez')}</a>
           </div>
         </div>
       </div>
@@ -2300,18 +2595,16 @@
   }
 
   function renderCollectionsList() {
-    $('#coll-modal-title').textContent = 'الباقات';
+    $('#coll-modal-title').textContent = t('clHeader');
     const body = $('#coll-body');
     const colls = state.collections.sort((a, b) => b.createdAt - a.createdAt);
 
     body.innerHTML = `
-      <p style="font-size:13px; color:var(--muted); margin:0 0 16px;">
-        نظّم محفوظاتك في باقات مسمّاة — مثل "أفضل البرومبتس" أو "مكتبة الكود".
-      </p>
+      <p style="font-size:13px; color:var(--muted); margin:0 0 16px;">${t('clEmpty')}</p>
       <div class="coll-grid">
         <button class="coll-add" id="coll-new">
           <span class="coll-add-plus">＋</span>
-          <span>باقة جديدة · New Collection</span>
+          <span>${t('clNewTile')}</span>
         </button>
         ${colls.map((c) => {
           const count = (c.itemIds || []).length;
@@ -2323,7 +2616,7 @@
               </div>
               <h4 class="coll-name">${esc(c.name)}</h4>
               <div class="coll-desc">${esc(c.description || '—')}</div>
-              <div class="coll-meta">${timeAgo(c.createdAt)} · ${count === 1 ? '١ عنصر' : count + ' عناصر'}</div>
+              <div class="coll-meta">${timeAgo(c.createdAt)} · ${t('clItemsCount', count)}</div>
             </button>`;
         }).join('')}
       </div>
@@ -2338,38 +2631,35 @@
   function openCollForm(existing) {
     state.collEditing = existing ? existing.id : null;
     const c = existing || { name: '', description: '', icon: '📁', color: '#0D9488' };
-    $('#coll-modal-title').textContent = existing ? 'تعديل الباقة' : 'باقة جديدة';
+    $('#coll-modal-title').textContent = existing ? t('clModalTitleEdit') : t('clModalTitleNew');
 
     $('#coll-body').innerHTML = `
       <button class="back-link" id="coll-form-back" style="background:none; border:none; color:var(--muted); font-weight:700; font-size:12px; padding:0; cursor:pointer; margin-bottom:14px; display:inline-flex; gap:6px; align-items:center;">
-        ← رجوع للقائمة
+        ${t('clBackList')}
       </button>
 
       <form id="coll-form">
         <div class="field">
           <div class="field-label">
-            <span>اسم الباقة <span class="req">*</span></span>
-            <span class="en">Name</span>
+            <span>${t('clNameLbl')} <span class="req">*</span></span>
           </div>
           <input type="text" id="coll-name" required maxlength="60"
-                 placeholder="مثلاً: برومبتس التسويق"
+                 placeholder="${t('clPhName')}"
                  value="${esc(c.name)}">
         </div>
 
         <div class="field">
           <div class="field-label">
-            <span>وصف قصير (اختياري)</span>
-            <span class="en">Description</span>
+            <span>${t('clDescLbl')}</span>
           </div>
           <input type="text" id="coll-desc" maxlength="200"
-                 placeholder="ما الذي يميّز هذه الباقة؟"
+                 placeholder="${t('clPhDesc')}"
                  value="${esc(c.description || '')}">
         </div>
 
         <div class="field">
           <div class="field-label">
-            <span>الأيقونة</span>
-            <span class="en">Icon</span>
+            <span>${t('clIconLbl')}</span>
           </div>
           <div class="icon-pick-row" id="icon-pick-row">
             ${COLL_ICONS.map((ic) =>
@@ -2380,8 +2670,7 @@
 
         <div class="field">
           <div class="field-label">
-            <span>اللون</span>
-            <span class="en">Color</span>
+            <span>${t('clColorLbl')}</span>
           </div>
           <div class="picker-row" id="color-pick-row">
             ${COLL_COLORS.map((col) =>
@@ -2395,9 +2684,9 @@
 
         <div style="display:flex; gap:8px; margin-top:18px; flex-wrap:wrap;">
           <button type="submit" class="btn btn-indigo btn-lg" style="flex:1; min-width:160px;">
-            ${existing ? '💾 حفظ التعديلات' : '＋ إنشاء الباقة'}
+            ${existing ? t('edSaveChanges') : t('clCreateBtn')}
           </button>
-          ${existing ? '<button type="button" class="btn btn-danger" id="coll-delete">🗑 حذف</button>' : ''}
+          ${existing ? `<button type="button" class="btn btn-danger" id="coll-delete">${t('clDelBtn')}</button>` : ''}
         </div>
       </form>
     `;
@@ -2427,7 +2716,7 @@
         if (!confirm(t('cfDeleteCollection'))) return;
         state.collections = state.collections.filter((x) => x.id !== existing.id);
         persist();
-        toast('تم حذف الباقة', 'success');
+        toast(t('clCollDel'), 'success');
         renderCollectionsList();
       };
     }
@@ -2436,7 +2725,7 @@
   function submitCollForm(e) {
     e.preventDefault();
     const name = $('#coll-name').value.trim();
-    if (!name) { toast('اسم الباقة مطلوب', 'error'); return; }
+    if (!name) { toast(t('clNameReq'), 'error'); return; }
     const payload = {
       name,
       description: $('#coll-desc').value.trim(),
@@ -2459,7 +2748,7 @@
         createdAt: Date.now(),
       });
       persist();
-      toast('تم إنشاء الباقة ✓', 'success');
+      toast(t('clCreated'), 'success');
     }
     state.collEditing = null;
     renderCollectionsList();
@@ -2478,7 +2767,7 @@
 
     $('#coll-body').innerHTML = `
       <div class="coll-breadcrumb">
-        <button id="coll-back-list">← كل الباقات</button>
+        <button id="coll-back-list">${t('clBackList')}</button>
         <span>/</span>
         <span>${esc(c.name)}</span>
       </div>
@@ -2487,13 +2776,13 @@
         <div class="coll-icon">${esc(c.icon)}</div>
         <div style="flex:1; min-width:0;">
           <h3>${esc(c.name)}</h3>
-          <p>${esc(c.description || 'لا يوجد وصف')}</p>
+          <p>${esc(c.description || t('clNoDesc'))}</p>
           <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
-            <button class="btn btn-indigo btn-sm" id="coll-add-items">＋ إضافة عناصر</button>
-            <button class="btn btn-ghost btn-sm" id="coll-edit">✎ تعديل</button>
-            <button class="btn btn-ghost btn-sm" id="coll-export-pdf">📄 PDF</button>
-            <button class="btn btn-ghost btn-sm" id="coll-export-md">📝 Markdown</button>
-            <button class="btn btn-ghost btn-sm" id="coll-export">⬇ JSON</button>
+            <button class="btn btn-indigo btn-sm" id="coll-add-items">${t('clAddItemsBtn')}</button>
+            <button class="btn btn-ghost btn-sm" id="coll-edit">${t('clEditBtn')}</button>
+            <button class="btn btn-ghost btn-sm" id="coll-export-pdf">${t('clExportPdf')}</button>
+            <button class="btn btn-ghost btn-sm" id="coll-export-md">${t('clExportMd')}</button>
+            <button class="btn btn-ghost btn-sm" id="coll-export">${t('clExportJson')}</button>
           </div>
         </div>
       </div>
@@ -2505,8 +2794,8 @@
       ` : `
         <div class="empty">
           <div class="empty-emoji">📭</div>
-          <h3>الباقة فارغة</h3>
-          <p>اضغط "+ إضافة عناصر" أعلاه لاختيار ما تبي ضمّه هنا.</p>
+          <h3>${t('clEmptyInside')}</h3>
+          <p>${t('clEmptyInsideP')}</p>
         </div>
       `}
     `;
@@ -2532,14 +2821,14 @@
     c.itemIds = c.itemIds || [];
 
     const body = $('#coll-body');
-    $('#coll-modal-title').textContent = 'إضافة عناصر';
+    $('#coll-modal-title').textContent = t('clModalTitleAddItems');
 
     // picker state — start with items already in the collection selected
     const selected = new Set(c.itemIds);
     const query = { q: '', type: 'all' };
 
     const typesOpts = allTypes()
-      .map((t) => `<option value="${t.id}">${t.icon} ${esc(t.ar)}</option>`).join('');
+      .map((tt) => `<option value="${tt.id}">${tt.icon} ${esc(currentLang === 'en' ? tt.en : tt.ar)}</option>`).join('');
 
     function paint() {
       const q = query.q.toLowerCase();
@@ -2556,28 +2845,31 @@
       const toAdd = [...selected].filter((id) => !c.itemIds.includes(id)).length;
       const toRemove = c.itemIds.filter((id) => !selected.has(id)).length;
 
+      const addToLabel = currentLang === 'en' ? `Add items to "${esc(c.name)}"` : `إضافة عناصر إلى "${esc(c.name)}"`;
+      const nowSelected = t('clSelectedNow', selected.size);
+
       body.innerHTML = `
         <div class="coll-breadcrumb">
-          <button id="pick-back">← رجوع للباقة</button>
+          <button id="pick-back">${t('clBackToColl')}</button>
           <span>/</span>
-          <span>إضافة عناصر إلى "${esc(c.name)}"</span>
+          <span>${addToLabel}</span>
         </div>
 
         <p style="font-size:13px; color:var(--muted); margin:0 0 14px;">
-          اختر العناصر اللي تبي تضمّها. الأخضر = داخل الباقة، الرمادي = خارجها.
+          ${t('clSelectItems')}
           <br>
-          <strong style="color:var(--ink);">${selected.size}</strong> محدّد الآن
-          ${toAdd ? `· <span style="color:var(--success);">+${toAdd} جديد</span>` : ''}
-          ${toRemove ? `· <span style="color:var(--danger);">-${toRemove} سيُشال</span>` : ''}
+          ${nowSelected}
+          ${toAdd ? '· ' + t('clNewItems', toAdd) : ''}
+          ${toRemove ? '· ' + t('clWillRemove', toRemove) : ''}
         </p>
 
         <div class="toolbar" style="margin-bottom:14px;">
           <div class="search-field has-value">
             <span class="search-field-icon">⌕</span>
-            <input type="search" id="pick-q" placeholder="ابحث في العناصر..." value="${esc(query.q)}">
+            <input type="search" id="pick-q" placeholder="${t('clSearchItems')}" value="${esc(query.q)}">
           </div>
           <select class="type-select" id="pick-type" style="width:100%;">
-            <option value="all">🗂 كل الأنواع (${state.items.length})</option>
+            <option value="all">${t('clAllTypes', state.items.length)}</option>
             ${typesOpts}
           </select>
         </div>
@@ -2585,23 +2877,24 @@
         ${list.length === 0 ? `
           <div class="empty">
             <div class="empty-emoji">🔍</div>
-            <h3>لا توجد عناصر</h3>
-            <p>جرّب كلمة ثانية أو غيّر النوع.</p>
+            <h3>${t('clNoItems')}</h3>
+            <p>${t('clNoItemsP')}</p>
           </div>
         ` : `
           <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:18px;">
             ${list.map((it) => {
-              const t = getType(it.type);
+              const tt = getType(it.type);
               const on = selected.has(it.id);
+              const typeName = currentLang === 'en' ? tt.en : tt.ar;
               return `
                 <label class="pack-select ${on ? 'on' : ''}" data-pick-item="${it.id}" style="cursor:pointer;">
                   <div class="pack-check">${on ? '✓' : ''}</div>
                   <div style="flex:1; min-width:0;">
                     <div style="font-size:13px; font-weight:700; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                      ${t.icon} ${esc(it.title)}
+                      ${tt.icon} ${esc(it.title)}
                     </div>
                     <div style="font-size:11px; color:var(--muted);">
-                      ${esc(t.ar)} · ${timeAgo(it.createdAt)}
+                      ${esc(typeName)} · ${timeAgo(it.createdAt)}
                       ${it.source ? `· ${esc(it.source)}` : ''}
                     </div>
                   </div>
@@ -2611,8 +2904,8 @@
         `}
 
         <div style="position: sticky; bottom: 0; background: var(--card); padding: 12px 0; border-top: 1px solid var(--line); display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn btn-indigo" id="pick-save" style="flex:1; min-width:150px;">💾 حفظ التغييرات</button>
-          <button class="btn btn-ghost" id="pick-cancel">إلغاء</button>
+          <button class="btn btn-indigo" id="pick-save" style="flex:1; min-width:150px;">${t('clSaveBtn')}</button>
+          <button class="btn btn-ghost" id="pick-cancel">${t('edCancel')}</button>
         </div>
       `;
 
@@ -2634,7 +2927,7 @@
         c.itemIds = [...selected];
         persist();
         const added = c.itemIds.length - existingInColl + toRemove;
-        toast(`تم الحفظ ✓ (الباقة فيها ${c.itemIds.length})`, 'success');
+        toast(t('clSavedToast', c.itemIds.length), 'success');
         openCollDetail(collId);
       };
     }
@@ -2666,33 +2959,41 @@
     a.download = safeFileName(c.name) + '.json';
     document.body.appendChild(a); a.click(); a.remove();
     URL.revokeObjectURL(url);
-    toast('تم التصدير JSON ✓', 'success');
+    toast(currentLang === 'en' ? 'Exported JSON ✓' : 'تم التصدير JSON ✓', 'success');
   }
 
   function exportCollectionMarkdown(c) {
     const items = collectionItems(c);
-    if (items.length === 0) { toast('الباقة فارغة', 'error'); return; }
+    const en = currentLang === 'en';
+    if (items.length === 0) { toast(en ? 'Collection is empty' : 'الباقة فارغة', 'error'); return; }
 
-    const today = new Date().toLocaleDateString('ar');
+    const today = new Date().toLocaleDateString(en ? 'en-US' : 'ar');
+    const summary = en
+      ? `*${items.length} item${items.length === 1 ? '' : 's'} · exported ${today}*`
+      : `*${items.length} عنصر · صُدِّر في ${today}*`;
     const lines = [];
     lines.push(`# ${c.name}`);
     lines.push('');
     if (c.description) { lines.push(`> ${c.description}`); lines.push(''); }
-    lines.push(`*${items.length} عنصر · صُدِّر في ${today}*`);
+    lines.push(summary);
     lines.push('');
     lines.push('---');
     lines.push('');
 
+    const lbl = en
+      ? { type: 'Type', src: 'Source', lang: 'Language', ai: 'Target AI', tags: 'Tags' }
+      : { type: 'النوع', src: 'المصدر', lang: 'اللغة', ai: 'موجَّه لـ', tags: 'وسوم' };
+
     items.forEach((it, i) => {
-      const t = getType(it.type);
+      const typ = getType(it.type);
       lines.push(`## ${i + 1}. ${it.title}`);
       lines.push('');
       const meta = [];
-      meta.push(`**النوع**: ${t.icon} ${t.ar} · ${t.en}`);
-      if (it.source) meta.push(`**المصدر**: ${it.source}`);
-      if (it.lang) meta.push(`**اللغة**: \`${it.lang}\``);
-      if (it.targetAi) meta.push(`**موجَّه لـ**: ${it.targetAi}`);
-      if (it.tags && it.tags.length) meta.push(`**وسوم**: ${it.tags.map((x) => '#' + x).join(' ')}`);
+      meta.push(`**${lbl.type}**: ${typ.icon} ${en ? typ.en : typ.ar + ' · ' + typ.en}`);
+      if (it.source) meta.push(`**${lbl.src}**: ${it.source}`);
+      if (it.lang) meta.push(`**${lbl.lang}**: \`${it.lang}\``);
+      if (it.targetAi) meta.push(`**${lbl.ai}**: ${it.targetAi}`);
+      if (it.tags && it.tags.length) meta.push(`**${lbl.tags}**: ${it.tags.map((x) => '#' + x).join(' ')}`);
       lines.push(meta.join(' · '));
       lines.push('');
 
@@ -2708,7 +3009,9 @@
       lines.push('');
     });
 
-    lines.push(`_صُدِّر من ذاكرة الذكاء الاصطناعي · AI Memory · coffez.net/pages/zakerah_`);
+    lines.push(en
+      ? '_Exported from AI Memory · coffez.net/pages/zakerah_'
+      : '_صُدِّر من ذاكرة الذكاء الاصطناعي · AI Memory · coffez.net/pages/zakerah_');
 
     const blob = new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -2717,12 +3020,12 @@
     a.download = safeFileName(c.name) + '.md';
     document.body.appendChild(a); a.click(); a.remove();
     URL.revokeObjectURL(url);
-    toast('تم التصدير Markdown ✓', 'success');
+    toast(currentLang === 'en' ? 'Exported Markdown ✓' : 'تم التصدير Markdown ✓', 'success');
   }
 
   function exportCollectionPDF(c) {
     const items = collectionItems(c);
-    if (items.length === 0) { toast('الباقة فارغة', 'error'); return; }
+    if (items.length === 0) { toast(currentLang === 'en' ? 'Collection is empty' : 'الباقة فارغة', 'error'); return; }
 
     const today = new Date().toLocaleDateString('ar');
     const css = `
@@ -2763,10 +3066,12 @@
         font-size: 11px; color: #8E99AC; text-align: center; }
     `;
 
+    const en = currentLang === 'en';
     const itemHTML = items.map((it, i) => {
-      const t = getType(it.type);
+      const typ = getType(it.type);
+      const typeLabel = en ? typ.en : `${typ.ar} · ${typ.en}`;
       const badges = [
-        `<span class="badge t">${t.icon} ${esc(t.ar)} · ${esc(t.en)}</span>`,
+        `<span class="badge t">${typ.icon} ${esc(typeLabel)}</span>`,
         it.source ? `<span class="badge">📎 ${esc(it.source)}</span>` : '',
         it.lang ? `<span class="badge">${esc(it.lang)}</span>` : '',
         it.targetAi ? `<span class="badge">→ ${esc(it.targetAi)}</span>` : '',
@@ -2782,12 +3087,19 @@
         </div>`;
     }).join('');
 
+    const coverMeta = en
+      ? `${items.length} item${items.length === 1 ? '' : 's'} · exported ${today}`
+      : `${items.length} عنصر · صُدِّر في ${today}`;
+    const footerText = en
+      ? 'Exported from AI Memory · coffez.net/pages/zakerah'
+      : 'صُدِّر من ذاكرة الذكاء الاصطناعي · AI Memory · coffez.net/pages/zakerah';
+
     const html = `<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="${en ? 'en' : 'ar'}" dir="${en ? 'ltr' : 'rtl'}">
 <head>
 <meta charset="UTF-8">
 <title>${esc(c.name)}</title>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=${en ? 'Inter' : 'Tajawal'}:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <style>${css}</style>
 </head>
 <body>
@@ -2795,10 +3107,10 @@
     <div class="icon">${esc(c.icon)}</div>
     <h1>${esc(c.name)}</h1>
     ${c.description ? `<p class="desc">${esc(c.description)}</p>` : ''}
-    <div class="meta-row">${items.length} عنصر · صُدِّر في ${today}</div>
+    <div class="meta-row">${coverMeta}</div>
   </div>
   ${itemHTML}
-  <div class="footer">صُدِّر من ذاكرة الذكاء الاصطناعي · AI Memory · coffez.net/pages/zakerah</div>
+  <div class="footer">${footerText}</div>
   <script>
     window.addEventListener('load', () => setTimeout(() => window.print(), 500));
   <\/script>
@@ -2806,9 +3118,9 @@
 </html>`;
 
     const w = window.open('', '_blank');
-    if (!w) { toast('السماح بالنوافذ مطلوب لإنشاء PDF', 'error'); return; }
+    if (!w) { toast(en ? 'Allow pop-ups to generate PDF' : 'السماح بالنوافذ مطلوب لإنشاء PDF', 'error'); return; }
     w.document.open(); w.document.write(html); w.document.close();
-    toast('افتح حوار الطباعة → احفظ كـPDF', 'success');
+    toast(en ? 'Open print dialog → Save as PDF' : 'افتح حوار الطباعة → احفظ كـPDF', 'success');
   }
 
   function toggleItemInCollection(collId, itemId) {
@@ -2818,10 +3130,10 @@
     const i = c.itemIds.indexOf(itemId);
     if (i >= 0) {
       c.itemIds.splice(i, 1);
-      toast('أُزيل من "' + c.name + '"', 'success');
+      toast(t('clRemovedFrom', c.name), 'success');
     } else {
       c.itemIds.unshift(itemId);
-      toast('أُضيف إلى "' + c.name + '"', 'success');
+      toast(t('clAddedTo', c.name), 'success');
     }
     persist();
     // refresh detail modal so pill state updates
