@@ -683,8 +683,8 @@
       if (dict[key] !== undefined) el.setAttribute('placeholder', dict[key]);
     });
     // Language toggle button label
-    const btn = $('#btn-lang');
-    if (btn) btn.textContent = lang === 'en' ? 'EN' : 'AR';
+    const label = $('#lang-toggle-label');
+    if (label) label.textContent = lang === 'en' ? 'EN' : 'AR';
   }
 
   function toggleLang() {
