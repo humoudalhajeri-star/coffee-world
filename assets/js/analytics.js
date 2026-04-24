@@ -18,10 +18,13 @@
 
   function sectionOf(pathname) {
     const p = (pathname || "/").toLowerCase();
-    if (p === "/" || p.endsWith("/index.html")) return "home";
+    // More specific routes first — otherwise /pages/zakerah/index.html
+    // would misclassify as "home".
+    if (p.includes("zakerah"))   return "zakerah";
     if (p.includes("recipe") || p.includes("cup")) return "recipe";
     if (p.includes("listing") || p.includes("marketplace")) return "marketplace";
     if (p.includes("barista")) return "baristas";
+    if (p === "/" || p.endsWith("/index.html")) return "home";
     return "other";
   }
 
