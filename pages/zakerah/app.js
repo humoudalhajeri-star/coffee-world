@@ -580,8 +580,14 @@
 
   /* ============ PRO / PAYWALL ============ */
   const PRO_KEY = 'zakerah.pro';
-  const FREE_TYPE_LIMIT = 1;   // 1 custom type on free tier
+  const FREE_BUILTIN_TYPE = 'prompt'; // only this built-in is free
+  const FREE_TYPE_LIMIT = 0;   // no custom types on free tier
   const FREE_ITEM_LIMIT = 5;   // 5 saved items on free tier
+
+  function isTypeAllowed(typeId) {
+    if (isPro()) return true;
+    return typeId === FREE_BUILTIN_TYPE;
+  }
   // Update this Gumroad product URL once you publish it. Until then, the
   // button explains the next step instead of opening a 404.
   const GUMROAD_PRO_URL = 'https://coffez.gumroad.com/l/zakerah-pro';
@@ -597,23 +603,27 @@
   function setPro(reason) { localStorage.setItem(PRO_KEY, reason || '1'); }
   function clearPro() { localStorage.removeItem(PRO_KEY); }
 
-  function openPaywall(reason = 'types') {
+  function openPaywall(reason = 'types', lockedTypeAr = '') {
     const sub = $('#paywall-sub');
     const titleEl = $('#paywall-title');
     if (titleEl) {
-      titleEl.textContent = reason === 'items'
-        ? 'وصلت حد الحفظ المجاني'
-        : 'وصلت حد الأنواع المجاني';
+      titleEl.textContent =
+        reason === 'items'         ? 'وصلت حد الحفظ المجاني' :
+        reason === 'locked-type'   ? `النوع "${lockedTypeAr}" مُقفَل` :
+                                     'هذا النوع مُقفَل';
     }
     if (sub) {
       if (reason === 'items') {
-        sub.innerHTML = `النسخة المجانية تسمح بحفظ <strong>${FREE_ITEM_LIMIT} عناصر</strong> فقط. رقِّ إلى Pro بـ$2 (مرة واحدة) لحفظ عدد غير محدود + فتح الأنواع المخصصة بالكامل.`;
+        sub.innerHTML = `النسخة المجانية تسمح بحفظ <strong>${FREE_ITEM_LIMIT} عناصر</strong> فقط. رقِّ إلى Pro بـ$2 (مرة واحدة) لفتح كل شي.`;
+      } else if (reason === 'locked-type') {
+        sub.innerHTML = `النوع المجاني الوحيد هو <strong>✨ برومبت</strong>. لاستخدام "${esc(lockedTypeAr)}" وبقية الأنواع، رقِّ إلى Pro بـ$2 (مرة واحدة).`;
       } else {
-        sub.innerHTML = `النسخة المجانية تسمح بـ<strong>${FREE_TYPE_LIMIT === 1 ? 'نوع مخصص واحد' : FREE_TYPE_LIMIT + ' أنواع مخصصة'}</strong>. رقِّ إلى Pro بـ$2 (مرة واحدة) لإضافة أنواع غير محدودة + حفظ عدد غير محدود من العناصر.`;
+        sub.innerHTML = `النسخة المجانية تعطيك نوع واحد: <strong>✨ برومبت</strong>. رقِّ إلى Pro بـ$2 (مرة واحدة) لفتح كل الأنواع + الأنواع المخصصة + حفظ غير محدود.`;
       }
     }
     $('#paywall-license').value = '';
     const msg = $('#paywall-msg'); if (msg) msg.textContent = '';
+    const steps = $('#paywall-steps'); if (steps) steps.style.display = 'none';
     $('#paywall-modal')?.classList.add('open');
   }
   function closePaywall() { $('#paywall-modal')?.classList.remove('open'); }
@@ -686,7 +696,9 @@
   /* ============ MODAL: CREATE / EDIT ============ */
   function openCreate(presetType) {
     state.editing = null;
-    state.creatingType = presetType || 'code';
+    const requested = presetType || FREE_BUILTIN_TYPE;
+    // If a free user hit a locked preset, fall back to the free type
+    state.creatingType = isTypeAllowed(requested) ? requested : FREE_BUILTIN_TYPE;
     renderEditor(null, state.creatingType);
     $('#editor-modal').classList.add('open');
   }
@@ -722,15 +734,20 @@
           <span class="en">Type</span>
         </div>
         <div class="type-picker">
-          ${allTypes().map((tt) => `
-            <button type="button" class="type-pick ${tt.id === typeId ? 'active' : ''}"
-                    data-pick="${tt.isCustom ? 'custom' : tt.id}" data-pick-type="${tt.id}"
-                    ${tt.isCustom ? `style="--pick-accent: ${esc(tt.color || '#0D9488')};"` : ''}>
-              <span class="type-pick-icon">${tt.icon}</span>
-              ${esc(tt.ar)}
-              <div style="font-size:9px; opacity:.7; margin-top:2px;">${esc(tt.en)}</div>
-            </button>
-          `).join('')}
+          ${allTypes().map((tt) => {
+            const locked = !isTypeAllowed(tt.id);
+            const lockStyle = locked ? 'opacity:0.55; position:relative;' : '';
+            const customStyle = tt.isCustom ? `--pick-accent: ${esc(tt.color || '#0D9488')};` : '';
+            return `
+              <button type="button" class="type-pick ${tt.id === typeId && !locked ? 'active' : ''}"
+                      data-pick="${tt.isCustom ? 'custom' : tt.id}" data-pick-type="${tt.id}"
+                      ${locked ? `data-locked="1" data-locked-ar="${esc(tt.ar)}"` : ''}
+                      style="${lockStyle}${customStyle}">
+                <span class="type-pick-icon">${tt.icon}</span>
+                ${esc(tt.ar)}${locked ? ' 🔒' : ''}
+                <div style="font-size:9px; opacity:.7; margin-top:2px;">${esc(tt.en)}</div>
+              </button>`;
+          }).join('')}
           <button type="button" class="type-pick" id="type-pick-add"
                   style="border-style: dashed; color: var(--muted);">
             <span class="type-pick-icon">＋</span>
@@ -906,6 +923,11 @@
     // bind type picker
     $$('[data-pick-type]').forEach((el) => {
       el.onclick = () => {
+        if (el.dataset.locked) {
+          closeEditor();
+          setTimeout(() => openPaywall('locked-type', el.dataset.lockedAr || ''), 160);
+          return;
+        }
         state.creatingType = el.dataset.pickType;
         state.newTypeOpen = false;
         renderEditor(null, state.creatingType);
@@ -915,6 +937,11 @@
     // "+ إضافة نوع" button
     const addTypeBtn = $('#type-pick-add');
     if (addTypeBtn) addTypeBtn.onclick = () => {
+      if (!isPro() && (state.customTypes || []).length >= FREE_TYPE_LIMIT) {
+        closeEditor();
+        setTimeout(() => openPaywall('types'), 160);
+        return;
+      }
       state.newTypeOpen = true;
       renderEditor(null, state.creatingType);
     };
@@ -2198,6 +2225,9 @@
     });
     $('#paywall-buy')?.addEventListener('click', () => {
       window.open(GUMROAD_PRO_URL, '_blank', 'noopener');
+      const steps = $('#paywall-steps');
+      if (steps) steps.style.display = 'block';
+      $('#paywall-license')?.focus();
     });
     $('#paywall-activate')?.addEventListener('click', activateLicense);
     $('#paywall-license')?.addEventListener('keydown', (e) => {
