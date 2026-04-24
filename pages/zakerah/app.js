@@ -579,6 +579,118 @@
     render();
   }
 
+  /* ============ i18n (AR primary, EN opt-in via ?lang=en or toggle) ============ */
+  const LANG_KEY = 'zakerah.lang';
+  const I18N = {
+    ar: {
+      tagline: 'الذكاء الاصطناعي لا يتذكّر محادثاتك — <strong>لكنّك تستطيع</strong>. احفظ أفضل <strong>البرومبتس (أوامر الذكاء الاصطناعي)</strong>، الأكواد، الملاحظات، الإجابات، الأفكار والقوالب في مكان واحد منظّم — قابل للبحث والمشاركة وإعادة الاستخدام.',
+      btnNew: '＋ جديد',
+      searchPlaceholder: 'ابحث بالكلمة... / Search…',
+      stripCopy: '<strong>سجّل دخولك</strong> لحفظ ميزة Pro على جميع أجهزتك.',
+      stripSignin: 'تسجيل دخول',
+      stripSignup: 'إنشاء حساب',
+      welcomeTitle: 'أهلاً بك في ذاكرة الذكاء الاصطناعي',
+      welcomeSub: 'المكان الذي يحفظ بدلاً عنك كل ما يستحق التذكّر من محادثاتك مع ChatGPT و Claude وغيرها.',
+      wcSave: 'احفظ',
+      wcSaveD: 'برومبتس (أوامر الذكاء الاصطناعي)، أكواد، إجابات، أفكار، قوالب وملاحظات',
+      wcFind: 'ابحث',
+      wcFindD: 'بالكلمة أو النوع — نتائج فورية',
+      wcOrg: 'نظّم',
+      wcOrgD: 'باقات + وسوم + مفضلة',
+      wcShare: 'شارك',
+      wcShareD: 'رابط مختصر أو تصدير JSON',
+      privTitle: 'الخصوصية — اقرأ قبل البدء',
+      privList: `
+        <li><strong>كل ما تحفظه يبقى في جهازك فقط.</strong> لا نحن ولا أي طرف ثالث نطّلع عليه.</li>
+        <li>البيانات تُحفظ في <strong>localStorage</strong> الخاص بمتصفحك.</li>
+        <li>لو مسحت بيانات المتصفح / التطبيق → <strong>كل المحفوظات تختفي</strong>.</li>
+        <li>لو غيّرت جهازك / هاتفك → البيانات <strong>لا تنتقل تلقائياً</strong>.</li>
+        <li>لنقل بياناتك لجهاز آخر: <strong>تصدير JSON</strong> ← ثم استيراد في الجهاز الثاني.</li>
+        <li>حساب اختياري لفتح Pro على كل أجهزتك — المحفوظات تبقى محلية.</li>
+      `,
+      welcomeChoose: 'كيف تبي تبدأ؟',
+      welcomeDemoT: 'ابدأ بأمثلة 🎁',
+      welcomeDemoS: '5 عناصر جاهزة لتستكشف',
+      welcomeBlankT: 'ابدأ فارغاً',
+      welcomeBlankS: 'خزنة نظيفة من صفر',
+      welcomeFoot: '💾 كل بياناتك تبقى في جهازك. لا سحابة، لا تتبّع.',
+    },
+    en: {
+      tagline: "AI doesn't remember your chats — <strong>but you can</strong>. Save your best <strong>prompts</strong>, code, notes, answers, ideas and templates in one organized place — searchable, shareable, reusable.",
+      btnNew: '＋ New',
+      searchPlaceholder: 'Search...',
+      stripCopy: '<strong>Sign in</strong> to keep your Pro access on every device.',
+      stripSignin: 'Sign in',
+      stripSignup: 'Create account',
+      welcomeTitle: 'Welcome to AI Memory',
+      welcomeSub: 'Your second brain for ChatGPT, Claude and other AI tools. Save the gold — skip the scrollback.',
+      wcSave: 'Save',
+      wcSaveD: 'Prompts, code, answers, ideas, templates and notes',
+      wcFind: 'Search',
+      wcFindD: 'By keyword or type — instant results',
+      wcOrg: 'Organize',
+      wcOrgD: 'Collections + tags + favorites',
+      wcShare: 'Share',
+      wcShareD: 'One-tap link or JSON export',
+      privTitle: 'Privacy — read this first',
+      privList: `
+        <li><strong>Everything you save stays on your device.</strong> Not us, not any third party, ever reads it.</li>
+        <li>Data lives in your browser's <strong>localStorage</strong>.</li>
+        <li>If you clear browser / app data → <strong>your saves disappear</strong>.</li>
+        <li>If you switch phones → saves <strong>don't transfer automatically</strong>.</li>
+        <li>To move your data: use <strong>Export JSON</strong> → Import on the new device.</li>
+        <li>An optional account syncs <em>Pro status only</em> — your data stays local.</li>
+      `,
+      welcomeChoose: 'How would you like to start?',
+      welcomeDemoT: 'Start with examples 🎁',
+      welcomeDemoS: '5 sample entries to explore',
+      welcomeBlankT: 'Start empty',
+      welcomeBlankS: 'Clean slate, your rules',
+      welcomeFoot: '💾 Your data stays on your device. No cloud, no tracking.',
+    },
+  };
+
+  function detectLang() {
+    // URL param wins (coming from a specific landing)
+    const urlLang = new URLSearchParams(location.search).get('lang');
+    if (urlLang === 'en' || urlLang === 'ar') {
+      localStorage.setItem(LANG_KEY, urlLang);
+      return urlLang;
+    }
+    // Persisted preference
+    const saved = localStorage.getItem(LANG_KEY);
+    if (saved === 'en' || saved === 'ar') return saved;
+    // Default: Arabic (primary audience)
+    return 'ar';
+  }
+
+  let currentLang = detectLang();
+
+  function applyLang(lang) {
+    currentLang = lang;
+    localStorage.setItem(LANG_KEY, lang);
+    document.documentElement.lang = lang;
+    document.documentElement.dir  = lang === 'en' ? 'ltr' : 'rtl';
+    const dict = I18N[lang] || I18N.ar;
+    // Text content
+    $$('[data-i18n]').forEach((el) => {
+      const key = el.getAttribute('data-i18n');
+      if (dict[key] !== undefined) el.innerHTML = dict[key];
+    });
+    // Placeholders
+    $$('[data-i18n-placeholder]').forEach((el) => {
+      const key = el.getAttribute('data-i18n-placeholder');
+      if (dict[key] !== undefined) el.setAttribute('placeholder', dict[key]);
+    });
+    // Language toggle button label
+    const btn = $('#btn-lang');
+    if (btn) btn.textContent = lang === 'en' ? 'EN' : 'AR';
+  }
+
+  function toggleLang() {
+    applyLang(currentLang === 'en' ? 'ar' : 'en');
+  }
+
   /* ============ EVENT TRACKING (silent, silent on failure) ============ */
   const EVENT_DEDUPE_KEY = 'zakerah.events.once';
   async function logEvent(name, meta = {}) {
@@ -2536,7 +2648,9 @@
   document.addEventListener('DOMContentLoaded', () => {
     load();
     bindGlobal();
+    applyLang(currentLang);
     renderAuthUI();
+    $('#btn-lang')?.addEventListener('click', toggleLang);
     // wire welcome CTAs (exist in DOM from first load)
     $('#welcome-demo')?.addEventListener('click', startWithDemos);
     $('#welcome-blank')?.addEventListener('click', startBlank);
