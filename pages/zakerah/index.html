@@ -464,8 +464,49 @@
 
         <div class="truth-section" id="truth-sources-section" hidden>
           <h4>🔗 المصادر التي ذُكرت في الإجابة</h4>
+          <p class="truth-section-note">
+            هذي أسماء مصادر <strong>ذكرها الذكاء الاصطناعي في إجابته</strong> — ما تحققنا منها فعلاً. اضغط جوجل أو ويكيبيديا للتحقق بنفسك.
+          </p>
           <div class="sources-list" id="truth-sources"></div>
         </div>
+
+        <div class="truth-section">
+          <h4>🌐 تحقق من النص الكامل</h4>
+          <p class="truth-section-note">
+            ابحث في جوجل عن أول جملة من الإجابة — يساعدك تشوف إذا كانت مأخوذة من مصدر معروف أو فيها معلومة شائعة.
+          </p>
+          <a class="src-action big-action" id="truth-verify-text" target="_blank" rel="noopener" href="#">
+            🔎 افتح بحث جوجل عن نص الإجابة
+          </a>
+        </div>
+
+        <details class="truth-section truth-formula-wrap">
+          <summary>
+            <span>🧮 كيف حُسبت الدرجة؟</span>
+            <span class="formula-toggle">اضغط للتفصيل</span>
+          </summary>
+          <p class="truth-section-note">
+            كل معيار يطلع له درجة 0-100، وكل معيار له وزن. الإجمالي = مجموع (الدرجة × الوزن).
+          </p>
+          <div id="truth-formula"></div>
+        </details>
+
+        <details class="truth-section truth-limits">
+          <summary>
+            <span>⚠ شنو لا تستطيع هذي الأداة؟</span>
+            <span class="formula-toggle">اقرأ قبل الاعتماد</span>
+          </summary>
+          <ul>
+            <li><strong>ما تتصل بالإنترنت</strong> — التحليل كله محلي، ما نسحب آخر الأخبار أو الأبحاث الحديثة.</li>
+            <li><strong>ما تتحقق من صحة الحقائق</strong> — لو AI قال "البحر الأحمر أزرق"، نحن ما نعرف الجواب الصحيح، فقط نقيس "أسلوب الإجابة".</li>
+            <li><strong>ما تربطك بمصادر فعلية</strong> — لما نقول "تم اكتشاف مصدر هارفارد"، يعني الكلمة "هارفارد" موجودة في النص — مو إن المصدر تحقق منه.</li>
+            <li><strong>اللغة العربية أصعب من الإنجليزية</strong> — أنماطنا تشتغل أحسن على النصوص الواضحة المنظمة.</li>
+            <li><strong>التقييم إشارة، مو حكم</strong> — درجة 90% ما تعني "صحيح 100%"، ودرجة 30% ما تعني "كذب". هي مؤشرات على جودة <em>أسلوب</em> الإجابة فقط.</li>
+          </ul>
+          <p style="margin:10px 0 0; font-size:12px; color:var(--ink); font-weight:700;">
+            👈 للتحقق الحقيقي: اضغط زر "تحقق في جوجل/ويكيبيديا" فوق، أو اسأل خبير في الموضوع.
+          </p>
+        </details>
 
         <div class="truth-disclaimer">
           <strong>تنبيه:</strong> هذي الأداة تعطي إشارات أوّلية فقط — مو بديلة للمراجعة البشرية أو الاستشارة المختصة. تحقّق دائماً من المصادر الأصلية قبل الاعتماد على إجابة AI في قرارات مهمة.
