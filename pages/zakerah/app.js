@@ -2427,6 +2427,380 @@
     openDetail(itemId);
   }
 
+  /* ============ TRUTH CHECK (تحقق من إجابة الـAI) ============ */
+
+  const TRUTH_HISTORY_KEY = 'zakerah.truth.v1';
+  const TRUTH_HISTORY_MAX = 8;
+
+  // Citation / source markers (Arabic + English)
+  const CITATION_PATTERNS = [
+    /\bحسب\b/gi, /\bوفقاً?\b/gi, /\bبحسب\b/gi, /\bأفاد(ت)?\b/gi,
+    /\bذكر(ت)?\b/gi, /\bأوضح(ت)?\b/gi, /\bأكّد(ت)?\b/gi, /\bأشار(ت)?\b/gi,
+    /\bدراسة\b/gi, /\bبحث\b/gi, /\bتقرير\b/gi, /\bإحصائية\b/gi,
+    /according to/gi, /study (shows|found|by)/gi, /research (shows|by)/gi,
+    /report(ed)? by/gi, /source[s]?:/gi, /cited in/gi,
+  ];
+
+  // Quality source keywords
+  const QUALITY_SOURCES = [
+    { name: 'ويكيبيديا', re: /wikipedia|ويكيبيديا/i, type: 'موسوعة' },
+    { name: 'هارفارد', re: /harvard|هارفارد/i, type: 'جامعة' },
+    { name: 'MIT', re: /\bmit\b/i, type: 'جامعة' },
+    { name: 'منظمة الصحة العالمية', re: /\bwho\b|منظمة الصحة|world health/i, type: 'منظمة دولية' },
+    { name: 'الأمم المتحدة', re: /united nations|\bun\b|الأمم المتحدة/i, type: 'منظمة دولية' },
+    { name: 'BBC', re: /\bbbc\b/i, type: 'إعلامي' },
+    { name: 'رويترز', re: /reuters|رويترز/i, type: 'وكالة أنباء' },
+    { name: 'Nature', re: /\bnature\b/i, type: 'مجلة علمية' },
+    { name: 'Science', re: /science magazine|science journal/i, type: 'مجلة علمية' },
+    { name: 'NASA', re: /\bnasa\b|ناسا/i, type: 'حكومي' },
+    { name: 'Google', re: /\bgoogle\b|قوقل/i, type: 'شركة تقنية' },
+    { name: 'موقع رسمي', re: /\.gov\b|\.edu\b|الموقع الرسمي/i, type: 'حكومي/أكاديمي' },
+    { name: 'موقع منشور', re: /https?:\/\/[^\s]+/i, type: 'رابط' },
+  ];
+
+  // Absolute / exaggeration words
+  const EXAGGERATION_WORDS = [
+    'دائماً', 'دائما', 'أبداً', 'ابدا', 'مستحيل', 'كل', 'جميع', 'بالتأكيد',
+    'قطعاً', 'قطعا', '100%', 'مئة بالمئة', 'الجميع', 'لا أحد',
+    'always', 'never', 'impossible', 'all of', 'every single',
+    'guaranteed', 'definitely', 'absolutely', 'no one', 'everyone',
+  ];
+
+  // Hedge / uncertainty words (positive signal — author is being careful)
+  const HEDGE_WORDS = [
+    'قد', 'ربما', 'يحتمل', 'في الغالب', 'يبدو', 'تشير', 'محتمل',
+    'may', 'might', 'could', 'possibly', 'likely', 'suggests', 'appears to',
+  ];
+
+  function loadTruthHistory() {
+    try {
+      const raw = localStorage.getItem(TRUTH_HISTORY_KEY);
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch { return []; }
+  }
+  function saveTruthHistory(list) {
+    localStorage.setItem(TRUTH_HISTORY_KEY, JSON.stringify(list.slice(0, TRUTH_HISTORY_MAX)));
+  }
+
+  function countMatches(text, patterns) {
+    let n = 0;
+    patterns.forEach((re) => {
+      const m = text.match(re);
+      if (m) n += m.length;
+    });
+    return n;
+  }
+  function countWords(text, words) {
+    const lower = text.toLowerCase();
+    let n = 0;
+    words.forEach((w) => {
+      const re = new RegExp('\\b' + w.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g');
+      const m = lower.match(re);
+      if (m) n += m.length;
+    });
+    return n;
+  }
+  function extractYears(text) {
+    const m = text.match(/\b(19|20)\d{2}\b/g) || [];
+    return m.map((y) => parseInt(y, 10));
+  }
+  function extractNumbers(text) {
+    return (text.match(/\b\d+([.,]\d+)?\s*%?/g) || []).length;
+  }
+  function detectSources(text) {
+    const found = [];
+    QUALITY_SOURCES.forEach((s) => {
+      if (s.re.test(text)) found.push({ name: s.name, type: s.type });
+    });
+    return found;
+  }
+
+  function analyzeTruth(text) {
+    const t = (text || '').trim();
+    const len = t.length;
+    const wordCount = t.split(/\s+/).filter(Boolean).length;
+
+    // 1) Multiple sources / citations
+    const citations = countMatches(t, CITATION_PATTERNS);
+    const sources = detectSources(t);
+    const multiSourcesScore = Math.min(100, citations * 25 + sources.length * 20);
+    const multiSourcesStatus =
+      multiSourcesScore >= 60 ? 'good'
+      : multiSourcesScore >= 30 ? 'warn'
+      : 'bad';
+
+    // 2) Source quality
+    const qualityScore = Math.min(100, sources.length * 35);
+    const qualityStatus =
+      qualityScore >= 60 ? 'good'
+      : qualityScore >= 30 ? 'warn'
+      : 'bad';
+
+    // 3) Recency (years mentioned)
+    const years = extractYears(t);
+    const currentYear = new Date().getFullYear();
+    let recencyScore = 50; // default neutral when no year
+    let recencyDetail = 'لا يوجد ذكر صريح للتاريخ';
+    if (years.length) {
+      const newest = Math.max(...years);
+      const age = currentYear - newest;
+      recencyDetail = `أحدث سنة مذكورة: ${newest}`;
+      if (age <= 2) recencyScore = 95;
+      else if (age <= 5) recencyScore = 65;
+      else if (age <= 10) recencyScore = 40;
+      else recencyScore = 20;
+    }
+    const recencyStatus =
+      recencyScore >= 60 ? 'good'
+      : recencyScore >= 35 ? 'warn'
+      : 'bad';
+
+    // 4) Specificity (numbers, percentages, named entities proxy)
+    const numbers = extractNumbers(t);
+    const specRatio = wordCount > 0 ? (numbers / wordCount) * 100 : 0;
+    const specScore = Math.min(100, numbers * 18 + Math.min(40, specRatio * 8));
+    const specStatus =
+      specScore >= 60 ? 'good'
+      : specScore >= 30 ? 'warn'
+      : 'bad';
+
+    // 5) Exaggeration risk (lower exag = better; hedges help)
+    const exag = countWords(t, EXAGGERATION_WORDS);
+    const hedge = countWords(t, HEDGE_WORDS);
+    let exagScore = 100 - (exag * 22) + (hedge * 8);
+    exagScore = Math.max(0, Math.min(100, exagScore));
+    const exagStatus =
+      exagScore >= 70 ? 'good'
+      : exagScore >= 40 ? 'warn'
+      : 'bad';
+
+    // Weighted final
+    const total = Math.round(
+        multiSourcesScore * 0.25
+      + qualityScore      * 0.25
+      + recencyScore      * 0.15
+      + specScore         * 0.15
+      + exagScore         * 0.20
+    );
+
+    const breakdown = [
+      {
+        key: 'sources',
+        name: 'تعدد المصادر',
+        detail: citations
+          ? `${citations} مرجع/إشارة مذكورة`
+          : 'لا توجد إشارات لمصادر خارجية',
+        score: multiSourcesScore,
+        status: multiSourcesStatus,
+        statusLabel: multiSourcesStatus === 'good' ? 'ممتاز' : multiSourcesStatus === 'warn' ? 'يحتاج تحسين' : 'مخاطر',
+      },
+      {
+        key: 'quality',
+        name: 'جودة المصادر',
+        detail: sources.length
+          ? `تم اكتشاف ${sources.length} مصدر معروف`
+          : 'ما تم ذكر مصادر موثوقة بأسمائها',
+        score: qualityScore,
+        status: qualityStatus,
+        statusLabel: qualityStatus === 'good' ? 'موثوقة' : qualityStatus === 'warn' ? 'محدودة' : 'منخفضة',
+      },
+      {
+        key: 'recency',
+        name: 'حداثة المعلومة',
+        detail: recencyDetail,
+        score: recencyScore,
+        status: recencyStatus,
+        statusLabel: recencyStatus === 'good' ? 'حديثة' : recencyStatus === 'warn' ? 'متوسطة' : 'قديمة',
+      },
+      {
+        key: 'specificity',
+        name: 'الدقة والتحديد',
+        detail: numbers
+          ? `${numbers} رقم/إحصائية محددة`
+          : 'الإجابة عامة بدون أرقام محددة',
+        score: specScore,
+        status: specStatus,
+        statusLabel: specStatus === 'good' ? 'محددة' : specStatus === 'warn' ? 'متوسطة' : 'عامة جداً',
+      },
+      {
+        key: 'exag',
+        name: 'مخاطر المبالغة',
+        detail: exag
+          ? `${exag} كلمة مطلقة (مثل: دائماً/كل/مستحيل)`
+          : (hedge ? `${hedge} عبارة تحفّظية (إيجابي)` : 'لغة متوازنة'),
+        score: exagScore,
+        status: exagStatus,
+        statusLabel: exagStatus === 'good' ? 'متوازنة' : exagStatus === 'warn' ? 'بعض المبالغة' : 'مبالغة عالية',
+      },
+    ];
+
+    let headline, summary;
+    if (total >= 75) {
+      headline = '✅ موثوقية عالية';
+      summary = 'الإجابة فيها إشارات قوية لمصادر، تحديد جيد، ولغة متوازنة. لكن لا تستغني عن التحقق من المصدر الأصلي.';
+    } else if (total >= 55) {
+      headline = '⚠ موثوقية متوسطة';
+      summary = 'في إشارات إيجابية لكن في نقاط ضعف — راجع التفصيل أدناه قبل الاعتماد على المعلومة.';
+    } else if (total >= 30) {
+      headline = '⚠ موثوقية منخفضة';
+      summary = 'الإجابة تفتقر لمصادر واضحة أو فيها لغة عامة/مطلقة. يفضّل تأكيدها من مصدر آخر قبل الاعتماد عليها.';
+    } else {
+      headline = '🚫 مخاطر عالية';
+      summary = 'الإجابة ضعيفة جداً من ناحية المصادر والدقة. لا تعتمد عليها بدون تحقق مستقل.';
+    }
+
+    return {
+      total,
+      headline,
+      summary,
+      breakdown,
+      sources,
+      length: len,
+      wordCount,
+      ts: Date.now(),
+    };
+  }
+
+  function gaugeColor(pct) {
+    if (pct >= 75) return '#15803D';
+    if (pct >= 55) return '#0D9488';
+    if (pct >= 30) return '#D97706';
+    return '#B91C1C';
+  }
+
+  function renderTruthResults(result, sourceText) {
+    const wrap = $('#truth-results');
+    if (!wrap) return;
+    wrap.hidden = false;
+
+    const color = gaugeColor(result.total);
+    const gauge = $('#truth-gauge');
+    if (gauge) {
+      gauge.style.setProperty('--gauge-pct', result.total);
+      gauge.style.setProperty('--gauge-color', color);
+    }
+    $('#truth-pct').textContent = result.total + '%';
+    $('#truth-pct').style.color = color;
+    $('#truth-headline').textContent = result.headline;
+    $('#truth-summary').textContent = result.summary;
+
+    const list = $('#truth-breakdown');
+    list.innerHTML = result.breakdown.map((b) => `
+      <div class="breakdown-row">
+        <div>
+          <div class="br-name">${esc(b.name)}</div>
+          <div class="br-detail">${esc(b.detail)}</div>
+        </div>
+        <span class="breakdown-status ${b.status}">${esc(b.statusLabel)}</span>
+      </div>
+    `).join('');
+
+    const srcSection = $('#truth-sources-section');
+    const srcList = $('#truth-sources');
+    if (result.sources.length) {
+      srcSection.hidden = false;
+      srcList.innerHTML = result.sources.map((s) => `
+        <div class="source-row">
+          <span class="src-name">${esc(s.name)}</span>
+          <span class="src-type">${esc(s.type)}</span>
+        </div>
+      `).join('');
+    } else {
+      srcSection.hidden = true;
+    }
+
+    // save to history
+    const history = loadTruthHistory();
+    history.unshift({
+      id: uid(),
+      ts: result.ts,
+      total: result.total,
+      headline: result.headline,
+      preview: (sourceText || '').slice(0, 120),
+      result,
+    });
+    saveTruthHistory(history);
+    renderTruthHistory();
+  }
+
+  function renderTruthHistory() {
+    const wrap = $('#truth-history');
+    if (!wrap) return;
+    const list = loadTruthHistory();
+    if (!list.length) {
+      wrap.innerHTML = '<div class="history-empty">ما تم تحليل أي إجابة بعد.</div>';
+      return;
+    }
+    wrap.innerHTML = list.map((h) => `
+      <div class="history-row" data-truth-id="${h.id}" style="--gauge-color:${gaugeColor(h.total)};">
+        <div class="h-mini-pct" style="background:${gaugeColor(h.total)};">${h.total}</div>
+        <div>
+          <div class="h-text">${esc(h.preview || '—')}</div>
+          <div class="h-time">${timeAgo(h.ts)} · ${esc(h.headline)}</div>
+        </div>
+        <button type="button" class="modal-close" data-truth-del="${h.id}" title="حذف" style="width:28px; height:28px; font-size:18px;">×</button>
+      </div>
+    `).join('');
+    wrap.querySelectorAll('[data-truth-id]').forEach((row) => {
+      row.addEventListener('click', (e) => {
+        if (e.target.dataset.truthDel) return;
+        const id = row.dataset.truthId;
+        const item = loadTruthHistory().find((x) => x.id === id);
+        if (item) {
+          $('#truth-input').value = item.preview || '';
+          renderTruthResults(item.result, item.preview);
+        }
+      });
+    });
+    wrap.querySelectorAll('[data-truth-del]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.truthDel;
+        const next = loadTruthHistory().filter((x) => x.id !== id);
+        saveTruthHistory(next);
+        renderTruthHistory();
+      });
+    });
+  }
+
+  function openTruth() {
+    const m = $('#truth-modal');
+    if (!m) return;
+    m.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    renderTruthHistory();
+    setTimeout(() => $('#truth-input')?.focus(), 60);
+    logEventOnce('zakerah_truth_open');
+  }
+  function closeTruth() {
+    $('#truth-modal')?.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function runTruthCheck() {
+    const inp = $('#truth-input');
+    const text = (inp?.value || '').trim();
+    if (text.length < 20) {
+      toast('الصق إجابة أطول (20 حرف على الأقل)', 'err');
+      return;
+    }
+    const btn = $('#truth-run');
+    if (btn) { btn.disabled = true; btn.textContent = '⌛ جاري التحليل...'; }
+    setTimeout(() => {
+      const result = analyzeTruth(text);
+      renderTruthResults(result, text);
+      if (btn) { btn.disabled = false; btn.innerHTML = '🛡 حلّل الآن'; }
+      logEvent('zakerah_truth_run', { score: result.total, length: result.length });
+    }, 280);
+  }
+
+  function clearTruthInput() {
+    const inp = $('#truth-input');
+    if (inp) { inp.value = ''; inp.focus(); }
+    $('#truth-results').hidden = true;
+  }
+
   /* ============ BOOTSTRAP ============ */
   function bindGlobal() {
     // top buttons
@@ -2437,6 +2811,19 @@
       render();
     });
     $('#btn-new')?.addEventListener('click', () => openCreate('prompt'));
+    $('#btn-truth')?.addEventListener('click', openTruth);
+    $('#truth-close')?.addEventListener('click', closeTruth);
+    $('#truth-modal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'truth-modal') closeTruth();
+    });
+    $('#truth-run')?.addEventListener('click', runTruthCheck);
+    $('#truth-clear')?.addEventListener('click', clearTruthInput);
+    $('#truth-input')?.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        runTruthCheck();
+      }
+    });
     $('#btn-collections')?.addEventListener('click', openCollections);
     $('#btn-monet')?.addEventListener('click', openMonetize);
     $('#monet-close')?.addEventListener('click', closeMonetize);
@@ -2518,7 +2905,7 @@
       if (e.key === 'Escape') {
         closeEditor(); closeDetail(); closeSearch();
         closeCollections(); closeSettings(); closeMonetize();
-        closePaywall(); closeAuth();
+        closePaywall(); closeAuth(); closeTruth();
       }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
