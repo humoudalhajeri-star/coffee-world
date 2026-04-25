@@ -36,6 +36,7 @@
 
     <div class="head-actions">
       <a class="icon-btn" href="landing.html" title="عن التطبيق · About" style="text-decoration:none;">ℹ</a>
+      <button class="icon-btn" id="btn-truth" title="تحقق من إجابة الـAI · Truth Check">🛡</button>
       <button class="icon-btn" id="btn-collections" title="الباقات · Collections">📁</button>
       <button class="icon-btn" id="btn-monet" title="للبيع · Monetize">💰</button>
       <button class="icon-btn" id="btn-settings" title="الإعدادات · Settings">⚙</button>
@@ -408,6 +409,74 @@
     </div>
 
     <div class="modal-body" id="coll-body"></div>
+  </div>
+</div>
+
+<!-- ========== TRUTH CHECK MODAL (تحقق من إجابة الـAI) ========== -->
+<div class="modal-backdrop" id="truth-modal">
+  <div class="modal truth-modal">
+    <div class="modal-head">
+      <h3>
+        <span>تحقق من إجابة الـAI</span>
+        <span class="tag" style="color: var(--teal); border-color: var(--teal);">TRUTH CHECK</span>
+      </h3>
+      <button type="button" class="modal-close" id="truth-close">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="truth-intro">
+        الصق إجابة من <strong>ChatGPT</strong> أو <strong>Claude</strong> أو أي ذكاء اصطناعي، ونحلّلها محلياً بـ5 معايير ذكية لقياس مدى موثوقيتها قبل ما تعتمد عليها.
+        <br>
+        <span class="privacy-pill">🔒 خصوصية 100% — يتم التحليل في جهازك فقط، بدون إنترنت</span>
+      </div>
+
+      <div class="truth-input-wrap">
+        <label for="truth-input">الصق إجابة الذكاء الاصطناعي هنا:</label>
+        <textarea
+          id="truth-input"
+          class="truth-input"
+          placeholder="مثال: حسب دراسة من جامعة هارفارد عام 2023، فإن 67% من المستخدمين يعتمدون على الذكاء الاصطناعي يومياً..."
+        ></textarea>
+        <div class="truth-actions">
+          <button class="truth-cta" id="truth-run">🛡 حلّل الآن</button>
+          <button class="btn btn-ghost btn-sm" id="truth-clear" type="button">مسح</button>
+        </div>
+      </div>
+
+      <div class="truth-results" id="truth-results" hidden>
+        <div class="truth-score-row">
+          <div class="gauge-ring" id="truth-gauge">
+            <div class="gauge-inner">
+              <div class="gauge-pct" id="truth-pct">0%</div>
+              <div class="gauge-label">درجة الثقة</div>
+            </div>
+          </div>
+          <div class="gauge-summary">
+            <div class="gs-title" id="truth-headline">—</div>
+            <div class="gs-text" id="truth-summary">—</div>
+          </div>
+        </div>
+
+        <div class="truth-section">
+          <h4>📊 تفصيل المعايير</h4>
+          <div class="breakdown-list" id="truth-breakdown"></div>
+        </div>
+
+        <div class="truth-section" id="truth-sources-section" hidden>
+          <h4>🔗 المصادر التي ذُكرت في الإجابة</h4>
+          <div class="sources-list" id="truth-sources"></div>
+        </div>
+
+        <div class="truth-disclaimer">
+          <strong>تنبيه:</strong> هذي الأداة تعطي إشارات أوّلية فقط — مو بديلة للمراجعة البشرية أو الاستشارة المختصة. تحقّق دائماً من المصادر الأصلية قبل الاعتماد على إجابة AI في قرارات مهمة.
+        </div>
+      </div>
+
+      <div class="truth-history" id="truth-history-wrap">
+        <h4>📜 آخر التحققات</h4>
+        <div class="history-list" id="truth-history"></div>
+      </div>
+    </div>
   </div>
 </div>
 
