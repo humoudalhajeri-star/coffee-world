@@ -2483,30 +2483,30 @@
     localStorage.setItem(TRUTH_HISTORY_KEY, JSON.stringify(list.slice(0, TRUTH_HISTORY_MAX)));
   }
 
-  function countMatches(text, patterns) {
-    let n = 0;
+  function findMatches(text, patterns) {
+    const all = [];
     patterns.forEach((re) => {
       const m = text.match(re);
-      if (m) n += m.length;
+      if (m) m.forEach((s) => all.push(s));
     });
-    return n;
+    return all;
   }
-  function countWords(text, words) {
+  function findWordHits(text, words) {
     const lower = text.toLowerCase();
-    let n = 0;
+    const hits = [];
     words.forEach((w) => {
       const re = new RegExp('\\b' + w.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g');
       const m = lower.match(re);
-      if (m) n += m.length;
+      if (m) m.forEach((x) => hits.push(x));
     });
-    return n;
+    return hits;
   }
   function extractYears(text) {
     const m = text.match(/\b(19|20)\d{2}\b/g) || [];
     return m.map((y) => parseInt(y, 10));
   }
   function extractNumbers(text) {
-    return (text.match(/\b\d+([.,]\d+)?\s*%?/g) || []).length;
+    return text.match(/\b\d+([.,]\d+)?\s*%?/g) || [];
   }
   function detectSources(text) {
     const found = [];
@@ -2516,13 +2516,16 @@
     return found;
   }
 
+  function uniq(arr) { return Array.from(new Set(arr)); }
+
   function analyzeTruth(text) {
     const t = (text || '').trim();
     const len = t.length;
     const wordCount = t.split(/\s+/).filter(Boolean).length;
 
     // 1) Multiple sources / citations
-    const citations = countMatches(t, CITATION_PATTERNS);
+    const citationHits = uniq(findMatches(t, CITATION_PATTERNS));
+    const citations = citationHits.length;
     const sources = detectSources(t);
     const multiSourcesScore = Math.min(100, citations * 25 + sources.length * 20);
     const multiSourcesStatus =
@@ -2542,10 +2545,11 @@
     const currentYear = new Date().getFullYear();
     let recencyScore = 50; // default neutral when no year
     let recencyDetail = 'لا يوجد ذكر صريح للتاريخ';
+    let newestYear = null;
     if (years.length) {
-      const newest = Math.max(...years);
-      const age = currentYear - newest;
-      recencyDetail = `أحدث سنة مذكورة: ${newest}`;
+      newestYear = Math.max(...years);
+      const age = currentYear - newestYear;
+      recencyDetail = `أحدث سنة مذكورة: ${newestYear}`;
       if (age <= 2) recencyScore = 95;
       else if (age <= 5) recencyScore = 65;
       else if (age <= 10) recencyScore = 40;
@@ -2557,7 +2561,8 @@
       : 'bad';
 
     // 4) Specificity (numbers, percentages, named entities proxy)
-    const numbers = extractNumbers(t);
+    const numberHits = extractNumbers(t);
+    const numbers = numberHits.length;
     const specRatio = wordCount > 0 ? (numbers / wordCount) * 100 : 0;
     const specScore = Math.min(100, numbers * 18 + Math.min(40, specRatio * 8));
     const specStatus =
@@ -2566,8 +2571,10 @@
       : 'bad';
 
     // 5) Exaggeration risk (lower exag = better; hedges help)
-    const exag = countWords(t, EXAGGERATION_WORDS);
-    const hedge = countWords(t, HEDGE_WORDS);
+    const exagHits = uniq(findWordHits(t, EXAGGERATION_WORDS));
+    const hedgeHits = uniq(findWordHits(t, HEDGE_WORDS));
+    const exag = exagHits.length;
+    const hedge = hedgeHits.length;
     let exagScore = 100 - (exag * 22) + (hedge * 8);
     exagScore = Math.max(0, Math.min(100, exagScore));
     const exagStatus =
@@ -2591,6 +2598,9 @@
         detail: citations
           ? `${citations} مرجع/إشارة مذكورة`
           : 'لا توجد إشارات لمصادر خارجية',
+        evidence: citationHits.length
+          ? `كلمات رصدناها: ${citationHits.slice(0, 6).join('، ')}`
+          : 'ما رصدنا أي كلمة من نوع: حسب، وفقاً، دراسة، according to، study shows…',
         score: multiSourcesScore,
         status: multiSourcesStatus,
         statusLabel: multiSourcesStatus === 'good' ? 'ممتاز' : multiSourcesStatus === 'warn' ? 'يحتاج تحسين' : 'مخاطر',
@@ -2601,6 +2611,9 @@
         detail: sources.length
           ? `تم اكتشاف ${sources.length} مصدر معروف`
           : 'ما تم ذكر مصادر موثوقة بأسمائها',
+        evidence: sources.length
+          ? `مصادر معروفة في النص: ${sources.map((s) => s.name).join('، ')}`
+          : 'ما طابقنا أي اسم في قائمتنا (هارفارد/MIT/WHO/Wikipedia/.gov/.edu…)',
         score: qualityScore,
         status: qualityStatus,
         statusLabel: qualityStatus === 'good' ? 'موثوقة' : qualityStatus === 'warn' ? 'محدودة' : 'منخفضة',
@@ -2609,6 +2622,9 @@
         key: 'recency',
         name: 'حداثة المعلومة',
         detail: recencyDetail,
+        evidence: years.length
+          ? `سنوات مذكورة: ${uniq(years).sort().join('، ')} · السنة الحالية: ${currentYear}`
+          : 'ما لقينا أي سنة (1900-2099) في النص — يصعب نحكم على الحداثة',
         score: recencyScore,
         status: recencyStatus,
         statusLabel: recencyStatus === 'good' ? 'حديثة' : recencyStatus === 'warn' ? 'متوسطة' : 'قديمة',
@@ -2619,6 +2635,9 @@
         detail: numbers
           ? `${numbers} رقم/إحصائية محددة`
           : 'الإجابة عامة بدون أرقام محددة',
+        evidence: numbers
+          ? `أرقام رصدناها: ${numberHits.slice(0, 6).join('، ')}${numberHits.length > 6 ? '…' : ''}`
+          : 'ما لقينا أرقام أو نسب — الإجابة عامة جداً',
         score: specScore,
         status: specStatus,
         statusLabel: specStatus === 'good' ? 'محددة' : specStatus === 'warn' ? 'متوسطة' : 'عامة جداً',
@@ -2629,6 +2648,12 @@
         detail: exag
           ? `${exag} كلمة مطلقة (مثل: دائماً/كل/مستحيل)`
           : (hedge ? `${hedge} عبارة تحفّظية (إيجابي)` : 'لغة متوازنة'),
+        evidence: (exag || hedge)
+          ? [
+              exag ? `كلمات مطلقة: ${exagHits.join('، ')}` : '',
+              hedge ? `كلمات تحفظية: ${hedgeHits.join('، ')}` : '',
+            ].filter(Boolean).join(' · ')
+          : 'ما رصدنا كلمات قاطعة (دائماً/أبداً) ولا تحفظية (قد/ربما)',
         score: exagScore,
         status: exagStatus,
         statusLabel: exagStatus === 'good' ? 'متوازنة' : exagStatus === 'warn' ? 'بعض المبالغة' : 'مبالغة عالية',
@@ -2658,6 +2683,16 @@
       sources,
       length: len,
       wordCount,
+      formula: {
+        weights: { sources: 25, quality: 25, recency: 15, specificity: 15, exag: 20 },
+        scores: {
+          sources: multiSourcesScore,
+          quality: qualityScore,
+          recency: recencyScore,
+          specificity: specScore,
+          exag: exagScore,
+        },
+      },
       ts: Date.now(),
     };
   }
@@ -2691,23 +2726,72 @@
         <div>
           <div class="br-name">${esc(b.name)}</div>
           <div class="br-detail">${esc(b.detail)}</div>
+          ${b.evidence ? `<div class="br-evidence">🔍 ${esc(b.evidence)}</div>` : ''}
         </div>
         <span class="breakdown-status ${b.status}">${esc(b.statusLabel)}</span>
       </div>
     `).join('');
 
+    // Source rows + Google / Wikipedia verify buttons
     const srcSection = $('#truth-sources-section');
     const srcList = $('#truth-sources');
     if (result.sources.length) {
       srcSection.hidden = false;
-      srcList.innerHTML = result.sources.map((s) => `
-        <div class="source-row">
-          <span class="src-name">${esc(s.name)}</span>
-          <span class="src-type">${esc(s.type)}</span>
-        </div>
-      `).join('');
+      srcList.innerHTML = result.sources.map((s) => {
+        const q = encodeURIComponent(s.name);
+        return `
+          <div class="source-row">
+            <div class="src-info">
+              <span class="src-name">${esc(s.name)}</span>
+              <span class="src-type">${esc(s.type)}</span>
+            </div>
+            <div class="src-actions">
+              <a class="src-action" target="_blank" rel="noopener" href="https://www.google.com/search?q=${q}">🔎 جوجل</a>
+              <a class="src-action" target="_blank" rel="noopener" href="https://ar.wikipedia.org/wiki/Special:Search?search=${q}">📖 ويكيبيديا</a>
+            </div>
+          </div>
+        `;
+      }).join('');
     } else {
       srcSection.hidden = true;
+    }
+
+    // Google search the whole answer (first ~10 words) — quick verify
+    const verifyBtn = $('#truth-verify-text');
+    if (verifyBtn) {
+      const snippet = (sourceText || '').trim().split(/\s+/).slice(0, 12).join(' ');
+      verifyBtn.href = 'https://www.google.com/search?q=' + encodeURIComponent('"' + snippet + '"');
+    }
+
+    // Transparency formula — show how the score was calculated
+    const formulaEl = $('#truth-formula');
+    if (formulaEl && result.formula) {
+      const f = result.formula;
+      formulaEl.innerHTML = `
+        <div class="formula-row">
+          <span>تعدد المصادر</span>
+          <span class="formula-calc">${f.scores.sources} × ${f.weights.sources}% = <strong>${(f.scores.sources * f.weights.sources / 100).toFixed(1)}</strong></span>
+        </div>
+        <div class="formula-row">
+          <span>جودة المصادر</span>
+          <span class="formula-calc">${f.scores.quality} × ${f.weights.quality}% = <strong>${(f.scores.quality * f.weights.quality / 100).toFixed(1)}</strong></span>
+        </div>
+        <div class="formula-row">
+          <span>حداثة المعلومة</span>
+          <span class="formula-calc">${f.scores.recency} × ${f.weights.recency}% = <strong>${(f.scores.recency * f.weights.recency / 100).toFixed(1)}</strong></span>
+        </div>
+        <div class="formula-row">
+          <span>الدقة والتحديد</span>
+          <span class="formula-calc">${f.scores.specificity} × ${f.weights.specificity}% = <strong>${(f.scores.specificity * f.weights.specificity / 100).toFixed(1)}</strong></span>
+        </div>
+        <div class="formula-row">
+          <span>مخاطر المبالغة</span>
+          <span class="formula-calc">${f.scores.exag} × ${f.weights.exag}% = <strong>${(f.scores.exag * f.weights.exag / 100).toFixed(1)}</strong></span>
+        </div>
+        <div class="formula-total">
+          الإجمالي: <strong>${result.total}%</strong>
+        </div>
+      `;
     }
 
     // save to history
