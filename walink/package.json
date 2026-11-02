@@ -1,0 +1,15 @@
+{
+  "name": "walink",
+  "version": "1.0.0",
+  "description": "walink — WhatsApp order assistant for merchants (catalog → saved order → wa.me message)",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node --no-warnings server.js",
+    "test": "node --no-warnings test/smoke.js"
+  },
+  "engines": { "node": ">=22.13" },
+  "dependencies": {
+    "express": "4.21.2"
+  }
+}
