@@ -1,0 +1,23 @@
+# Render Blueprint for walink — New + → Blueprint → pick this repo/branch.
+services:
+  - type: web
+    name: walink
+    runtime: node
+    rootDir: walink
+    plan: starter            # a persistent disk needs a paid instance; SQLite lives on it
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: "22.13.0"
+      - key: NODE_ENV
+        value: production
+      - key: DATA_DIR
+        value: /var/data
+      - key: OWNER_PASS          # admin password — Render asks you for it on first deploy
+        sync: false
+    disk:
+      name: walink-data
+      mountPath: /var/data
+      sizeGB: 1

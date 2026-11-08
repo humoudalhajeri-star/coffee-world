@@ -1,0 +1,25 @@
+# fly launch --copy-config --no-deploy && fly volumes create walink_data --size 1 && fly secrets set OWNER_PASS=... && fly deploy
+app = "walink"
+primary_region = "fra"
+
+[build]
+
+[env]
+  DATA_DIR = "/data"
+  PORT = "8080"
+
+[[mounts]]
+  source = "walink_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    path = "/healthz"
+    interval = "30s"
+    timeout = "5s"
